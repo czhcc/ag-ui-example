@@ -1,0 +1,7 @@
+target/
+.idea/
+*.iml
+.env
+logs/
+node_modules/
+dist/

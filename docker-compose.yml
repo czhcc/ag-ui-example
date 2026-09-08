@@ -1,0 +1,26 @@
+services:
+  mcp-server:
+    build:
+      context: .
+      dockerfile: mcp-server/Dockerfile
+    ports:
+      - "8081:8081"
+  agent-client:
+    build:
+      context: .
+      dockerfile: agent-client/Dockerfile
+    environment:
+      AI_DASHSCOPE_API_KEY: ${AI_DASHSCOPE_API_KEY:-}
+      AC_MCP_SERVERS_0_BASE_URL: http://mcp-server:8081
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mcp-server
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - agent-client

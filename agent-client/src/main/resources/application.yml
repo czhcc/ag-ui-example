@@ -1,0 +1,22 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: ac-agent-client
+  ai:
+    dashscope:
+      api-key: ${AI_DASHSCOPE_API_KEY:}
+ac:
+  result-store:
+    ttl: 45m
+  mcp:
+    servers:
+      - code: knowledge
+        name: AC Knowledge MCP
+        base-url: http://localhost:8081
+        endpoint: /mcp
+        timeout: 30s
+        enabled: true
+        tool-prefix: ""
+        auth:
+          type: NONE

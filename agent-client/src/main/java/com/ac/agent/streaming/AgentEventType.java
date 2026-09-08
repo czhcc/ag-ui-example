@@ -1,0 +1,6 @@
+package com.ac.agent.streaming;
+
+public enum AgentEventType {
+    TEXT_MESSAGE_START, TEXT_MESSAGE_CONTENT, TEXT_MESSAGE_END,
+    TOOL_CALL_START, TOOL_CALL_END, UI_CREATE, UI_UPDATE, RUN_FINISHED, ERROR
+}
