@@ -2,10 +2,11 @@ package com.ac.agent.agent;
 
 import com.ac.agent.streaming.AgentEventBus;
 import com.ac.agent.streaming.event.*;
-import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.UUID;
 
@@ -20,14 +21,17 @@ public class AgentService {
     }
 
     public Flux<String> stream(String message, AgentContext context) {
-        ChatClient client = factory.create();
         String messageId = UUID.randomUUID().toString();
-        events.emit(new TextStartEvent(messageId));
-        return client.prompt()
-                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, context.conversationId()))
-                .user(message)
-                .stream()
-                .content()
+        return Mono.fromCallable(() -> {
+                    events.emit(new TextStartEvent(messageId));
+                    return factory.create();
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMapMany(client -> client.prompt()
+                        .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, context.conversationId()))
+                        .user(message)
+                        .stream()
+                        .content())
                 .doOnNext(delta -> events.emit(new TextDeltaEvent(messageId, delta)))
                 .doOnError(error -> events.emit(new ErrorEvent(
                         "CHAT_STREAM_ERROR", "智能体响应失败，请稍后重试。")))

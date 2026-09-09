@@ -27,14 +27,10 @@ public class OpenAiCompatibleConfig {
             ObjectProvider<RestClient.Builder> restClientBuilderProvider,
             ObjectProvider<WebClient.Builder> webClientBuilderProvider,
             ResponseErrorHandler responseErrorHandler) {
-        return OpenAiApi.builder()
-                .baseUrl(baseUrl)
-                .apiKey(new NoopApiKey())
-                .completionsPath(completionsPath)
-                .embeddingsPath("/embeddings")
-                .restClientBuilder(restClientBuilderProvider.getIfAvailable(RestClient::builder))
-                .webClientBuilder(webClientBuilderProvider.getIfAvailable(WebClient::builder))
-                .responseErrorHandler(responseErrorHandler)
-                .build();
+        return new ToolCallMergingOpenAiApi(baseUrl, new NoopApiKey(), new org.springframework.util.LinkedMultiValueMap<>(),
+                completionsPath, "/embeddings",
+                restClientBuilderProvider.getIfAvailable(RestClient::builder),
+                webClientBuilderProvider.getIfAvailable(WebClient::builder),
+                responseErrorHandler);
     }
 }
