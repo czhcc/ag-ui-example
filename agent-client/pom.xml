@@ -9,7 +9,7 @@
     </parent>
     <artifactId>agent-client</artifactId>
     <properties>
-        <spring-ai.version>1.1.2</spring-ai.version>
+        <spring-ai.version>1.1.8</spring-ai.version>
         <mcp-sdk.version>1.0.0</mcp-sdk.version>
     </properties>
     <dependencyManagement>
@@ -71,6 +71,13 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
