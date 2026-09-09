@@ -19,6 +19,9 @@ spring:
         completions-path: /chat/completions
         options:
           model: "${AI_OPENAI_MODEL:trs-m6}"
+          extra-body:
+            chat_template_kwargs:
+              enable_thinking: false
 ac:
   result-store:
     ttl: 45m
