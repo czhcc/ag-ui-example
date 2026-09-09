@@ -15,7 +15,7 @@ import java.util.Map;
 public class ActivityListTool {
     private final ActivityService service;
     public ActivityListTool(ActivityService service) { this.service = service; }
-    @McpTool(name = "kg_list_activity", description = "查询指定人员在时间范围内的活动", generateOutputSchema = true)
+    @McpTool(name = "kg_list_activity", description = "查询指定人员在时间范围内的活动")
     public McpResult<List<Activity>> list(String personId, Instant startTime, Instant endTime) {
         var data = service.list(personId, startTime, endTime);
         var view = new TimelineViewHint("activity-timeline", "timeline", "vertical", "活动时间线", null,

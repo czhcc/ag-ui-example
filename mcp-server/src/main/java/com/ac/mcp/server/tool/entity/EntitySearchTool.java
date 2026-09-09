@@ -11,7 +11,7 @@ import java.util.List;
 public class EntitySearchTool {
     private final EntityService service;
     public EntitySearchTool(EntityService service) { this.service = service; }
-    @McpTool(name = "kg_search_entity", description = "按关键词查询实体", generateOutputSchema = true)
+    @McpTool(name = "kg_search_entity", description = "按关键词查询实体")
     public McpResult<List<Entity>> search(String keyword) {
         var data = service.search(keyword);
         return McpResult.success(data, new ResultSummary(data.size(), data.size(), false, "实体搜索结果", List.of()), null, null);

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class EntityDetailTool {
     private final EntityService service;
     public EntityDetailTool(EntityService service) { this.service = service; }
-    @McpTool(name = "kg_get_entity", description = "获取实体详情", generateOutputSchema = true)
+    @McpTool(name = "kg_get_entity", description = "获取实体详情")
     public McpResult<Entity> get(String entityId) {
         return McpResult.success(service.get(entityId), new ResultSummary(1, 1, false, "实体详情", null), null, null);
     }

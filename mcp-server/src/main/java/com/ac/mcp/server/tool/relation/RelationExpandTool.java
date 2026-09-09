@@ -13,7 +13,7 @@ import java.util.Map;
 public class RelationExpandTool {
     private final RelationService service;
     public RelationExpandTool(RelationService service) { this.service = service; }
-    @McpTool(name = "kg_expand_relations", description = "扩展指定实体的关系网络", generateOutputSchema = true)
+    @McpTool(name = "kg_expand_relations", description = "扩展指定实体的关系网络")
     public McpResult<List<Relation>> expand(String entityId, int depth) {
         var data = service.expand(entityId, Math.min(Math.max(depth, 1), 3));
         var view = new RelationGraphViewHint("relation-network", "relation_graph", "network", "实体关系网络", null,

@@ -19,7 +19,7 @@ public class ActivityStatisticsTool {
     private final ActivityService service;
     public ActivityStatisticsTool(ActivityService service) { this.service = service; }
 
-    @McpTool(name = "kg_activity_statistics", description = "统计指定人员在时间范围内的活动情况", generateOutputSchema = true)
+    @McpTool(name = "kg_activity_statistics", description = "统计指定人员在时间范围内的活动情况")
     public McpResult<List<ActivityStat>> statistics(String personId, Instant startTime, Instant endTime) {
         var data = service.statistics(personId, startTime, endTime);
         var summary = new ResultSummary(data.size(), data.size(), false, "按城市统计活动次数",

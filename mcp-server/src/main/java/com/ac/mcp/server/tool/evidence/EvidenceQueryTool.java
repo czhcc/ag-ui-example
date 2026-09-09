@@ -11,7 +11,7 @@ import java.util.List;
 public class EvidenceQueryTool {
     private final EvidenceService service;
     public EvidenceQueryTool(EvidenceService service) { this.service = service; }
-    @McpTool(name = "kg_get_evidence", description = "获取实体相关证据", generateOutputSchema = true)
+    @McpTool(name = "kg_get_evidence", description = "获取实体相关证据")
     public McpResult<List<Evidence>> query(String entityId) {
         var data = service.query(entityId);
         return McpResult.success(data, new ResultSummary(data.size(), data.size(), false, "证据查询结果", List.of()), null, null);

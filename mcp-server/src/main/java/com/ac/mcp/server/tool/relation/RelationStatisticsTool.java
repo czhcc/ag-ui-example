@@ -11,7 +11,7 @@ import java.util.List;
 public class RelationStatisticsTool {
     private final RelationService service;
     public RelationStatisticsTool(RelationService service) { this.service = service; }
-    @McpTool(name = "kg_relation_statistics", description = "统计指定实体的关系", generateOutputSchema = true)
+    @McpTool(name = "kg_relation_statistics", description = "统计指定实体的关系")
     public McpResult<List<Relation>> statistics(String entityId) {
         var data = service.statistics(entityId);
         return McpResult.success(data, new ResultSummary(data.size(), data.size(), false, "关系统计", List.of()), null, null);
