@@ -1,6 +1,6 @@
 # AI MCP Platform
 
-面向正式业务演进的 Conversation Driven Analytical UI 基础工程。系统将 Spring AI Alibaba Agent 与独立的 Spring AI 2 MCP Server 隔离部署，通过动态 MCP Client、结构化结果存储和受控 UI Runtime，把一次对话组织为“查询 → 分析 → 文字 → UI → 继续分析”的连续过程。
+面向正式业务演进的 Conversation Driven Analytical UI 基础工程。系统将 Spring AI Agent 与独立的 Spring AI 2 MCP Server 隔离部署，通过动态 MCP Client、结构化结果存储和受控 UI Runtime，把一次对话组织为“查询 → 分析 → 文字 → UI → 继续分析”的连续过程。
 
 ## 模块结构
 
@@ -16,7 +16,7 @@ ai-mcp-platform/
 ├── mcp-server/                   # Spring AI 2.x 独立应用，端口 8081
 │   ├── Dockerfile
 │   └── src/{main,test}/...
-├── agent-client/                 # Spring AI Alibaba 1.x 独立应用，端口 8080
+├── agent-client/                 # Spring AI 1.1 OpenAI 兼容客户端，端口 8080
 │   ├── Dockerfile
 │   └── src/{main,test}/...
 └── frontend/                     # Vue 3 + Vite + TypeScript + Tailwind CSS
@@ -30,7 +30,7 @@ ai-mcp-platform/
 
 ```mermaid
 flowchart TD
-    U[User] --> A[Spring AI Alibaba Agent]
+    U[User] --> A[Spring AI Agent]
     A --> C[DynamicMcpToolCallback]
     C --> M[McpClientManager]
     M --> S[McpSyncClient]
@@ -53,11 +53,9 @@ flowchart TD
 
 ## 启动方式
 
-准备 Java 21、Maven 3.9+，并设置模型密钥：
-
-```powershell
-$env:AI_DASHSCOPE_API_KEY = "your-key"
-```
+准备 Java 21、Maven 3.9+。Agent Client 默认连接 OpenAI 兼容服务
+`http://192.168.5.68:6116/v1`，使用模型 `trs-m6`，不发送 API Key。
+可通过 `AI_OPENAI_BASE_URL` 和 `AI_OPENAI_MODEL` 环境变量覆盖地址和模型。
 
 先启动 MCP Server：
 

@@ -4,8 +4,21 @@ spring:
   application:
     name: ac-agent-client
   ai:
-    dashscope:
-      api-key: ${AI_DASHSCOPE_API_KEY:}
+    model:
+      chat: openai
+      embedding: none
+      image: none
+      audio:
+        transcription: none
+        speech: none
+      moderation: none
+    openai:
+      base-url: "${AI_OPENAI_BASE_URL:http://192.168.5.68:6116/v1}"
+      api-key: ""
+      chat:
+        completions-path: /chat/completions
+        options:
+          model: "${AI_OPENAI_MODEL:trs-m6}"
 ac:
   result-store:
     ttl: 45m

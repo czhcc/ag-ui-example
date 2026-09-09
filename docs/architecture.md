@@ -5,4 +5,4 @@
 - `agent-client` owns dynamic MCP connections, agent adaptation, result retention and UI events.
 - `structuredContent` is the primary result path; text JSON exists only for interoperability.
 - Presentation hints never contain renderer-specific code or configuration.
-- Spring AI Alibaba 1.x and Spring AI 2.x are isolated in separate executable modules.
+- Spring AI 1.1 and Spring AI 2.x are isolated in separate executable modules.
