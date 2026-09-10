@@ -3,6 +3,8 @@ import {nextTick, onBeforeUnmount, reactive, ref, watch} from 'vue'
 import {streamChat} from './api/chat'
 import type {UiEventPayload} from './api/chat'
 import UiPart from './chat/UiPart.vue'
+import RunLogPanel from './chat/RunLogPanel.vue'
+import type {RunLogEntry} from './chat/RunLogPanel.vue'
 
 type Role = 'user' | 'assistant'
 
@@ -14,8 +16,19 @@ interface Message {
   id: string
   role: Role
   parts: MessagePart[]
+  logs: RunLogEntry[]
   streaming?: boolean
   failed?: boolean
+}
+
+let logSeq = 0
+
+function nowTime(): string {
+    return new Date().toLocaleTimeString('zh-CN', {hour12: false})
+}
+
+function pushLog(message: Message, kind: RunLogEntry['kind'], title: string, detail?: string) {
+    message.logs.push({id: ++logSeq, time: nowTime(), kind, title, detail})
 }
 
 const starterPrompts = [
@@ -41,6 +54,7 @@ const messages = ref<Message[]>([
     id: createId(),
     role: 'assistant',
     parts: [{kind: 'text', text: '你好，我是你的分析智能体。告诉我你想查询或分析什么，我会调用合适的工具协助你。'}],
+    logs: [],
   },
 ])
 
@@ -77,11 +91,12 @@ async function sendMessage() {
   input.value = ''
   nextTick(resizeComposer)
 
-  messages.value.push({id: createId(), role: 'user', parts: [{kind: 'text', text: content}]})
+  messages.value.push({id: createId(), role: 'user', parts: [{kind: 'text', text: content}], logs: []})
   const reply = reactive<Message>({
     id: createId(),
     role: 'assistant',
     parts: [{kind: 'text', text: ''}],
+    logs: [],
     streaming: true,
   })
   messages.value.push(reply)
@@ -97,13 +112,31 @@ async function sendMessage() {
           sessionStorage.setItem('agent-conversation-id', event.conversationId)
 
           if (event.type === 'delta' && event.content) {
+            if (reply.logs.length === 0 || reply.logs[reply.logs.length - 1].kind !== 'llm_start') {
+              pushLog(reply, 'llm_start', 'LLM 开始生成回复')
+            }
             const last = reply.parts[reply.parts.length - 1]
             if (last && last.kind === 'text') last.text += event.content
             else reply.parts.push({kind: 'text', text: event.content})
+          } else if (event.type === 'tool_start') {
+            pushLog(reply, 'tool_start', `调用 ${event.toolName}`, event.arguments ?? undefined)
+          } else if (event.type === 'tool_end') {
+            const detail = event.detail
+                ? event.detail
+                : [event.success === null ? null : `success: ${event.success}`,
+                    event.resultRef ? `resultRef: ${event.resultRef}` : null,
+                ].filter(Boolean).join('\n') || undefined
+            pushLog(reply, 'tool_end',
+                `${event.toolName} 返回${event.success === false ? '（失败）' : ''}${event.resultRef ? ` · ${event.resultRef}` : ''}`,
+                detail)
           } else if (event.type === 'ui') {
             const {type: _type, ...surface} = event
             reply.parts.push({kind: 'ui', surface})
+            pushLog(reply, 'ui', `渲染组件 ${surface.components[0]?.type ?? 'Unknown'}`,
+                JSON.stringify(surface))
           } else if (event.type === 'done') {
+            pushLog(reply, 'llm_end', 'LLM 回复完成')
+            pushLog(reply, 'run_end', '本轮执行结束')
             reply.streaming = false
           } else if (event.type === 'error') {
             reply.streaming = false
@@ -112,6 +145,7 @@ async function sendMessage() {
             const last = reply.parts[reply.parts.length - 1]
             if (last && last.kind === 'text' && !last.text) last.text = event.content ?? fallback
             else reply.parts.push({kind: 'text', text: event.content ?? fallback})
+            pushLog(reply, 'error', '执行出错', event.content ?? fallback)
             errorMessage.value = event.content ?? fallback
           }
         },
@@ -122,6 +156,7 @@ async function sendMessage() {
     reply.streaming = false
     reply.failed = true
     reply.parts.push({kind: 'text', text: '连接智能体失败，请确认 Agent Client 已启动后重试。'})
+    pushLog(reply, 'error', '连接失败', error instanceof Error ? error.message : '连接失败')
     errorMessage.value = error instanceof Error ? error.message : '连接失败'
   } finally {
     reply.streaming = false
@@ -146,6 +181,7 @@ function resetConversation() {
       id: createId(),
       role: 'assistant',
       parts: [{kind: 'text', text: '新对话已创建。今天想从哪里开始？'}],
+      logs: [],
     },
   ]
   errorMessage.value = ''
@@ -292,16 +328,20 @@ onBeforeUnmount(() => controller.value?.abort())
                     <UiPart v-else-if="part.kind === 'ui'" :surface="part.surface" class="w-full"/>
                   </template>
                 </div>
-                <button v-if="message.role === 'assistant' && messageText(message) && !message.streaming"
-                        class="mt-2 flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] text-slate-400 opacity-0 transition hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100 focus:opacity-100"
-                        type="button" @click="copyMessage(messageText(message))">
-                  <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" aria-hidden="true">
-                    <rect x="8" y="8" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"/>
-                    <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="currentColor"
-                          stroke-width="1.7"/>
-                  </svg>
-                  复制
-                </button>
+                <div v-if="message.role === 'assistant' && messageText(message) && !message.streaming"
+                     class="mt-2 flex items-center gap-0.5 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+                  <button
+                      class="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                      type="button" @click="copyMessage(messageText(message))">
+                    <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" aria-hidden="true">
+                      <rect x="8" y="8" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"/>
+                      <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="currentColor"
+                            stroke-width="1.7"/>
+                    </svg>
+                    复制
+                  </button>
+                  <RunLogPanel v-if="message.logs.length > 0" :entries="message.logs"/>
+                </div>
               </div>
             </div>
 

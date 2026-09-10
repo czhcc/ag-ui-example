@@ -28,7 +28,19 @@ export type ChatStreamEvent =
     | { type: 'done'; conversationId: string; runId: string; content: null }
     | { type: 'error'; conversationId: string; runId: string; content: string }
 
-export type StreamEvent = ChatStreamEvent | (UiEventPayload & { type: 'ui' })
+export interface ToolEventPayload {
+    type: 'tool_start' | 'tool_end'
+    conversationId: string
+    runId: string
+    toolCallId: string
+    toolName: string
+    arguments: string | null
+    success: boolean | null
+    resultRef: string | null
+    detail: string | null
+}
+
+export type StreamEvent = ChatStreamEvent | (UiEventPayload & { type: 'ui' }) | ToolEventPayload
 
 export interface ResultPayload {
     resultRef: string
@@ -93,6 +105,8 @@ export async function streamChat(
             const payload = JSON.parse(data)
             if (eventName === 'ui') {
                 onEvent({...payload, type: 'ui'})
+            } else if (eventName === 'tool') {
+                onEvent(payload as ToolEventPayload)
             } else {
                 onEvent(payload)
             }
