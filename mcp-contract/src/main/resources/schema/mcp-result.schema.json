@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-mcp-platform.ac.com/schema/mcp-result.schema.json",
+  "title": "McpResult",
+  "description": "平台 MCP Data Tool 统一返回契约。工具的 structuredContent 必须符合本结构。协议/传输层错误走 MCP isError，业务失败走 success=false + error。",
+  "type": "object",
+  "required": ["specVersion", "success"],
+  "additionalProperties": false,
+  "properties": {
+    "specVersion": {
+      "const": "1.0",
+      "description": "契约版本，与 MCP 协议版本无关"
+    },
+    "success": {
+      "type": "boolean",
+      "description": "业务操作是否成功。业务失败时 data 应为 null 并携带 error"
+    },
+    "data": {
+      "description": "真实业务数据。推荐 Array<Object>（行式数据），字段名必须与 presentation.views[].mapping 引用的字段完全一致",
+      "type": ["object", "array", "string", "number", "boolean", "null"]
+    },
+    "summary": { "$ref": "#/$defs/summary" },
+    "presentation": { "$ref": "#/$defs/presentation" },
+    "resultMeta": { "$ref": "#/$defs/resultMeta" },
+    "error": { "$ref": "#/$defs/error" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "success": { "const": false } } },
+      "then": { "required": ["error"] }
+    }
+  ],
+  "$defs": {
+    "summary": {
+      "title": "ResultSummary",
+      "description": "给 Agent 的结果摘要。highlights 必须是服务端确定性计算出的事实，不是模型推测",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "count": { "type": "integer", "minimum": 0, "description": "当前返回数量" },
+        "total": { "type": "integer", "minimum": 0, "description": "完整数量" },
+        "truncated": { "type": "boolean", "description": "是否截断" },
+        "description": { "type": "string", "description": "结果描述" },
+        "highlights": {
+          "type": "array",
+          "items": { "type": "string" },
+          "maxItems": 20,
+          "description": "确定性事实列表，如 '北京18次'"
+        }
+      }
+    },
+    "presentation": {
+      "title": "PresentationHint",
+      "description": "数据表达方式的轻量建议，非强制 UI 指令。mode=none 表示无建议",
+      "type": "object",
+      "required": ["mode", "views"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": ["NONE", "RECOMMENDED", "REQUIRED"],
+          "description": "none=无建议；recommended=推荐（最常用，LLM 决定是否采用）；required=仅限不用专属 UI 无法表达的场景"
+        },
+        "views": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/viewHint" },
+          "maxItems": 5
+        }
+      }
+    },
+    "viewHint": {
+      "title": "ViewHint",
+      "description": "单条视图建议：数据字段到图语义的映射，不含任何绘制细节（无 ECharts/G6/HTML/JS）",
+      "type": "object",
+      "required": ["id", "type", "mapping"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "description": "视图唯一标识，ui_render(resultRef, viewId) 引用" },
+        "type": {
+          "enum": ["chart", "relation_graph", "timeline", "table"],
+          "description": "视图类型，对应前端 Renderer：chart→ECharts、relation_graph→AntV G6、timeline/table→Vue"
+        },
+        "subType": {
+          "description": "类型子类。chart: bar/line/area/pie/scatter；timeline: vertical；relation_graph: network；table 可省略",
+          "type": "string"
+        },
+        "title": { "type": "string", "description": "视图标题" },
+        "description": { "type": "string", "description": "视图说明" },
+        "mapping": {
+          "description": "字段映射（硬要求：引用的字段名必须存在于 data 行中）。chart: {category,value}；timeline: {time,title,description?,group?}；relation_graph: {source,target,label?}；table: {columns:[{field,label}]或省略自动推导",
+          "type": "object",
+          "additionalProperties": { "type": ["string", "array"] }
+        },
+        "options": {
+          "description": "展示选项白名单：orientation/order/limit/showLegend/showLabels/group/sort",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "priority": { "type": "integer", "description": "优先级，数值越大越靠前" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "chart" } }, "required": ["type"] },
+          "then": {
+            "properties": {
+              "mapping": {
+                "type": "object",
+                "required": ["category", "value"],
+                "properties": {
+                  "category": { "type": "string" },
+                  "value": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "timeline" } }, "required": ["type"] },
+          "then": {
+            "properties": {
+              "mapping": {
+                "type": "object",
+                "required": ["time", "title"],
+                "properties": {
+                  "time": { "type": "string", "description": "ISO-8601 时间字符串" },
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "group": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "relation_graph" } }, "required": ["type"] },
+          "then": {
+            "properties": {
+              "mapping": {
+                "type": "object",
+                "required": ["source", "target"],
+                "properties": {
+                  "source": { "type": "string" },
+                  "target": { "type": "string" },
+                  "label": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "resultMeta": {
+      "title": "ResultMeta",
+      "description": "运行时元数据，模型无需理解",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requestId": { "type": "string" },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "attributes": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "error": {
+      "title": "McpBusinessError",
+      "description": "业务错误。禁止包含密码、Token、内部堆栈、连接字符串等敏感信息",
+      "type": "object",
+      "required": ["code", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "code": { "type": "string", "description": "错误码，如 ENTITY_NOT_FOUND" },
+        "message": { "type": "string", "description": "人类可读错误说明" },
+        "retryable": { "type": "boolean", "description": "是否可重试" },
+        "details": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "非敏感补充信息"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "specVersion": "1.0",
+      "success": true,
+      "data": [
+        { "city": "北京", "count": 18 },
+        { "city": "上海", "count": 11 },
+        { "city": "杭州", "count": 6 }
+      ],
+      "summary": {
+        "count": 3,
+        "total": 3,
+        "truncated": false,
+        "description": "按城市统计活动次数",
+        "highlights": ["北京18次", "上海11次", "杭州6次"]
+      },
+      "presentation": {
+        "mode": "RECOMMENDED",
+        "views": [
+          {
+            "id": "city-stat",
+            "type": "chart",
+            "subType": "bar",
+            "title": "各城市活动次数",
+            "description": "按城市汇总",
+            "mapping": { "category": "city", "value": "count" },
+            "options": {},
+            "priority": 10
+          }
+        ]
+      },
+      "resultMeta": null,
+      "error": null
+    },
+    {
+      "specVersion": "1.0",
+      "success": false,
+      "data": null,
+      "summary": null,
+      "presentation": { "mode": "NONE", "views": [] },
+      "resultMeta": null,
+      "error": {
+        "code": "ENTITY_NOT_FOUND",
+        "message": "未找到指定人员",
+        "retryable": false
+      }
+    }
+  ]
+}
