@@ -3,16 +3,51 @@ export interface ChatRequest {
     message: string
 }
 
-export interface ChatStreamEvent {
-    type: 'delta' | 'done' | 'error'
+export interface SurfaceComponent {
+    id: string
+    type: 'Chart' | 'RelationGraph' | 'Timeline' | 'Table' | string
+    props: {
+        subType?: string
+        title?: string
+        description?: string
+        encoding?: Record<string, unknown>
+        options?: Record<string, unknown>
+    }
+}
+
+export interface UiEventPayload {
     conversationId: string
     runId: string
-    content: string | null
+    surfaceId: string
+    dataRef: string
+    components: SurfaceComponent[]
+}
+
+export type ChatStreamEvent =
+    | { type: 'delta'; conversationId: string; runId: string; content: string }
+    | { type: 'done'; conversationId: string; runId: string; content: null }
+    | { type: 'error'; conversationId: string; runId: string; content: string }
+
+export type StreamEvent = ChatStreamEvent | (UiEventPayload & { type: 'ui' })
+
+export interface ResultPayload {
+    resultRef: string
+    serverCode: string
+    toolName: string
+    data: unknown
+    summary: { count?: number; description?: string } | null
+    expiresAtEpochMs: number | null
+}
+
+export async function fetchResult(resultRef: string): Promise<ResultPayload> {
+    const response = await fetch(`/api/results/${encodeURIComponent(resultRef)}`)
+    if (!response.ok) throw new Error(`结果数据不可用（${response.status}）`)
+    return (await response.json()) as ResultPayload
 }
 
 export async function streamChat(
     request: ChatRequest,
-    onEvent: (event: ChatStreamEvent) => void,
+    onEvent: (event: StreamEvent) => void,
     signal?: AbortSignal,
 ): Promise<void> {
     const response = await fetch('/api/chat/messages', {
@@ -43,14 +78,23 @@ export async function streamChat(
         buffer = frames.pop() ?? ''
 
         for (const frame of frames) {
-            const data = frame
-                .split('\n')
+            const lines = frame.split('\n')
+            const eventName = lines
+                .find((line) => line.startsWith('event:'))
+                ?.slice(6)
+                .trim()
+            const data = lines
                 .filter((line) => line.startsWith('data:'))
                 .map((line) => line.slice(5).trimStart())
                 .join('\n')
 
-            if (data) {
-                onEvent(JSON.parse(data) as ChatStreamEvent)
+            if (!data) continue
+
+            const payload = JSON.parse(data)
+            if (eventName === 'ui') {
+                onEvent({...payload, type: 'ui'})
+            } else {
+                onEvent(payload)
             }
         }
     }

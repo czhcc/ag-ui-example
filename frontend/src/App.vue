@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import {nextTick, onBeforeUnmount, reactive, ref, watch} from 'vue'
 import {streamChat} from './api/chat'
+import type {UiEventPayload} from './api/chat'
+import UiPart from './chat/UiPart.vue'
 
 type Role = 'user' | 'assistant'
+
+type MessagePart =
+    | { kind: 'text'; text: string }
+    | { kind: 'ui'; surface: UiEventPayload }
 
 interface Message {
   id: string
   role: Role
-  content: string
+  parts: MessagePart[]
   streaming?: boolean
   failed?: boolean
 }
@@ -34,7 +40,7 @@ const messages = ref<Message[]>([
   {
     id: createId(),
     role: 'assistant',
-    content: '你好，我是你的分析智能体。告诉我你想查询或分析什么，我会调用合适的工具协助你。',
+    parts: [{kind: 'text', text: '你好，我是你的分析智能体。告诉我你想查询或分析什么，我会调用合适的工具协助你。'}],
   },
 ])
 
@@ -71,11 +77,11 @@ async function sendMessage() {
   input.value = ''
   nextTick(resizeComposer)
 
-  messages.value.push({id: createId(), role: 'user', content})
+  messages.value.push({id: createId(), role: 'user', parts: [{kind: 'text', text: content}]})
   const reply = reactive<Message>({
     id: createId(),
     role: 'assistant',
-    content: '',
+    parts: [{kind: 'text', text: ''}],
     streaming: true,
   })
   messages.value.push(reply)
@@ -91,14 +97,22 @@ async function sendMessage() {
           sessionStorage.setItem('agent-conversation-id', event.conversationId)
 
           if (event.type === 'delta' && event.content) {
-            reply.content += event.content
+            const last = reply.parts[reply.parts.length - 1]
+            if (last && last.kind === 'text') last.text += event.content
+            else reply.parts.push({kind: 'text', text: event.content})
+          } else if (event.type === 'ui') {
+            const {type: _type, ...surface} = event
+            reply.parts.push({kind: 'ui', surface})
           } else if (event.type === 'done') {
             reply.streaming = false
           } else if (event.type === 'error') {
             reply.streaming = false
             reply.failed = true
-            reply.content ||= event.content ?? '智能体暂时无法响应，请稍后再试。'
-            errorMessage.value = reply.content
+            const fallback = '智能体暂时无法响应，请稍后再试。'
+            const last = reply.parts[reply.parts.length - 1]
+            if (last && last.kind === 'text' && !last.text) last.text = event.content ?? fallback
+            else reply.parts.push({kind: 'text', text: event.content ?? fallback})
+            errorMessage.value = event.content ?? fallback
           }
         },
         controller.value.signal,
@@ -107,8 +121,8 @@ async function sendMessage() {
     if (error instanceof DOMException && error.name === 'AbortError') return
     reply.streaming = false
     reply.failed = true
-    reply.content ||= '连接智能体失败，请确认 Agent Client 已启动后重试。'
-    errorMessage.value = error instanceof Error ? error.message : reply.content
+    reply.parts.push({kind: 'text', text: '连接智能体失败，请确认 Agent Client 已启动后重试。'})
+    errorMessage.value = error instanceof Error ? error.message : '连接失败'
   } finally {
     reply.streaming = false
     isSending.value = false
@@ -131,11 +145,17 @@ function resetConversation() {
     {
       id: createId(),
       role: 'assistant',
-      content: '新对话已创建。今天想从哪里开始？',
+      parts: [{kind: 'text', text: '新对话已创建。今天想从哪里开始？'}],
     },
   ]
   errorMessage.value = ''
   nextTick(() => composer.value?.focus())
+}
+
+function messageText(message: Message): string {
+  return message.parts.filter((p): p is Extract<MessagePart, { kind: 'text' }> => p.kind === 'text')
+      .map((p) => p.text)
+      .join('\n')
 }
 
 async function copyMessage(content: string) {
@@ -250,25 +270,31 @@ onBeforeUnmount(() => controller.value?.abort())
                   {{ message.role === 'assistant' ? 'Agent' : '你' }}
                   <span v-if="message.streaming" class="text-brand-600">正在回复</span>
                 </div>
-                <div
-                    class="message-bubble relative whitespace-pre-wrap break-words text-[14px] leading-7 sm:text-[15px]"
-                    :class="[
-                  message.role === 'user'
-                    ? 'rounded-[20px] rounded-tr-md bg-brand-600 px-4 py-2.5 text-white shadow-md shadow-blue-700/10'
-                    : 'pr-3 text-slate-700',
-                  message.failed ? 'text-rose-600' : '',
-                ]">
-                  <span v-if="message.content">{{ message.content }}</span>
-                  <span v-if="message.streaming && !message.content" class="inline-flex items-center gap-1.5 py-2"
-                        aria-label="正在生成回答">
-                    <i class="typing-dot"></i><i class="typing-dot"></i><i class="typing-dot"></i>
-                  </span>
-                  <span v-else-if="message.streaming"
-                        class="ml-1 inline-block h-4 w-0.5 animate-pulse bg-brand-500 align-middle"></span>
+                <div class="flex flex-col gap-1"
+                     :class="message.role === 'user' ? 'items-end' : 'items-start'">
+                  <template v-for="(part, index) in message.parts" :key="index">
+                    <div v-if="part.kind === 'text'"
+                         class="message-bubble relative whitespace-pre-wrap break-words text-[14px] leading-7 sm:text-[15px]"
+                         :class="[
+                          message.role === 'user'
+                            ? 'rounded-[20px] rounded-tr-md bg-brand-600 px-4 py-2.5 text-white shadow-md shadow-blue-700/10'
+                            : 'pr-3 text-slate-700',
+                          message.failed ? 'text-rose-600' : '',
+                        ]">
+                      <span v-if="part.text">{{ part.text }}</span>
+                      <span v-if="message.streaming && !part.text && index === 0"
+                            class="inline-flex items-center gap-1.5 py-2" aria-label="正在生成回答">
+                        <i class="typing-dot"></i><i class="typing-dot"></i><i class="typing-dot"></i>
+                      </span>
+                      <span v-else-if="message.streaming && index === message.parts.length - 1"
+                            class="ml-1 inline-block h-4 w-0.5 animate-pulse bg-brand-500 align-middle"></span>
+                    </div>
+                    <UiPart v-else-if="part.kind === 'ui'" :surface="part.surface" class="w-full"/>
+                  </template>
                 </div>
-                <button v-if="message.role === 'assistant' && message.content && !message.streaming"
+                <button v-if="message.role === 'assistant' && messageText(message) && !message.streaming"
                         class="mt-2 flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] text-slate-400 opacity-0 transition hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100 focus:opacity-100"
-                        type="button" @click="copyMessage(message.content)">
+                        type="button" @click="copyMessage(messageText(message))">
                   <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" aria-hidden="true">
                     <rect x="8" y="8" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"/>
                     <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="currentColor"
