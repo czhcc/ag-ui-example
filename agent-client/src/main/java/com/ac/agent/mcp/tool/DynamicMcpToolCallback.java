@@ -37,22 +37,26 @@ public class DynamicMcpToolCallback implements ToolCallback {
     }
     @Override public ToolDefinition getToolDefinition() { return definition; }
 
+    private static final int MAX_RESULT_JSON_CHARS = 20_000;
+
     @Override public String call(String toolInput) {
         var callId = UUID.randomUUID().toString();
         var started = System.nanoTime();
-        events.emit(new ToolStartEvent(callId, definition.name()));
         log.info("MCP tool call started serverCode={} tool={}", serverCode, remoteToolName);
         try {
             Map<String, Object> arguments = mapper.readValue(toolInput, new TypeReference<>() { });
+            events.emit(new ToolStartEvent(callId, definition.name(), toolInput));
             var request = McpSchema.CallToolRequest.builder().name(remoteToolName).arguments(arguments).build();
             var callResult = clients.getClient(serverCode).callTool(request);
             McpResult<?> result = parse(callResult);
             String ref = resultStore.save(serverCode, remoteToolName, result);
-            events.emit(new ToolEndEvent(callId, definition.name(), result.success(), ref));
+            events.emit(new ToolEndEvent(callId, definition.name(), result.success(), ref,
+                    truncate(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result)), null));
             log.info("MCP tool call completed serverCode={} tool={} elapsedMs={}", serverCode, remoteToolName, elapsedMillis(started));
             return observations.build(definition.name(), ref, result);
         } catch (Exception exception) {
-            events.emit(new ToolEndEvent(callId, definition.name(), false, null));
+            events.emit(new ToolEndEvent(callId, definition.name(), false, null, null,
+                    exception.getMessage() == null ? exception.getClass().getSimpleName() : exception.getMessage()));
             log.warn("MCP tool call failed serverCode={} tool={} elapsedMs={} reason={}", serverCode, remoteToolName, elapsedMillis(started), exception.getMessage());
             throw new IllegalStateException("MCP tool call failed: " + definition.name(), exception);
         }
@@ -75,4 +79,9 @@ public class DynamicMcpToolCallback implements ToolCallback {
                 .map(McpSchema.TextContent.class::cast).map(McpSchema.TextContent::text).findFirst().orElse(null);
     }
     private long elapsedMillis(long started) { return (System.nanoTime() - started) / 1_000_000; }
+
+    private String truncate(String json) {
+        if (json == null || json.length() <= MAX_RESULT_JSON_CHARS) return json;
+        return json.substring(0, MAX_RESULT_JSON_CHARS) + "\n…(已截断，完整结果共 " + json.length() + " 字符)";
+    }
 }

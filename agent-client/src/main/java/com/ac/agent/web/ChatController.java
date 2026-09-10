@@ -60,18 +60,40 @@ public class ChatController {
                             .build();
                 });
 
+        Flux<ServerSentEvent<ToolStreamEvent>> toolEvents = eventBus.events()
+                .filter(e -> e.type() == com.ac.agent.streaming.AgentEventType.TOOL_CALL_START
+                        || e.type() == com.ac.agent.streaming.AgentEventType.TOOL_CALL_END)
+                .map(e -> {
+                    if (e instanceof com.ac.agent.streaming.event.ToolStartEvent start) {
+                        return ServerSentEvent.<ToolStreamEvent>builder(new ToolStreamEvent(
+                                        "tool_start", context.conversationId(), context.runId(),
+                                        start.toolCallId(), start.toolName(), start.arguments(), null, null, null))
+                                .event("tool")
+                                .build();
+                    }
+                    var end = (com.ac.agent.streaming.event.ToolEndEvent) e;
+                    return ServerSentEvent.<ToolStreamEvent>builder(new ToolStreamEvent(
+                                    "tool_end", context.conversationId(), context.runId(),
+                                    end.toolCallId(), end.toolName(), null, end.success(), end.resultRef(),
+                                    end.error() != null ? end.error() : end.resultJson()))
+                            .event("tool")
+                            .build();
+                });
+
         ServerSentEvent<Object> doneEvent = ServerSentEvent.<Object>builder(new ChatStreamEvent(
                 "done", context.conversationId(), context.runId(), null)).event("done").build();
 
         Flux<ServerSentEvent<Object>> textStream = content.map(se -> ServerSentEvent.<Object>builder(se.data()).event(se.event()).build());
         Flux<ServerSentEvent<Object>> uiStream = uiEvents.map(se -> ServerSentEvent.<Object>builder(se.data()).event(se.event()).build());
+        Flux<ServerSentEvent<Object>> toolStream = toolEvents.map(se -> ServerSentEvent.<Object>builder(se.data()).event(se.event()).build());
 
         reactor.core.publisher.Mono<Void> runFinished = eventBus.events()
                 .filter(e -> e.type() == com.ac.agent.streaming.AgentEventType.RUN_FINISHED
                         && context.runId().equals(((com.ac.agent.streaming.event.RunFinishedEvent) e).runId()))
                 .next()
                 .then();
-        return textStream.mergeWith(uiStream.takeUntilOther(runFinished))
+        return reactor.core.publisher.Flux.merge(textStream, uiStream, toolStream)
+                .takeUntilOther(runFinished)
                 .concatWithValues(doneEvent)
                 .onErrorResume(error -> Flux.just(ServerSentEvent.<Object>builder(new ChatStreamEvent(
                         "error",
@@ -114,5 +136,17 @@ public class ChatController {
             String surfaceId,
             String dataRef,
             java.util.List<?> components) {
+    }
+
+    public record ToolStreamEvent(
+            String type,
+            String conversationId,
+            String runId,
+            String toolCallId,
+            String toolName,
+            String arguments,
+            Boolean success,
+            String resultRef,
+            String detail) {
     }
 }
