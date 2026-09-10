@@ -80,19 +80,38 @@ function toOption(): Option {
 
 function disposePending() {
     if (pendingRender) {
-        cancelAnimationFrame(pendingRender)
+        cancelIdle(pendingRender)
         pendingRender = 0
     }
+}
+
+function scheduleIdle(callback: () => void): number {
+    const ric = (window as { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback
+    if (typeof ric === 'function') {
+        return ric(callback) as unknown as number
+    }
+    return requestAnimationFrame(() => requestAnimationFrame(callback))
+}
+
+function cancelIdle(handle: number) {
+    const cic = (window as { cancelIdleCallback?: (h: number) => void }).cancelIdleCallback
+    if (typeof cic === 'function') {
+        cic(handle)
+        return
+    }
+    cancelAnimationFrame(handle)
 }
 
 function render() {
     if (!container.value) return
     disposePending()
-    pendingRender = requestAnimationFrame(() => {
-        pendingRender = requestAnimationFrame(() => {
+    pendingRender = scheduleIdle(() => {
+        pendingRender = 0
+        if (!container.value) return
+        if (!chart) chart = echarts.init(container.value)
+        pendingRender = scheduleIdle(() => {
             pendingRender = 0
-            if (!container.value) return
-            if (!chart) chart = echarts.init(container.value)
+            if (!chart || !container.value) return
             chart.setOption(toOption())
             chart.resize()
         })
