@@ -1,0 +1,12 @@
+{
+  "extends": "../../frontend/tsconfig.app.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
+    "types": ["vite/client"],
+    "paths": {},
+    "baseUrl": "."
+  },
+  "include": ["src/**/*.ts", "src/**/*.vue"]
+}

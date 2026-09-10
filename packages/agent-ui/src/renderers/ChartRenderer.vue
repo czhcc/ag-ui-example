@@ -4,7 +4,7 @@ import {GridComponent, LegendComponent, TitleComponent, TooltipComponent} from '
 import * as echarts from 'echarts/core'
 import {CanvasRenderer} from 'echarts/renderers'
 import {onBeforeUnmount, onMounted, ref, watch} from 'vue'
-import type {ResultPayload, SurfaceComponent} from '../api/chat'
+import type {ResultPayload, SurfaceComponent} from '../core/types'
 
 echarts.use([BarChart, LineChart, PieChart, ScatterChart, GridComponent, TooltipComponent, TitleComponent, LegendComponent, CanvasRenderer])
 

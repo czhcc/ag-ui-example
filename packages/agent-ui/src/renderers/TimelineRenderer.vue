@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {computed} from 'vue'
-import type {ResultPayload, SurfaceComponent} from '../api/chat'
+import type {ResultPayload, SurfaceComponent} from '../core/types'
 
 const props = defineProps<{
     component: SurfaceComponent

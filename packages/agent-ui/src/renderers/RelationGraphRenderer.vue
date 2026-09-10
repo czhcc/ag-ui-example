@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import {Graph} from '@antv/g6'
-import type {ResultPayload, SurfaceComponent} from '../api/chat'
+import type {ResultPayload, SurfaceComponent} from '../core/types'
 
 const props = defineProps<{
     component: SurfaceComponent

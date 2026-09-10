@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {nextTick, onBeforeUnmount, reactive, ref, watch} from 'vue'
-import {streamChat} from './api/chat'
-import type {UiEventPayload} from './api/chat'
-import UiPart from './chat/UiPart.vue'
+import {streamChat} from '@ac/agent-ui'
+import type {UiSurface} from '@ac/agent-ui'
+import UiSurfacePart from '@ac/agent-ui/components/UiSurfacePart.vue'
 import RunLogPanel from './chat/RunLogPanel.vue'
 import type {RunLogEntry} from './chat/RunLogPanel.vue'
 
@@ -10,7 +10,7 @@ type Role = 'user' | 'assistant'
 
 type MessagePart =
     | { kind: 'text'; text: string }
-    | { kind: 'ui'; surface: UiEventPayload }
+    | { kind: 'ui'; surface: UiSurface }
 
 interface Message {
   id: string
@@ -330,7 +330,7 @@ onBeforeUnmount(() => controller.value?.abort())
                       <span v-else-if="message.streaming && index === message.parts.length - 1"
                             class="ml-1 inline-block h-4 w-0.5 animate-pulse bg-brand-500 align-middle"></span>
                     </div>
-                    <UiPart v-else-if="part.kind === 'ui'" :surface="part.surface" class="w-full"/>
+                    <UiSurfacePart v-else-if="part.kind === 'ui'" :surface="part.surface" class="w-full"/>
                   </template>
                 </div>
                 <div v-if="message.role === 'assistant' && messageText(message) && !message.streaming"
