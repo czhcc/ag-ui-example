@@ -53,6 +53,8 @@ function buildGraphData(): GraphData {
 async function render() {
     if (!container.value) return
     failed.value = ''
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+    if (!container.value) return
     try {
         const data = buildGraphData()
         graph?.destroy()

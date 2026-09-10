@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import * as echarts from 'echarts'
+import {BarChart, LineChart, PieChart, ScatterChart} from 'echarts/charts'
+import {GridComponent, LegendComponent, TitleComponent, TooltipComponent} from 'echarts/components'
+import * as echarts from 'echarts/core'
+import {CanvasRenderer} from 'echarts/renderers'
 import {onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import type {ResultPayload, SurfaceComponent} from '../api/chat'
+
+echarts.use([BarChart, LineChart, PieChart, ScatterChart, GridComponent, TooltipComponent, TitleComponent, LegendComponent, CanvasRenderer])
+
+type EChartsType = ReturnType<typeof echarts.init>
 
 const props = defineProps<{
     component: SurfaceComponent
@@ -9,8 +16,9 @@ const props = defineProps<{
 }>()
 
 const container = ref<HTMLDivElement | null>(null)
-let chart: echarts.ECharts | null = null
+let chart: EChartsType | null = null
 let observer: ResizeObserver | null = null
+let pendingRender = 0
 const failed = ref('')
 
 const ALLOWED_CHART_TYPES = new Set(['bar', 'line', 'area', 'pie', 'scatter'])
@@ -24,7 +32,9 @@ function buildRows(): Record<string, unknown>[] {
     return []
 }
 
-function toOption(): echarts.EChartsOption {
+type Option = Record<string, unknown>
+
+function toOption(): Option {
     const encoding = (props.component.props.encoding ?? {}) as Record<string, string>
     const rows = buildRows()
     const subType = ALLOWED_CHART_TYPES.has(props.component.props.subType ?? '')
@@ -68,11 +78,25 @@ function toOption(): echarts.EChartsOption {
     }
 }
 
+function disposePending() {
+    if (pendingRender) {
+        cancelAnimationFrame(pendingRender)
+        pendingRender = 0
+    }
+}
+
 function render() {
     if (!container.value) return
-    if (!chart) chart = echarts.init(container.value)
-    chart.setOption(toOption())
-    requestAnimationFrame(() => chart?.resize())
+    disposePending()
+    pendingRender = requestAnimationFrame(() => {
+        pendingRender = requestAnimationFrame(() => {
+            pendingRender = 0
+            if (!container.value) return
+            if (!chart) chart = echarts.init(container.value)
+            chart.setOption(toOption())
+            chart.resize()
+        })
+    })
 }
 
 function handleResize() {
@@ -90,6 +114,7 @@ onMounted(() => {
 watch(() => props.result, render, {deep: true})
 
 onBeforeUnmount(() => {
+    disposePending()
     observer?.disconnect()
     observer = null
     window.removeEventListener('resize', handleResize)

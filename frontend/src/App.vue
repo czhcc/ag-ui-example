@@ -64,7 +64,12 @@ watch(
     messages,
     async () => {
       await nextTick()
-      messageList.value?.scrollTo({top: messageList.value.scrollHeight, behavior: 'smooth'})
+      const el = messageList.value
+      if (!el) return
+      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 160
+      if (nearBottom || isSending.value) {
+        el.scrollTo({top: el.scrollHeight, behavior: isSending.value ? 'auto' : 'smooth'})
+      }
     },
     {deep: true},
 )
