@@ -14,7 +14,7 @@
 - **渲染器注册表**：内置 Chart / Timeline / RelationGraph / Table 四类，支持第三方注册新类型、覆盖替换渲染实现
 - **数据端点可配置**：默认 `GET /api/results/{dataRef}`，可替换为任意网关
 
-## 2. 快速接入（五步）
+## 2. 快速接入
 
 ### 2.1 安装
 
@@ -42,7 +42,101 @@ registerBuiltinRenderers()
 createApp(App).mount('#app')
 ```
 
-### 2.3 发起会话并渲染
+**这两行是什么意思？**
+
+- 第 1 行：从 SDK 的 `renderers` 子入口导入函数
+- 第 2 行：把 SDK 自带的 4 个渲染器（Chart / Timeline / RelationGraph / Table）登记进全局注册表
+
+为什么需要这一步：SDK 的渲染器是**可插拔**设计，注册表默认为空，宿主自己决定装哪些。不调用它，收到 `event:ui` 时只会显示"暂不支持的组件类型"。
+
+注意：**这两行只需在应用启动时执行一次**（`main.ts`），不是每个组件里都写。
+
+### 2.3 接入层次：三层按需取用
+
+SDK 分三层，第三方已有对话前端时**不必全上**，按需选最浅的一层：
+
+```
+┌─────────────────────────────────────────────────┐
+│ 层 3：useConversation   全托管会话状态（零逻辑）   │
+│ 层 2：streamChat        只要 SSE 解析             │
+│ 层 1：UiSurfacePart     只要图表渲染插槽           │  ← 已有前端通常从这层开始
+└─────────────────────────────────────────────────┘
+```
+
+`registerBuiltinRenderers()`（装引擎）是任何一层的**前置**；三层之间不捆绑——用自己的会话管理 + SDK 渲染完全合法。
+
+#### 情况 A：已有前端只想加"图表渲染能力"（最常见）
+
+自己的对话逻辑、气泡样式、会话管理**全部保留**，只在渲染 Assistant 消息的地方插入 SDK 组件：
+
+```vue
+<!-- 你的 MessageList.vue：原有结构不动，消息体换成 parts 交错渲染 -->
+<script setup lang="ts">
+import UiSurfacePart from '@ac/agent-ui/components/UiSurfacePart.vue'
+</script>
+
+<template>
+  <div v-for="msg in yourMessages" :key="msg.id" :class="yourBubbleClass">
+    <template v-for="(part, i) in msg.parts" :key="i">
+      <!-- 文字：用你自己的样式 -->
+      <span v-if="part.kind === 'text'">{{ part.text }}</span>
+      <!-- 图表：交给 SDK（loading 骨架 → 拉数据 → 渲染全自理） -->
+      <UiSurfacePart v-else :surface="part.surface"/>
+    </template>
+  </div>
+</template>
+```
+
+后端交互保持你自己的实现，只需在收到 `event:ui` 时往消息 parts 里 push `{kind:'ui', surface}`。
+
+#### 情况 B：连 SSE 解析也不想写
+
+用 SDK 的 `streamChat` 替换请求代码（负责解析 delta / ui / tool / done 帧并回调）：
+
+```ts
+import {streamChat} from '@ac/agent-ui'
+
+await streamChat(
+    {conversationId, message: text},
+    (event) => {
+        if (event.type === 'delta') appendText(reply, event.content)
+        else if (event.type === 'ui') reply.parts.push({kind: 'ui', surface: strip(event)})
+        else if (event.type === 'done') reply.streaming = false
+    },
+    abortSignal,
+    {url: 'https://your-gateway/v1/chat/messages'},  // 你的后端地址
+)
+```
+
+#### 情况 C：零逻辑接入（新前端或重写）
+
+`useConversation` 把"发消息 → 收流 → 维护 parts"整个状态机接管：
+
+```ts
+import {useConversation, streamChat} from '@ac/agent-ui'
+
+const {messages, send} = useConversation({send: streamChat})
+// messages 是响应式 RichMessage[]，直接 v-for 渲染
+// send('统计活动城市') 即可
+```
+
+#### 完整接入清单（第三方视角速查）
+
+```ts
+// main.ts —— 一次性初始化
+import {registerBuiltinRenderers} from '@ac/agent-ui/renderers'
+registerBuiltinRenderers()                          // ① 装内置渲染器（必须）
+// setFetchResult(myFetch)                          // ② 可选：替换数据端点
+// registerRenderer('Heatmap', MyHeatmap)           // ③ 可选：新增自定义渲染器
+// registerRenderer('Chart', MyChart)               // ④ 可选：覆盖内置实现
+
+// 发消息处 —— 按情况 A/B/C 选一层
+// 渲染处 —— <UiSurfacePart :surface="part.surface"/>
+```
+
+一句话总结：`registerBuiltinRenderers()` 是装引擎（一次性），`UiSurfacePart` 是插图表的插槽（每个图的位置），`streamChat` / `useConversation` 是可选的通信层——**三层按需取用，不绑架现有前端结构**。
+
+### 2.4 发起会话并渲染（完整示例）
 
 ```vue
 <script setup lang="ts">
@@ -91,7 +185,7 @@ async function send(text: string) {
 </template>
 ```
 
-### 2.4 最简方案：useConversation
+### 2.5 最简方案：useConversation
 
 不想自己维护 parts 逻辑时：
 
@@ -107,7 +201,7 @@ const {conversationId, messages, send} = useConversation({send: streamChat})
 <RichMessageView v-for="m in messages" :key="m.id" :message="m"/>
 ```
 
-### 2.5 自定义后端地址
+### 2.6 自定义后端地址
 
 ```ts
 import {streamChat} from '@ac/agent-ui'
@@ -115,7 +209,23 @@ import {streamChat} from '@ac/agent-ui'
 await streamChat(req, onEvent, signal, {url: 'https://my-host/v1/chat/messages'})
 ```
 
-## 3. 第三方扩展渲染器
+## 3. UiSurfacePart 的加载体验（内置行为）
+
+收到 `event:ui` 时组件立即挂载，**不等待数据、不阻塞文字流**：
+
+```
+ui 事件到达 → 显示"正在加载统计图…"+ 柱状图形状 shimmer 骨架屏（高度与最终图表接近，无布局跳动）
+           → 文字继续流式输出（骨架是轻量 DOM）
+           → fetchResult 拉数据（异步）
+           → 双 requestAnimationFrame 让位（确保排队的文字 delta 先绘制）
+           → 骨架原位替换为真实图表
+```
+
+- 提示文案按组件类型动态显示（统计图/时间线/关系图/数据表）
+- 加载失败显示错误态与原因，文字流不受影响
+- 图表渲染经 idle 调度让出主线程（见 §5 规范 2）
+
+## 4. 第三方扩展渲染器
 
 ### 3.1 Renderer 契约
 
@@ -203,7 +313,7 @@ configure({
 })
 ```
 
-## 4. Renderer 开发规范（重要）
+## 5. Renderer 开发规范（重要）
 
 1. **encoding 白名单**：subType 等枚举值必须白名单校验，未知值降级到安全默认，不要透传给图形库
 2. **让出主线程**：重图形库初始化（ECharts/G6）建议双 `requestAnimationFrame` 延迟，保证文字流不卡顿（参考内置 ChartRenderer）
@@ -212,7 +322,7 @@ configure({
 5. **不做网络请求**：数据由 UiSurfacePart 统一拉取注入，Renderer 保持纯渲染
 6. **禁止执行代码**：不 eval、不 innerHTML 拼接、不渲染 encoding/options 之外的任意配置（安全白名单原则，见方案 §55）
 
-## 5. SSE 事件协议参考
+## 6. SSE 事件协议参考
 
 | 事件名 | 载荷 | 说明 |
 |---|---|---|
@@ -233,7 +343,7 @@ configure({
 
 完整数据契约：`mcp-contract/src/main/resources/schema/mcp-result.schema.json`
 
-## 6. 参考实现
+## 7. 参考实现
 
 本仓库 `frontend/` 即完整消费示例：
 
@@ -241,7 +351,7 @@ configure({
 - `frontend/src/App.vue`：自有气泡样式 + SDK 的 streamChat/UiSurfacePart + 业务日志面板
 - `packages/agent-ui/README.md`：API 速查
 
-## 7. 已知边界
+## 8. 已知边界
 
 - `useConversation` 不含执行日志/错误横幅等业务 UI，需要时参照 frontend/App.vue 自行扩展
 - 后端新增 ViewHint type 时，需同步在 agent-client `UiComponentType` 枚举与 `PresentationMapper` 登记映射
