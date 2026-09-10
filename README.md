@@ -217,6 +217,49 @@ viewId=city-stat, type=chart, subType=bar, title=各城市活动次数
 - 完成 Vue3 Component Catalog、断线续传、UI_UPDATE 和前端 schema 校验。
 - 启用并完善 Client/Server Streamable HTTP 集成测试。
 
+## 根据 mcp-server 的 7 个 MCP 工具（当前为 Mock 数据，实体主要是 `person-001`/`person-002`），可以问这些问题：
+
+### 📊 活动分析（数据最丰富，带图表 ViewHint）
+
+| 问法示例 | 触发工具 | 可视化 |
+|---|---|---|
+| 统计 person-001 最近一月的活动城市 | `kg_activity_statistics` | 📊 柱状图（北京/上海/杭州） |
+| person-001 今年上半年有哪些活动？ | `kg_list_activity` | 🕐 时间线 |
+| 按时间线展示 person-001 的活动记录 | `kg_list_activity` | 🕐 时间线 |
+| 查一下 person-001 三月份去过哪些地方 | `kg_list_activity` / `kg_activity_statistics` | 文字或图 |
+
+### 🔗 关系网络
+
+| 问法示例 | 触发工具 | 可视化 |
+|---|---|---|
+| 用关系图展示 person-001 的关系网络 | `kg_expand_relations` | 🕸️ 关系图（G6） |
+| person-001 和谁有关系？ | `kg_expand_relations` / `kg_relation_statistics` | 文字/关系图 |
+| 统计一下 person-001 的关系分布 | `kg_relation_statistics` | 文字 |
+
+### 🔍 实体查询
+
+| 问法示例 | 触发工具 |
+|---|---|
+| 帮我搜一下叫“张三”的人 | `kg_search_entity`（关键词任意，Mock 固定返回 person-001） |
+| person-001 的详细资料是什么？ | `kg_get_entity` |
+| 查一下 person-001 的档案信息 | `kg_get_entity` |
+
+### 📋 证据查询
+
+| 问法示例 | 触发工具 |
+|---|---|
+| 有哪些证据和 person-001 相关？ | `kg_get_evidence` |
+| 查一下 person-001 的证据材料 | `kg_get_evidence` |
+
+### 💡 提问技巧
+
+- **想看图表**：问句里带上“统计/时间线/关系图”等词，或直接说“请给出统计图”——LLM 会调用 `ui_render`
+- **实体 ID**：目前 Mock 数据围绕 `person-001`（数据最全），`person-002`/`person-003` 在关系里有出现；问 `person-009` 这类不存在的 ID 会得到业务失败响应
+- **组合分析**：可以问综合问题如“分析 person-001 这个人”（LLM 会自主决定调详情+活动+关系多个工具）
+- **时间范围**：活动类工具接受 `startTime/endTime` 参数，“最近一月/今年三月/上个月”等自然语言均可
+
+所有回答都是流式文字 + 按需内联图表，数据到 2026 年的 Mock 记录为止。
+
 ## 下一阶段建议
 
 先锁定实际仓库与 JDK 上可解析的依赖矩阵并完成编译适配，再实现会话隔离与 Vue3 事件消费。随后接入一个真实只读业务域，打通认证、权限、脱敏、监控和端到端测试，最后再扩展 Redis、多 MCP Server 热更新及更多分析 Skill。
