@@ -9,7 +9,22 @@ export interface SurfaceComponent {
         description?: string
         encoding?: Record<string, unknown>
         options?: Record<string, unknown>
+        drillDown?: DrillDownHint
     }
+}
+
+export interface DrillDownHint {
+    enabled: boolean
+    dimension: string
+    label?: string
+    promptTemplate: string
+}
+
+export interface DrillDownEvent {
+    question: string
+    surfaceId: string
+    dimension: string
+    value: unknown
 }
 
 export interface UiSurface {
@@ -36,6 +51,7 @@ export interface ResultPayload {
     toolName?: string
     data: unknown
     summary: { count?: number; description?: string } | null
+    resultMeta?: { requestId?: string; generatedAt?: string; attributes?: Record<string, unknown> } | null
     expiresAtEpochMs?: number | null
 }
 

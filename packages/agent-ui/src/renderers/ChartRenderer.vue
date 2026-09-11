@@ -3,8 +3,8 @@ import {BarChart, LineChart, PieChart, ScatterChart} from 'echarts/charts'
 import {GridComponent, LegendComponent, TitleComponent, TooltipComponent} from 'echarts/components'
 import * as echarts from 'echarts/core'
 import {CanvasRenderer} from 'echarts/renderers'
-import {onBeforeUnmount, onMounted, ref, watch} from 'vue'
-import type {ResultPayload, SurfaceComponent} from '../core/types'
+import {computed, onBeforeUnmount, onMounted, ref, watch} from 'vue'
+import type {DrillDownEvent, DrillDownHint, ResultPayload, SurfaceComponent} from '../core/types'
 
 echarts.use([BarChart, LineChart, PieChart, ScatterChart, GridComponent, TooltipComponent, TitleComponent, LegendComponent, CanvasRenderer])
 
@@ -14,6 +14,39 @@ const props = defineProps<{
     component: SurfaceComponent
     result: ResultPayload
 }>()
+
+const emit = defineEmits<{ (e: 'drill-down', event: DrillDownEvent): void }>()
+
+const drillDown = computed<DrillDownHint | null>(() => {
+    const drill = props.component.props.drillDown
+    return drill && drill.enabled && drill.promptTemplate ? drill : null
+})
+
+function buildDrillQuestion(categoryValue: unknown): DrillDownEvent | null {
+    if (!drillDown.value) return null
+    const encoding = (props.component.props.encoding ?? {}) as Record<string, string>
+    const rows = buildRows()
+    const row = rows.find((r) => String(r[encoding.category ?? 'category'] ?? '') === String(categoryValue))
+    if (!row) return null
+    const context: Record<string, unknown> = {
+        ...row,
+        ...(props.result.resultMeta?.attributes ?? {}),
+    }
+    const question = drillDown.value.promptTemplate.replace(/\{(\w+)\}/g,
+        (_, key: string) => String(context[key] ?? ''))
+    return {
+        question,
+        surfaceId: props.component.id,
+        dimension: drillDown.value.dimension,
+        value: context[drillDown.value.dimension],
+    }
+}
+
+function handleChartClick(params: { name?: string; componentType?: string }) {
+    if (params.componentType !== 'series' || params.name == null) return
+    const event = buildDrillQuestion(params.name)
+    if (event) emit('drill-down', event)
+}
 
 const container = ref<HTMLDivElement | null>(null)
 let chart: EChartsType | null = null
@@ -58,7 +91,10 @@ function toOption(): Option {
 
     return {
         title: props.component.props.title ? {text: props.component.props.title, left: 'center'} : undefined,
-        tooltip: {trigger: 'axis'},
+        tooltip: {
+            trigger: 'axis',
+            ...(drillDown.value ? {appendToBody: true} : {}),
+        },
         grid: {left: 56, right: 32, top: 56, bottom: 40, containLabel: false},
         xAxis: {
             type: 'category',
@@ -114,6 +150,10 @@ function render() {
             if (!chart || !container.value) return
             chart.setOption(toOption())
             chart.resize()
+            if (drillDown.value) {
+                chart.off('click')
+                chart.on('click', handleChartClick)
+            }
         })
     })
 }
@@ -145,6 +185,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="w-full">
     <div v-if="failed" class="rounded-xl bg-rose-50 px-4 py-3 text-xs text-rose-600">{{ failed }}</div>
-    <div v-else ref="container" class="h-72 w-full"></div>
+    <div v-else ref="container" class="h-72 w-full" :class="drillDown ? 'cursor-pointer' : ''"
+         :title="drillDown ? (drillDown.label ?? '点击深入分析') : undefined"></div>
   </div>
 </template>

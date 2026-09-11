@@ -5,6 +5,8 @@ import type {ResultPayload, UiSurface} from '../core/types'
 
 const props = defineProps<{ surface: UiSurface }>()
 
+const emit = defineEmits<{ (e: 'drill-down', event: import('../core/types').DrillDownEvent): void }>()
+
 const status = ref<'loading' | 'ready' | 'error'>('loading')
 const result = ref<ResultPayload | null>(null)
 const errorText = ref('')
@@ -72,6 +74,7 @@ onMounted(() => {
         :is="renderer"
         :component="primary"
         :result="result"
+        @drill-down="(event: import('../core/types').DrillDownEvent) => emit('drill-down', event)"
     />
   </div>
 </template>

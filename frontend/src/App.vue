@@ -88,12 +88,22 @@ function usePrompt(prompt: string) {
   })
 }
 
+async function onDrillDown(event: { question: string; value: unknown }) {
+  if (isSending.value) return
+  await sendContent(`🔗 ${event.question}`, false)
+}
+
 async function sendMessage() {
   const content = input.value.trim()
   if (!content || isSending.value) return
+  await sendContent(content, true)
+}
+
+async function sendContent(content: string, fromUser: boolean) {
+  if (isSending.value) return
 
   errorMessage.value = ''
-  input.value = ''
+  if (fromUser) input.value = ''
   nextTick(resizeComposer)
 
   messages.value.push({id: createId(), role: 'user', parts: [{kind: 'text', text: content}], logs: []})
@@ -330,7 +340,8 @@ onBeforeUnmount(() => controller.value?.abort())
                       <span v-else-if="message.streaming && index === message.parts.length - 1"
                             class="ml-1 inline-block h-4 w-0.5 animate-pulse bg-brand-500 align-middle"></span>
                     </div>
-                    <UiSurfacePart v-else-if="part.kind === 'ui'" :surface="part.surface" class="w-full"/>
+                    <UiSurfacePart v-else-if="part.kind === 'ui'" :surface="part.surface" class="w-full"
+                                   @drill-down="onDrillDown"/>
                   </template>
                 </div>
                 <div v-if="message.role === 'assistant' && messageText(message) && !message.streaming"
