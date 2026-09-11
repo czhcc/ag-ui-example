@@ -95,7 +95,8 @@
           "type": "object",
           "additionalProperties": true
         },
-        "priority": { "type": "integer", "description": "优先级，数值越大越靠前" }
+        "priority": { "type": "integer", "description": "优先级，数值越大越靠前" },
+        "drillDown": { "$ref": "#/$defs/drillDown" }
       },
       "allOf": [
         {
@@ -147,6 +148,25 @@
           }
         }
       ]
+    },
+    "drillDown": {
+      "title": "DrillDown",
+      "description": "点击视图元素触发的对话式下钻声明。前端做确定性模板替换生成追问，走正常对话链路；数据提供方必须同时在 resultMeta.attributes 回填模板所需查询参数",
+      "type": "object",
+      "required": ["enabled", "dimension", "promptTemplate"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "description": "false 或缺省整个 drillDown 时点击无动作" },
+        "dimension": {
+          "type": "string",
+          "description": "点击命中的数据维度字段名（通常是 mapping 的类目轴字段），用于从被点击行提取占位值"
+        },
+        "label": { "type": "string", "description": "悬停提示文案，默认'深入分析'" },
+        "promptTemplate": {
+          "type": "string",
+          "description": "追问模板，{占位符} 替换规则：数据行同名字段优先，其次 resultMeta.attributes 同名键。占位符仅做字面替换"
+        }
+      }
     },
     "resultMeta": {
       "title": "ResultMeta",

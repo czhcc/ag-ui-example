@@ -21,4 +21,5 @@ public sealed interface ViewHint permits ChartViewHint, RelationGraphViewHint, T
     Map<String, String> mapping();
     Map<String, Object> options();
     Integer priority();
+    DrillDown drillDown();
 }
