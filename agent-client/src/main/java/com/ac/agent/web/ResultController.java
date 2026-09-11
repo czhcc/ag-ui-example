@@ -15,7 +15,7 @@ public class ResultController {
     public ResultController(ResultStore resultStore) { this.resultStore = resultStore; }
 
     public record ResultPayload(String resultRef, String serverCode, String toolName,
-                                Object data, Object summary, Long expiresAtEpochMs) { }
+                                Object data, Object summary, Object resultMeta, Long expiresAtEpochMs) { }
 
     @GetMapping("/{resultRef}")
     public ResponseEntity<ResultPayload> get(@PathVariable("resultRef") String resultRef) {
@@ -24,6 +24,7 @@ public class ResultController {
             return ResponseEntity.ok(new ResultPayload(
                     stored.resultRef(), stored.serverCode(), stored.toolName(),
                     stored.result().data(), stored.result().summary(),
+                    stored.result().resultMeta(),
                     stored.expiresAt().toEpochMilli()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
