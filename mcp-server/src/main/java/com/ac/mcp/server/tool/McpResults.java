@@ -26,15 +26,26 @@ public final class McpResults {
 
     public static Map<String, Object> envelope(boolean success, Object data, Map<String, Object> summary,
                                                Map<String, Object> presentation, Map<String, Object> error) {
+        return envelope(success, data, summary, presentation, error, Map.of());
+    }
+
+    public static Map<String, Object> envelope(boolean success, Object data, Map<String, Object> summary,
+                                               Map<String, Object> presentation, Map<String, Object> error,
+                                               Map<String, Object> attributes) {
         var result = new LinkedHashMap<String, Object>();
         result.put("specVersion", "1.0");
         result.put("success", success);
         result.put("data", data);
         result.put("summary", summary);
         result.put("presentation", presentation == null ? presentation("NONE", List.of()) : presentation);
-        result.put("resultMeta", meta());
+        result.put("resultMeta", meta(attributes));
         result.put("error", error);
         return result;
+    }
+
+    public static Map<String, Object> success(Object data, Map<String, Object> summary,
+                                              Map<String, Object> presentation, Map<String, Object> attributes) {
+        return envelope(true, data, summary, presentation, null, attributes);
     }
 
     public static Map<String, Object> summary(int count, int total, boolean truncated,
@@ -57,6 +68,12 @@ public final class McpResults {
 
     public static Map<String, Object> view(String id, String type, String subType, String title, String description,
                                            Map<String, String> mapping, Map<String, Object> options, int priority) {
+        return view(id, type, subType, title, description, mapping, options, priority, null);
+    }
+
+    public static Map<String, Object> view(String id, String type, String subType, String title, String description,
+                                           Map<String, String> mapping, Map<String, Object> options, int priority,
+                                           Map<String, Object> drillDown) {
         var view = new LinkedHashMap<String, Object>();
         view.put("id", id);
         view.put("type", type);
@@ -66,15 +83,28 @@ public final class McpResults {
         view.put("mapping", mapping);
         view.put("options", options == null ? Map.of() : options);
         view.put("priority", priority);
+        if (drillDown != null) view.put("drillDown", drillDown);
         return view;
+    }
+
+    public static Map<String, Object> drillDown(String dimension, String label, String promptTemplate) {
+        var drill = new LinkedHashMap<String, Object>();
+        drill.put("enabled", true);
+        drill.put("dimension", dimension);
+        drill.put("label", label);
+        drill.put("promptTemplate", promptTemplate);
+        return drill;
     }
 
     public static Map<String, Object> recommended(Map<String, Object> view) {
         return presentation("RECOMMENDED", List.of(view));
     }
 
-    private static Map<String, Object> meta() {
-        return Map.of("requestId", UUID.randomUUID().toString(),
-                "generatedAt", Instant.now().toString());
+    private static Map<String, Object> meta(Map<String, Object> attributes) {
+        var meta = new LinkedHashMap<String, Object>();
+        meta.put("requestId", UUID.randomUUID().toString());
+        meta.put("generatedAt", Instant.now().toString());
+        meta.put("attributes", attributes == null ? Map.of() : attributes);
+        return meta;
     }
 }
