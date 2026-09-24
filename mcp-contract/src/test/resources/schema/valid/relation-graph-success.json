@@ -1,0 +1,22 @@
+{
+  "specVersion": "1.1",
+  "success": true,
+  "data": [{ "sourceId": "p1", "targetId": "p2", "relation": "同事", "sourceName": "张三" }],
+  "presentation": {
+    "mode": "RECOMMENDED",
+    "views": [
+      {
+        "id": "relation-network",
+        "type": "relation_graph",
+        "subType": "network",
+        "mapping": {
+          "source": "sourceId",
+          "target": "targetId",
+          "label": "relation",
+          "sourceLabel": "sourceName"
+        },
+        "options": { "showLabels": true, "limit": 500 }
+      }
+    ]
+  }
+}

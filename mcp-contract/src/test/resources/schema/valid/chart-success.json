@@ -1,0 +1,21 @@
+{
+  "specVersion": "1.1",
+  "success": true,
+  "data": [
+    { "city": "北京", "count": 18 },
+    { "city": "上海", "count": 11 }
+  ],
+  "summary": { "count": 2, "description": "按城市统计活动次数" },
+  "presentation": {
+    "mode": "RECOMMENDED",
+    "views": [
+      {
+        "id": "city-stat",
+        "type": "chart",
+        "subType": "bar",
+        "mapping": { "category": "city", "value": "count" },
+        "options": { "order": "desc", "limit": 20 }
+      }
+    ]
+  }
+}

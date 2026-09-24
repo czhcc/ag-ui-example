@@ -7,4 +7,12 @@ class PresentationHintTest {
     @Test void noneHasNoViews() {
         assertTrue(PresentationHint.none().views().isEmpty());
     }
+
+    @Test void tableMappingCarriesColumns() {
+        var mapping = new TableMapping(java.util.List.of(
+                new TableColumn("city", "城市"),
+                new TableColumn("count", "次数")));
+
+        assertEquals(java.util.Set.of("city", "count"), mapping.referencedFields());
+    }
 }

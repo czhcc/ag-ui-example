@@ -34,10 +34,20 @@ function toggle(id: number) {
 
 function prettyDetail(entry: RunLogEntry): string {
     if (!entry.detail) return ''
+    if (entry.kind === 'tool_start') return ''
     try {
-        return JSON.stringify(JSON.parse(entry.detail), null, 2)
+        const parsed: unknown = JSON.parse(entry.detail)
+        if (entry.kind === 'tool_end' && parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            const value = parsed as Record<string, unknown>
+            return JSON.stringify({
+                kind: value.kind,
+                summary: value.summary,
+                resultRef: value.resultRef,
+            }, null, 2)
+        }
+        return JSON.stringify(parsed, null, 2).slice(0, 2_000)
     } catch {
-        return entry.detail
+        return entry.detail.slice(0, 2_000)
     }
 }
 </script>

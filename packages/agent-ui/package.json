@@ -1,18 +1,20 @@
 {
   "name": "@ac/agent-ui",
   "version": "0.1.0",
-  "description": "Rich streaming conversation UI SDK: interleaved text/tool/ui parts, pluggable renderer registry, AG-UI style SSE consumption",
+  "description": "Official AG-UI Vue SDK with keyed reducer, secure rich-result loading, and pluggable ac.rich-ui renderers",
   "type": "module",
   "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
     "./renderers": "./src/renderers/index.ts",
-    "./components/UiSurfacePart.vue": "./src/components/UiSurfacePart.vue"
+    "./components/UiSurfacePart.vue": "./src/components/UiSurfacePart.vue",
+    "./components/RunActivityPanel.vue": "./src/components/RunActivityPanel.vue"
   },
   "files": [
     "src"
   ],
   "scripts": {
+    "test": "node --experimental-transform-types --test test/*.test.ts",
     "typecheck": "vue-tsc -b"
   },
   "peerDependencies": {

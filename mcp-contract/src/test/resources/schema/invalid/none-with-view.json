@@ -1,0 +1,16 @@
+{
+  "specVersion": "1.1",
+  "success": true,
+  "data": [{ "city": "北京", "count": 18 }],
+  "presentation": {
+    "mode": "NONE",
+    "views": [
+      {
+        "id": "unexpected-chart",
+        "type": "chart",
+        "subType": "bar",
+        "mapping": { "category": "city", "value": "count" }
+      }
+    ]
+  }
+}

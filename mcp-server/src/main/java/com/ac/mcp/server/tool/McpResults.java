@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -12,6 +13,9 @@ import java.util.UUID;
  * that the wire contract is the JSON structure itself.
  */
 public final class McpResults {
+    private static final String SPEC_VERSION = "1.1";
+    private static final Set<String> PRESENTATION_MODES = Set.of("NONE", "RECOMMENDED", "REQUIRED");
+
     private McpResults() { }
 
     public static Map<String, Object> success(Object data, Map<String, Object> summary,
@@ -32,14 +36,23 @@ public final class McpResults {
     public static Map<String, Object> envelope(boolean success, Object data, Map<String, Object> summary,
                                                Map<String, Object> presentation, Map<String, Object> error,
                                                Map<String, Object> attributes) {
+        if (success && error != null) {
+            throw new IllegalArgumentException("Successful result must not contain error");
+        }
+        if (!success && data != null) {
+            throw new IllegalArgumentException("Failed result must contain null data");
+        }
+        if (!success && error == null) {
+            throw new IllegalArgumentException("Failed result requires error");
+        }
         var result = new LinkedHashMap<String, Object>();
-        result.put("specVersion", "1.0");
+        result.put("specVersion", SPEC_VERSION);
         result.put("success", success);
         result.put("data", data);
-        result.put("summary", summary);
+        if (summary != null) result.put("summary", summary);
         result.put("presentation", presentation == null ? presentation("NONE", List.of()) : presentation);
         result.put("resultMeta", meta(attributes));
-        result.put("error", error);
+        if (error != null) result.put("error", error);
         return result;
     }
 
@@ -54,25 +67,35 @@ public final class McpResults {
         summary.put("count", count);
         summary.put("total", total);
         summary.put("truncated", truncated);
-        summary.put("description", description);
+        if (description != null) summary.put("description", description);
         summary.put("highlights", highlights == null ? List.of() : highlights);
         return summary;
     }
 
     public static Map<String, Object> presentation(String mode, List<Map<String, Object>> views) {
+        if (!PRESENTATION_MODES.contains(mode)) {
+            throw new IllegalArgumentException("Unsupported presentation mode: " + mode);
+        }
+        var safeViews = views == null ? List.<Map<String, Object>>of() : List.copyOf(views);
+        if ("NONE".equals(mode) && !safeViews.isEmpty()) {
+            throw new IllegalArgumentException("NONE presentation must not contain views");
+        }
+        if (!"NONE".equals(mode) && safeViews.isEmpty()) {
+            throw new IllegalArgumentException(mode + " presentation requires at least one view");
+        }
         var presentation = new LinkedHashMap<String, Object>();
         presentation.put("mode", mode);
-        presentation.put("views", views == null ? List.of() : views);
+        presentation.put("views", safeViews);
         return presentation;
     }
 
     public static Map<String, Object> view(String id, String type, String subType, String title, String description,
-                                           Map<String, String> mapping, Map<String, Object> options, int priority) {
+                                           Map<String, ?> mapping, Map<String, Object> options, int priority) {
         return view(id, type, subType, title, description, mapping, options, priority, null);
     }
 
     public static Map<String, Object> view(String id, String type, String subType, String title, String description,
-                                           Map<String, String> mapping, Map<String, Object> options, int priority,
+                                           Map<String, ?> mapping, Map<String, Object> options, int priority,
                                            Map<String, Object> drillDown) {
         var view = new LinkedHashMap<String, Object>();
         view.put("id", id);
@@ -80,7 +103,7 @@ public final class McpResults {
         if (subType != null) view.put("subType", subType);
         if (title != null) view.put("title", title);
         if (description != null) view.put("description", description);
-        view.put("mapping", mapping);
+        view.put("mapping", mapping == null ? Map.of() : mapping);
         view.put("options", options == null ? Map.of() : options);
         view.put("priority", priority);
         if (drillDown != null) view.put("drillDown", drillDown);
@@ -91,7 +114,7 @@ public final class McpResults {
         var drill = new LinkedHashMap<String, Object>();
         drill.put("enabled", true);
         drill.put("dimension", dimension);
-        drill.put("label", label);
+        if (label != null) drill.put("label", label);
         drill.put("promptTemplate", promptTemplate);
         return drill;
     }

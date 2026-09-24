@@ -537,13 +537,12 @@ McpResult<T>
 
 ```json
 {
-  "specVersion": "1.0",
+  "specVersion": "1.1",
   "success": true,
   "data": {},
   "summary": {},
   "presentation": {},
-  "resultMeta": {},
-  "error": null
+  "resultMeta": {}
 }
 ```
 
@@ -555,7 +554,7 @@ McpResult<T>
 
 ```json
 {
-  "specVersion": "1.0"
+  "specVersion": "1.1"
 }
 ```
 
@@ -706,8 +705,8 @@ MCP 强制 UI 指令
 ```json
 {
   "presentation": {
-    "mode": "recommended",
-    "views": []
+    "mode": "RECOMMENDED",
+    "views": [ViewHint]
   }
 }
 ```
@@ -719,17 +718,18 @@ MCP 强制 UI 指令
 支持：
 
 ```text
-none
-recommended
-required
+NONE
+RECOMMENDED
+REQUIRED
 ```
 
-## none
+## NONE
 
 ```json
 {
   "presentation": {
-    "mode": "none"
+    "mode": "NONE",
+    "views": []
   }
 }
 ```
@@ -738,12 +738,13 @@ required
 
 ---
 
-## recommended
+## RECOMMENDED
 
 ```json
 {
   "presentation": {
-    "mode": "recommended"
+    "mode": "RECOMMENDED",
+    "views": [ViewHint]
   }
 }
 ```
@@ -758,12 +759,13 @@ required
 
 ---
 
-## required
+## REQUIRED
 
 ```json
 {
   "presentation": {
-    "mode": "required"
+    "mode": "REQUIRED",
+    "views": [ViewHint]
   }
 }
 ```
@@ -804,7 +806,7 @@ ViewHint
 {
   "id": "city-stat",
   "type": "chart",
-  "chartType": "bar",
+  "subType": "bar",
   "title": "城市活动次数",
   "mapping": {
     "category": "city",
@@ -859,7 +861,7 @@ custom
 {
   "id": "city-stat",
   "type": "chart",
-  "chartType": "bar",
+  "subType": "bar",
   "title": "城市活动次数",
   "mapping": {
     "category": "city",
@@ -886,22 +888,13 @@ scatter
 {
   "id": "person-relation",
   "type": "relation_graph",
+  "subType": "network",
   "title": "人员关系",
   "mapping": {
-    "source": {
-      "id": "sourceId",
-      "label": "sourceName",
-      "type": "sourceType"
-    },
-    "target": {
-      "id": "targetId",
-      "label": "targetName",
-      "type": "targetType"
-    },
-    "edge": {
-      "type": "relationType",
-      "label": "relationName"
-    }
+    "source": "sourceId",
+    "target": "targetId",
+    "label": "relationName",
+    "sourceLabel": "sourceName"
   }
 }
 ```
@@ -931,6 +924,7 @@ WebGL
 {
   "id": "activity-timeline",
   "type": "timeline",
+  "subType": "vertical",
   "title": "活动时间线",
   "mapping": {
     "time": "eventTime",
@@ -949,6 +943,7 @@ WebGL
 {
   "id": "activity-list",
   "type": "table",
+  "subType": "standard",
   "title": "活动记录",
   "mapping": {
     "columns": [
@@ -983,7 +978,7 @@ kg.activity_statistics
 
 ```json
 {
-  "specVersion": "1.0",
+  "specVersion": "1.1",
 
   "success": true,
 
@@ -1008,13 +1003,13 @@ kg.activity_statistics
   },
 
   "presentation": {
-    "mode": "recommended",
+    "mode": "RECOMMENDED",
 
     "views": [
       {
         "id": "city-stat",
         "type": "chart",
-        "chartType": "bar",
+        "subType": "bar",
         "title": "各城市活动次数",
 
         "mapping": {
@@ -1200,7 +1195,7 @@ result_17
 
 viewId: city-stat
 type: chart
-chartType: bar
+subType: bar
 title: 各城市活动次数
 
 如果该图有助于回答当前问题，可以使用对应 Presentation；
@@ -1285,12 +1280,12 @@ Renderer Registry
       "type": "Chart",
 
       "props": {
-        "chartType": "bar",
+        "subType": "bar",
         "title": "各城市活动次数",
 
         "encoding": {
-          "x": "city",
-          "y": "count"
+          "category": "city",
+          "value": "count"
         }
       }
     }
@@ -1738,12 +1733,12 @@ CUSTOM
         "type": "Chart",
 
         "props": {
-          "chartType": "bar",
+          "subType": "bar",
           "title": "各城市活动次数",
 
           "encoding": {
-            "x": "city",
-            "y": "count"
+            "category": "city",
+            "value": "count"
           }
         }
       }
@@ -2436,14 +2431,14 @@ sort
 
 ```json
 {
-  "specVersion": "1.0",
+  "specVersion": "1.1",
 
   "success": false,
 
   "data": null,
 
   "presentation": {
-    "mode": "none",
+    "mode": "NONE",
     "views": []
   },
 

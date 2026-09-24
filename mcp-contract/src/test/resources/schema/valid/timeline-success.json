@@ -1,0 +1,17 @@
+{
+  "specVersion": "1.1",
+  "success": true,
+  "data": [{ "occurredAt": "2026-09-15T08:00:00Z", "event": "会面", "kind": "活动" }],
+  "presentation": {
+    "mode": "RECOMMENDED",
+    "views": [
+      {
+        "id": "activity-timeline",
+        "type": "timeline",
+        "subType": "vertical",
+        "mapping": { "time": "occurredAt", "title": "event", "group": "kind" },
+        "options": { "order": "desc", "limit": 50, "group": true }
+      }
+    ]
+  }
+}

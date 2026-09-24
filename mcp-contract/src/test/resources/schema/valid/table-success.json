@@ -1,0 +1,22 @@
+{
+  "specVersion": "1.1",
+  "success": true,
+  "data": [{ "city": "北京", "count": 18 }],
+  "presentation": {
+    "mode": "REQUIRED",
+    "views": [
+      {
+        "id": "city-table",
+        "type": "table",
+        "subType": "standard",
+        "mapping": {
+          "columns": [
+            { "field": "city", "label": "城市" },
+            { "field": "count", "label": "次数" }
+          ]
+        },
+        "options": { "limit": 100, "sort": "count", "order": "desc" }
+      }
+    ]
+  }
+}

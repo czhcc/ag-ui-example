@@ -1,0 +1,13 @@
+[
+  {"type":"RUN_STARTED","timestamp":1000,"threadId":"thread-1","runId":"run-1"},
+  {"type":"STATE_SNAPSHOT","timestamp":1000,"snapshot":{"route":"/sales"}},
+  {"type":"TEXT_MESSAGE_START","timestamp":1000,"messageId":"run-1:assistant","role":"assistant"},
+  {"type":"TEXT_MESSAGE_CONTENT","timestamp":1000,"messageId":"run-1:assistant","delta":"hello"},
+  {"type":"TOOL_CALL_START","timestamp":1000,"toolCallId":"tool-1","toolCallName":"search","parentMessageId":"run-1:assistant"},
+  {"type":"TOOL_CALL_ARGS","timestamp":1000,"toolCallId":"tool-1","delta":"{\"q\":\"sales\"}"},
+  {"type":"TOOL_CALL_END","timestamp":1000,"toolCallId":"tool-1"},
+  {"type":"TOOL_CALL_RESULT","timestamp":1000,"messageId":"tool-1:result","toolCallId":"tool-1","content":"{\"kind\":\"RICH_RESULT\",\"summary\":\"1 row\",\"resultRef\":\"result://1\"}","role":"tool"},
+  {"type":"CUSTOM","timestamp":1000,"name":"ui.surface.create","value":{"profile":"ac.rich-ui","profileVersion":"1.0","surfaceId":"surface-1","dataRef":"result://1","components":[{"id":"c1","type":"Table","props":{}}]}},
+  {"type":"TEXT_MESSAGE_END","timestamp":1000,"messageId":"run-1:assistant"},
+  {"type":"RUN_FINISHED","timestamp":1000,"threadId":"thread-1","runId":"run-1","outcome":{"type":"success"},"result":{"status":"completed"}}
+]

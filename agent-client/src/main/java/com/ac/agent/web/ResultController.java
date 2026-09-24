@@ -1,33 +1,29 @@
 package com.ac.agent.web;
 
-import com.ac.agent.mcp.result.StoredMcpResult;
-import com.ac.agent.mcp.result.ResultStore;
+import com.ac.agui.web.ResultApiService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/results")
-public class ResultController {
-    private final ResultStore resultStore;
-    public ResultController(ResultStore resultStore) { this.resultStore = resultStore; }
+public final class ResultController {
+    private final ResultApiService results;
 
-    public record ResultPayload(String resultRef, String serverCode, String toolName,
-                                Object data, Object summary, Object resultMeta, Long expiresAtEpochMs) { }
+    public ResultController(ResultApiService results) {
+        this.results = results;
+    }
 
     @GetMapping("/{resultRef}")
-    public ResponseEntity<ResultPayload> get(@PathVariable("resultRef") String resultRef) {
-        try {
-            StoredMcpResult stored = resultStore.get(resultRef);
-            return ResponseEntity.ok(new ResultPayload(
-                    stored.resultRef(), stored.serverCode(), stored.toolName(),
-                    stored.result().data(), stored.result().summary(),
-                    stored.result().resultMeta(),
-                    stored.expiresAt().toEpochMilli()));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<?> get(
+            @PathVariable("resultRef") String resultRef,
+            @RequestParam("threadId") String threadId,
+            @RequestParam("runId") String runId,
+            ServerHttpRequest request) {
+        return results.get(resultRef, threadId, runId, request);
     }
 }

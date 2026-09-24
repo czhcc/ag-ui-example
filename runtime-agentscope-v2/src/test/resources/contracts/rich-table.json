@@ -1,0 +1,20 @@
+{
+  "specVersion": "1.1",
+  "success": true,
+  "data": [{"city": "Beijing", "count": 18}],
+  "summary": {"description": "Found one city", "highlights": []},
+  "presentation": {
+    "mode": "REQUIRED",
+    "views": [{
+      "id": "city-table",
+      "type": "table",
+      "subType": "standard",
+      "title": "Cities",
+      "mapping": {"columns": [
+        {"field": "city", "label": "City"},
+        {"field": "count", "label": "Count"}
+      ]},
+      "options": {"limit": 100}
+    }]
+  }
+}

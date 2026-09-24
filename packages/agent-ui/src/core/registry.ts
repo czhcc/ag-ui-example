@@ -1,15 +1,24 @@
-import type {AgentUiOptions, RendererComponent, ResultPayload} from './types'
+import {fetchResult as requestResult} from './stream'
+import type {
+    AgentUiOptions,
+    RendererComponent,
+    ResultFetchContext,
+    ResultPayload,
+} from './types'
 
 export interface AgentUiContextValue {
-    fetchResult: (dataRef: string) => Promise<ResultPayload>
+    fetchResult: (dataRef: string, context?: ResultFetchContext) => Promise<ResultPayload>
     resolveRenderer: (type: string) => RendererComponent | null
 }
 
-let defaultFetch: (dataRef: string) => Promise<ResultPayload> = async (dataRef) => {
-    const response = await fetch(`/api/results/${encodeURIComponent(dataRef)}`)
-    if (!response.ok) throw new Error(`Result unavailable (${response.status})`)
-    return (await response.json()) as ResultPayload
-}
+let resultUrl = '/api/results'
+let resultHeaders: AgentUiOptions['resultHeaders']
+let credentials: RequestCredentials = 'same-origin'
+let defaultFetch: AgentUiContextValue['fetchResult'] = (dataRef, context) => requestResult(
+    dataRef,
+    context,
+    {resultUrl, headers: resultHeaders, credentials},
+)
 
 const registry = new Map<string, RendererComponent>()
 
@@ -25,11 +34,14 @@ export function listRenderers(): string[] {
     return [...registry.keys()]
 }
 
-export function setFetchResult(fetch: (dataRef: string) => Promise<ResultPayload>): void {
+export function setFetchResult(fetch: AgentUiContextValue['fetchResult']): void {
     defaultFetch = fetch
 }
 
 export function configure(options: AgentUiOptions): void {
+    if (options.resultUrl) resultUrl = options.resultUrl
+    if (options.resultHeaders) resultHeaders = options.resultHeaders
+    if (options.credentials) credentials = options.credentials
     if (options.fetchResult) setFetchResult(options.fetchResult)
     if (options.renderers) {
         for (const [type, renderer] of Object.entries(options.renderers)) {

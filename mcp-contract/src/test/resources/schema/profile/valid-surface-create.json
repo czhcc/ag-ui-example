@@ -1,0 +1,21 @@
+{
+  "type": "CUSTOM",
+  "name": "ui.surface.create",
+  "value": {
+    "profile": "ac.rich-ui",
+    "profileVersion": "1.0",
+    "surfaceId": "surface_01",
+    "dataRef": "result_17",
+    "components": [
+      {
+        "id": "city-stat",
+        "type": "Chart",
+        "props": {
+          "subType": "bar",
+          "encoding": { "category": "city", "value": "count" },
+          "options": { "showLabels": true }
+        }
+      }
+    ]
+  }
+}

@@ -23,8 +23,28 @@ spring:
             chat_template_kwargs:
               enable_thinking: false
 ac:
+  deployment:
+    # Set true only when shared result, AG-UI replay, and SAA checkpoint stores are installed.
+    distributed: "${AC_DISTRIBUTED:false}"
+  ag-ui:
+    retention: 30m
+    replay-limit: 512
+    maximum-runs: 10000
   result-store:
     ttl: 45m
+    maximum-entries: 10000
+    maximum-entries-per-tenant: 1000
+    maximum-bytes-per-result: 2097152
+    maximum-bytes-per-tenant: 268435456
+  result-api:
+    rate-limit:
+      requests: 120
+      window: 1m
+      maximum-subjects: 100000
+  agent:
+    hitl:
+      # Comma-separated exposed tool names that require HumanInTheLoop approval.
+      approval-tools: "${AI_HITL_APPROVAL_TOOLS:}"
   mcp:
     servers:
       - code: knowledge

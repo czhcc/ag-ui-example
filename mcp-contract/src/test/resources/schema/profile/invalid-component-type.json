@@ -1,0 +1,17 @@
+{
+  "type": "CUSTOM",
+  "name": "ui.surface.create",
+  "value": {
+    "profile": "ac.rich-ui",
+    "profileVersion": "1.0",
+    "surfaceId": "surface_unsafe",
+    "dataRef": "result_unsafe",
+    "components": [
+      {
+        "id": "raw-html",
+        "type": "Html",
+        "props": { "html": "<script>alert(1)</script>" }
+      }
+    ]
+  }
+}

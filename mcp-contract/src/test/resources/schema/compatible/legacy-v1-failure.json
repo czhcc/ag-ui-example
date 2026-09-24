@@ -1,0 +1,13 @@
+{
+  "specVersion": "1.0",
+  "success": false,
+  "data": null,
+  "summary": null,
+  "presentation": { "mode": "NONE", "views": [] },
+  "resultMeta": null,
+  "error": {
+    "code": "ENTITY_NOT_FOUND",
+    "message": "未找到指定人员",
+    "retryable": false
+  }
+}

@@ -1,0 +1,311 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-mcp-platform.ac.com/schema/ac-rich-ui-profile.schema.json",
+  "title": "ac.rich-ui AG-UI Custom Event Profile",
+  "description": "AG-UI CUSTOM 事件中的 ac.rich-ui/1.0 payload。Schema 只约束项目扩展字段，并允许标准 AG-UI envelope 增加其他字段。",
+  "oneOf": [
+    { "$ref": "#/$defs/surfaceCreateEvent" },
+    { "$ref": "#/$defs/surfaceUpdateEvent" },
+    { "$ref": "#/$defs/surfaceRemoveEvent" }
+  ],
+  "$defs": {
+    "surfaceCreateEvent": {
+      "type": "object",
+      "required": ["type", "name", "value"],
+      "properties": {
+        "type": { "const": "CUSTOM" },
+        "name": { "const": "ui.surface.create" },
+        "value": { "$ref": "#/$defs/createValue" }
+      }
+    },
+    "surfaceUpdateEvent": {
+      "type": "object",
+      "required": ["type", "name", "value"],
+      "properties": {
+        "type": { "const": "CUSTOM" },
+        "name": { "const": "ui.surface.update" },
+        "value": { "$ref": "#/$defs/updateValue" }
+      }
+    },
+    "surfaceRemoveEvent": {
+      "type": "object",
+      "required": ["type", "name", "value"],
+      "properties": {
+        "type": { "const": "CUSTOM" },
+        "name": { "const": "ui.surface.remove" },
+        "value": { "$ref": "#/$defs/removeValue" }
+      }
+    },
+    "createValue": {
+      "type": "object",
+      "required": ["profile", "profileVersion", "surfaceId", "dataRef", "components"],
+      "additionalProperties": false,
+      "properties": {
+        "profile": { "const": "ac.rich-ui" },
+        "profileVersion": { "const": "1.0" },
+        "surfaceId": { "$ref": "#/$defs/id" },
+        "dataRef": { "$ref": "#/$defs/id" },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": { "$ref": "#/$defs/component" }
+        }
+      }
+    },
+    "updateValue": {
+      "type": "object",
+      "required": ["profile", "profileVersion", "surfaceId"],
+      "additionalProperties": false,
+      "properties": {
+        "profile": { "const": "ac.rich-ui" },
+        "profileVersion": { "const": "1.0" },
+        "surfaceId": { "$ref": "#/$defs/id" },
+        "dataRef": { "$ref": "#/$defs/id" },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": { "$ref": "#/$defs/component" }
+        }
+      },
+      "anyOf": [
+        { "required": ["dataRef"] },
+        { "required": ["components"] }
+      ]
+    },
+    "removeValue": {
+      "type": "object",
+      "required": ["profile", "profileVersion", "surfaceId"],
+      "additionalProperties": false,
+      "properties": {
+        "profile": { "const": "ac.rich-ui" },
+        "profileVersion": { "const": "1.0" },
+        "surfaceId": { "$ref": "#/$defs/id" }
+      }
+    },
+    "component": {
+      "oneOf": [
+        { "$ref": "#/$defs/chartComponent" },
+        { "$ref": "#/$defs/tableComponent" },
+        { "$ref": "#/$defs/timelineComponent" },
+        { "$ref": "#/$defs/relationGraphComponent" }
+      ]
+    },
+    "chartComponent": {
+      "type": "object",
+      "required": ["id", "type", "props"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "const": "Chart" },
+        "props": {
+          "type": "object",
+          "required": ["subType", "encoding"],
+          "additionalProperties": false,
+          "properties": {
+            "subType": { "enum": ["bar", "line", "area", "pie", "scatter"] },
+            "title": { "$ref": "#/$defs/title" },
+            "description": { "$ref": "#/$defs/description" },
+            "encoding": { "$ref": "#/$defs/chartEncoding" },
+            "options": { "$ref": "#/$defs/chartOptions" },
+            "drillDown": { "$ref": "#/$defs/drillDown" }
+          }
+        }
+      }
+    },
+    "tableComponent": {
+      "type": "object",
+      "required": ["id", "type", "props"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "const": "Table" },
+        "props": {
+          "type": "object",
+          "required": ["encoding"],
+          "additionalProperties": false,
+          "properties": {
+            "subType": { "const": "standard" },
+            "title": { "$ref": "#/$defs/title" },
+            "description": { "$ref": "#/$defs/description" },
+            "encoding": { "$ref": "#/$defs/tableEncoding" },
+            "options": { "$ref": "#/$defs/tableOptions" },
+            "drillDown": { "$ref": "#/$defs/drillDown" }
+          }
+        }
+      }
+    },
+    "timelineComponent": {
+      "type": "object",
+      "required": ["id", "type", "props"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "const": "Timeline" },
+        "props": {
+          "type": "object",
+          "required": ["subType", "encoding"],
+          "additionalProperties": false,
+          "properties": {
+            "subType": { "const": "vertical" },
+            "title": { "$ref": "#/$defs/title" },
+            "description": { "$ref": "#/$defs/description" },
+            "encoding": { "$ref": "#/$defs/timelineEncoding" },
+            "options": { "$ref": "#/$defs/timelineOptions" },
+            "drillDown": { "$ref": "#/$defs/drillDown" }
+          }
+        }
+      }
+    },
+    "relationGraphComponent": {
+      "type": "object",
+      "required": ["id", "type", "props"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "const": "RelationGraph" },
+        "props": {
+          "type": "object",
+          "required": ["subType", "encoding"],
+          "additionalProperties": false,
+          "properties": {
+            "subType": { "const": "network" },
+            "title": { "$ref": "#/$defs/title" },
+            "description": { "$ref": "#/$defs/description" },
+            "encoding": { "$ref": "#/$defs/relationGraphEncoding" },
+            "options": { "$ref": "#/$defs/relationGraphOptions" },
+            "drillDown": { "$ref": "#/$defs/drillDown" }
+          }
+        }
+      }
+    },
+    "chartEncoding": {
+      "type": "object",
+      "required": ["category", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "category": { "$ref": "#/$defs/fieldName" },
+        "value": { "$ref": "#/$defs/fieldName" }
+      }
+    },
+    "tableEncoding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "required": ["field", "label"],
+            "additionalProperties": false,
+            "properties": {
+              "field": { "$ref": "#/$defs/fieldName" },
+              "label": { "type": "string", "minLength": 1, "maxLength": 100 }
+            }
+          }
+        }
+      }
+    },
+    "timelineEncoding": {
+      "type": "object",
+      "required": ["time", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "time": { "$ref": "#/$defs/fieldName" },
+        "title": { "$ref": "#/$defs/fieldName" },
+        "description": { "$ref": "#/$defs/fieldName" },
+        "group": { "$ref": "#/$defs/fieldName" }
+      }
+    },
+    "relationGraphEncoding": {
+      "type": "object",
+      "required": ["source", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "source": { "$ref": "#/$defs/fieldName" },
+        "target": { "$ref": "#/$defs/fieldName" },
+        "label": { "$ref": "#/$defs/fieldName" },
+        "sourceLabel": { "$ref": "#/$defs/fieldName" }
+      }
+    },
+    "chartOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "orientation": { "enum": ["vertical", "horizontal"] },
+        "order": { "enum": ["none", "asc", "desc"] },
+        "limit": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "showLegend": { "type": "boolean" },
+        "showLabels": { "type": "boolean" }
+      }
+    },
+    "tableOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "sort": { "$ref": "#/$defs/fieldName" },
+        "order": { "enum": ["asc", "desc"] }
+      }
+    },
+    "timelineOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": { "type": "integer", "minimum": 1, "maximum": 500 },
+        "order": { "enum": ["asc", "desc"] },
+        "group": { "type": "boolean" }
+      }
+    },
+    "relationGraphOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "showLabels": { "type": "boolean" }
+      }
+    },
+    "drillDown": {
+      "type": "object",
+      "required": ["enabled", "dimension", "promptTemplate"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "const": true },
+        "dimension": { "$ref": "#/$defs/fieldName" },
+        "label": { "type": "string", "maxLength": 100 },
+        "promptTemplate": { "type": "string", "minLength": 1, "maxLength": 2000 }
+      }
+    },
+    "id": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "fieldName": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "title": { "type": "string", "maxLength": 200 },
+    "description": { "type": "string", "maxLength": 2000 }
+  },
+  "examples": [
+    {
+      "type": "CUSTOM",
+      "name": "ui.surface.create",
+      "value": {
+        "profile": "ac.rich-ui",
+        "profileVersion": "1.0",
+        "surfaceId": "surface_01",
+        "dataRef": "result_17",
+        "components": [
+          {
+            "id": "city-stat",
+            "type": "Chart",
+            "props": {
+              "subType": "bar",
+              "title": "各城市活动次数",
+              "encoding": { "category": "city", "value": "count" },
+              "options": { "order": "desc" }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

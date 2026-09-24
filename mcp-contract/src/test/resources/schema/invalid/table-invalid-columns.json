@@ -1,0 +1,15 @@
+{
+  "specVersion": "1.1",
+  "success": true,
+  "data": [{ "city": "北京" }],
+  "presentation": {
+    "mode": "RECOMMENDED",
+    "views": [
+      {
+        "id": "invalid-table",
+        "type": "table",
+        "mapping": { "columns": ["city"] }
+      }
+    ]
+  }
+}

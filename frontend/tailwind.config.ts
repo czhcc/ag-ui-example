@@ -1,7 +1,11 @@
 import type {Config} from 'tailwindcss'
 
 export default {
-    content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
+    content: [
+        './index.html',
+        './src/**/*.{vue,js,ts,jsx,tsx}',
+        '../packages/agent-ui/src/**/*.{vue,js,ts,jsx,tsx}',
+    ],
     theme: {
         extend: {
             colors: {

@@ -6,6 +6,7 @@
   "packageManager": "pnpm@10.15.1",
   "scripts": {
     "dev": "vite",
+    "dev:agentscope": "vite --mode agentscope",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc -b"

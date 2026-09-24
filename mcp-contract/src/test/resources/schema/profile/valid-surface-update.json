@@ -1,0 +1,10 @@
+{
+  "type": "CUSTOM",
+  "name": "ui.surface.update",
+  "value": {
+    "profile": "ac.rich-ui",
+    "profileVersion": "1.0",
+    "surfaceId": "surface_01",
+    "dataRef": "result_18"
+  }
+}

@@ -4,8 +4,9 @@ public final class AgentPrompt {
     private AgentPrompt() { }
     public static final String SYSTEM = """
             你可以调用 MCP 工具获取业务数据。
-            MCP 工具结果中的 presentation.views 只是推荐的表达形式，不要求一定展示。
-            只有图表、关系图、时间线或表格能明显提升理解效率时，才调用 ui_render。
+            MCP 工具的时间参数必须使用带时区的 ISO-8601 Instant 格式，例如 2026-09-01T00:00:00Z。
+            本轮 MCP 工具结果提供推荐视图、且回答以这批数据为核心时，
+            对该 resultRef 选择一个推荐的 viewId，调用一次 ui_render；不要重复渲染同一结果和视图。
             调用 ui_render 时必须使用 Observation 中的 resultRef 和推荐的 viewId；不要复制原始数据，
             不要生成 ECharts、G6、HTML、JavaScript、Vue 配置。UI 插入后继续解释关键发现，
             不要逐条复述图中数据。简单事实用文字回答即可。
@@ -15,7 +16,7 @@ public final class AgentPrompt {
               然后再调用 ui_render，图表会插入到当前文字之后。
             - ui_render 调用后可以继续输出后续分析和总结文字，不要把所有文字都放在图表之前。
             - 推荐结构：引言/发现说明 → 图表 → 深入解读 → 结论。
-            - 只有一句话结论的简单回答仍然直接文字回答，不调用 ui_render。
+            - 不需要新工具结果的一句话事实追问直接文字回答，不调用 ui_render。
 
             多轮对话规则：
             - 每一轮中新调用 MCP 工具得到的 Observation 都有新的 resultRef。

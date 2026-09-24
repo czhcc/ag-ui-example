@@ -1,55 +1,64 @@
-import {reactive} from 'vue'
-import type {RichMessage, StreamEvent, UiSurface} from './types'
+import {computed, reactive, ref} from 'vue'
+import {createAgentUiState, reduceAgentUiEvent} from './reducer'
+import {streamAgent} from './stream'
+import type {AgentStreamOptions} from './stream'
+import type {AgentUiState, AgUiEvent, AgUiResume, RunAgentInput} from './types'
 
 export interface UseConversationOptions {
-    conversationId?: string
-    send: (request: { conversationId: string; message: string },
-           onEvent: (event: StreamEvent) => void,
-           signal?: AbortSignal) => Promise<void>
+    threadId?: string
+    stream?: (
+        request: RunAgentInput,
+        onEvent: (event: AgUiEvent) => void,
+        signal?: AbortSignal,
+    ) => Promise<void>
+    streamOptions?: AgentStreamOptions
+    initialState?: unknown
+    forwardedProps?: Record<string, unknown>
 }
 
-export function useConversation(options: UseConversationOptions) {
-    const conversationId = options.conversationId ?? `conv-${crypto.randomUUID()}`
-    const messages = reactive<RichMessage[]>([])
-    let sending = false
+export interface SendOptions {
+    parentRunId?: string
+    resume?: AgUiResume[]
+    signal?: AbortSignal
+}
 
-    function appendText(message: RichMessage, text: string) {
-        const last = message.parts[message.parts.length - 1]
-        if (last && last.kind === 'text') last.text += text
-        else message.parts.push({kind: 'text', text})
-    }
+export function useConversation(options: UseConversationOptions = {}) {
+    const threadId = ref(options.threadId ?? `thread-${createId()}`)
+    const state = reactive(createAgentUiState()) as AgentUiState
+    const sending = ref(false)
+    const activeRunId = ref<string | null>(null)
+    const messages = computed(() => Object.values(state.messages))
+    const sendStream = options.stream ?? ((request, onEvent, signal) =>
+        streamAgent(request, onEvent, signal, options.streamOptions))
 
-    async function send(content: string, signal?: AbortSignal): Promise<void> {
-        if (sending || !content.trim()) return
-        sending = true
-        messages.push({id: crypto.randomUUID(), role: 'user', parts: [{kind: 'text', text: content}]})
-        const reply: RichMessage = reactive({
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            parts: [{kind: 'text', text: ''}],
-            streaming: true,
-        })
-        messages.push(reply)
+    async function send(content: string, sendOptions: SendOptions = {}): Promise<string | null> {
+        if (sending.value || (!content.trim() && !sendOptions.resume?.length)) return null
+        const runId = `run-${createId()}`
+        const request: RunAgentInput = {
+            threadId: threadId.value,
+            runId,
+            parentRunId: sendOptions.parentRunId,
+            state: options.initialState,
+            messages: content.trim() ? [{id: `message-${createId()}`, role: 'user', content}] : [],
+            tools: [],
+            context: [],
+            forwardedProps: options.forwardedProps ?? {},
+            resume: sendOptions.resume ?? [],
+        }
+        sending.value = true
+        activeRunId.value = runId
         try {
-            await options.send({conversationId, message: content}, (event) => {
-                if (event.type === 'delta' && event.content) {
-                    appendText(reply, event.content)
-                } else if (event.type === 'ui') {
-                    const {type: _t, conversationId: _c, runId: _r, ...surface} = event
-                    reply.parts.push({kind: 'ui', surface: surface as UiSurface})
-                } else if (event.type === 'done') {
-                    reply.streaming = false
-                } else if (event.type === 'error') {
-                    reply.streaming = false
-                    reply.failed = true
-                    appendText(reply, event.content ?? 'Agent temporarily unavailable.')
-                }
-            }, signal)
+            await sendStream(request, (event) => reduceAgentUiEvent(state, event, runId), sendOptions.signal)
+            return runId
         } finally {
-            reply.streaming = false
-            sending = false
+            sending.value = false
+            activeRunId.value = null
         }
     }
 
-    return {conversationId, messages, send}
+    return {threadId, state, messages, sending, activeRunId, send}
+}
+
+function createId(): string {
+    return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`
 }

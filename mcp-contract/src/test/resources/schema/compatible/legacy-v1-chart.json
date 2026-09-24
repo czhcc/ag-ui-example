@@ -1,0 +1,20 @@
+{
+  "specVersion": "1.0",
+  "success": true,
+  "data": [{ "city": "北京", "count": 18 }],
+  "summary": null,
+  "presentation": {
+    "mode": "RECOMMENDED",
+    "views": [
+      {
+        "id": "legacy-city-stat",
+        "type": "chart",
+        "subType": "bar",
+        "mapping": { "category": "city", "value": "count" },
+        "options": {}
+      }
+    ]
+  },
+  "resultMeta": null,
+  "error": null
+}

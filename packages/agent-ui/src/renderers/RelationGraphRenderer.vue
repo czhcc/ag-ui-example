@@ -107,6 +107,14 @@ onBeforeUnmount(() => {
       {{ component.props.title }}
     </p>
     <div v-if="failed" class="rounded-xl bg-rose-50 px-4 py-3 text-xs text-rose-600">{{ failed }}</div>
-    <div v-else ref="container" class="h-80 w-full"></div>
+    <div v-else ref="container" class="agent-ui-relation-graph h-80 w-full"></div>
   </div>
 </template>
+
+<style scoped>
+.agent-ui-relation-graph {
+    width: 100%;
+    height: 20rem;
+    min-height: 20rem;
+}
+</style>

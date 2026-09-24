@@ -18,5 +18,50 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>1.5.7</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-portable-contract-boundary</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <searchTransitive>true</searchTransitive>
+                                    <excludes>
+                                        <exclude>com.alibaba.cloud.ai:*</exclude>
+                                        <exclude>io.agentscope:*</exclude>
+                                        <exclude>org.springframework:spring-web*</exclude>
+                                        <exclude>org.springframework.boot:spring-boot-starter-web*</exclude>
+                                        <exclude>org.springframework.data:*</exclude>
+                                        <exclude>com.github.ben-manes.caffeine:*</exclude>
+                                        <exclude>org.redisson:*</exclude>
+                                        <exclude>redis.clients:*</exclude>
+                                    </excludes>
+                                    <message>mcp-contract must remain independent of agent runtimes, web frameworks, and concrete stores.</message>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

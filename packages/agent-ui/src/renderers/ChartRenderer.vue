@@ -185,7 +185,15 @@ onBeforeUnmount(() => {
 <template>
   <div class="w-full">
     <div v-if="failed" class="rounded-xl bg-rose-50 px-4 py-3 text-xs text-rose-600">{{ failed }}</div>
-    <div v-else ref="container" class="h-72 w-full" :class="drillDown ? 'cursor-pointer' : ''"
+    <div v-else ref="container" class="agent-ui-chart h-72 w-full" :class="drillDown ? 'cursor-pointer' : ''"
          :title="drillDown ? (drillDown.label ?? '点击深入分析') : undefined"></div>
   </div>
 </template>
+
+<style scoped>
+.agent-ui-chart {
+    width: 100%;
+    height: 18rem;
+    min-height: 18rem;
+}
+</style>

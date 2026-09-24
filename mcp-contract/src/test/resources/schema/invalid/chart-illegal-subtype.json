@@ -1,0 +1,16 @@
+{
+  "specVersion": "1.1",
+  "success": true,
+  "data": [{ "city": "北京", "count": 18 }],
+  "presentation": {
+    "mode": "RECOMMENDED",
+    "views": [
+      {
+        "id": "radar-chart",
+        "type": "chart",
+        "subType": "radar",
+        "mapping": { "category": "city", "value": "count" }
+      }
+    ]
+  }
+}

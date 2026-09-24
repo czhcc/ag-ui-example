@@ -2,175 +2,365 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ai-mcp-platform.ac.com/schema/mcp-result.schema.json",
   "title": "McpResult",
-  "description": "平台 MCP Data Tool 统一返回契约。工具的 structuredContent 必须符合本结构。协议/传输层错误走 MCP isError，业务失败走 success=false + error。",
-  "type": "object",
-  "required": ["specVersion", "success"],
-  "additionalProperties": false,
-  "properties": {
-    "specVersion": {
-      "const": "1.0",
-      "description": "契约版本，与 MCP 协议版本无关"
-    },
-    "success": {
-      "type": "boolean",
-      "description": "业务操作是否成功。业务失败时 data 应为 null 并携带 error"
-    },
-    "data": {
-      "description": "真实业务数据。推荐 Array<Object>（行式数据），字段名必须与 presentation.views[].mapping 引用的字段完全一致",
-      "type": ["object", "array", "string", "number", "boolean", "null"]
-    },
-    "summary": { "$ref": "#/$defs/summary" },
-    "presentation": { "$ref": "#/$defs/presentation" },
-    "resultMeta": { "$ref": "#/$defs/resultMeta" },
-    "error": { "$ref": "#/$defs/error" }
-  },
-  "allOf": [
-    {
-      "if": { "properties": { "success": { "const": false } } },
-      "then": { "required": ["error"] }
-    }
+  "description": "平台 MCP Data Tool 统一返回契约。1.1 是当前严格版本；1.0 仅作为迁移兼容输入。协议/传输层错误使用 MCP isError，业务失败使用 success=false + error。",
+  "oneOf": [
+    { "$ref": "#/$defs/envelopeV11" },
+    { "$ref": "#/$defs/envelopeV10" }
   ],
   "$defs": {
+    "envelopeV11": {
+      "title": "McpResult 1.1",
+      "type": "object",
+      "required": ["specVersion", "success", "data", "presentation"],
+      "additionalProperties": false,
+      "properties": {
+        "specVersion": { "const": "1.1" },
+        "success": { "type": "boolean" },
+        "data": { "$ref": "#/$defs/data" },
+        "summary": { "$ref": "#/$defs/summary" },
+        "presentation": { "$ref": "#/$defs/presentationV11" },
+        "resultMeta": { "$ref": "#/$defs/resultMeta" },
+        "error": { "$ref": "#/$defs/error" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "success": { "const": true } },
+            "required": ["success"]
+          },
+          "then": { "not": { "required": ["error"] } }
+        },
+        {
+          "if": {
+            "properties": { "success": { "const": false } },
+            "required": ["success"]
+          },
+          "then": {
+            "required": ["error"],
+            "properties": { "data": { "type": "null" } }
+          }
+        }
+      ]
+    },
+    "envelopeV10": {
+      "title": "McpResult 1.0 compatibility input",
+      "description": "只用于滚动升级期间读取既有 1.0 payload；新生产者不得继续输出 1.0。",
+      "type": "object",
+      "required": ["specVersion", "success"],
+      "additionalProperties": false,
+      "properties": {
+        "specVersion": { "const": "1.0" },
+        "success": { "type": "boolean" },
+        "data": { "$ref": "#/$defs/data" },
+        "summary": {
+          "oneOf": [
+            { "$ref": "#/$defs/summary" },
+            { "type": "null" }
+          ]
+        },
+        "presentation": { "$ref": "#/$defs/presentationV10" },
+        "resultMeta": {
+          "oneOf": [
+            { "$ref": "#/$defs/resultMeta" },
+            { "type": "null" }
+          ]
+        },
+        "error": {
+          "oneOf": [
+            { "$ref": "#/$defs/error" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "success": { "const": false } },
+            "required": ["success"]
+          },
+          "then": {
+            "required": ["error"],
+            "properties": { "error": { "$ref": "#/$defs/error" } }
+          }
+        }
+      ]
+    },
+    "data": {
+      "description": "真实业务数据。富视图推荐使用对象数组，字段名必须与 mapping 引用的字段完全一致。",
+      "type": ["object", "array", "string", "number", "boolean", "null"]
+    },
     "summary": {
       "title": "ResultSummary",
-      "description": "给 Agent 的结果摘要。highlights 必须是服务端确定性计算出的事实，不是模型推测",
+      "description": "给 Agent 的结果摘要。highlights 必须是服务端确定性计算出的事实。",
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "count": { "type": "integer", "minimum": 0, "description": "当前返回数量" },
-        "total": { "type": "integer", "minimum": 0, "description": "完整数量" },
-        "truncated": { "type": "boolean", "description": "是否截断" },
-        "description": { "type": "string", "description": "结果描述" },
+        "count": { "type": "integer", "minimum": 0 },
+        "total": { "type": "integer", "minimum": 0 },
+        "truncated": { "type": "boolean" },
+        "description": { "type": "string", "maxLength": 2000 },
         "highlights": {
           "type": "array",
-          "items": { "type": "string" },
-          "maxItems": 20,
-          "description": "确定性事实列表，如 '北京18次'"
+          "items": { "type": "string", "maxLength": 500 },
+          "maxItems": 20
         }
       }
     },
-    "presentation": {
-      "title": "PresentationHint",
-      "description": "数据表达方式的轻量建议，非强制 UI 指令。mode=none 表示无建议",
+    "presentationV11": {
+      "title": "PresentationHint 1.1",
       "type": "object",
       "required": ["mode", "views"],
       "additionalProperties": false,
       "properties": {
         "mode": {
           "enum": ["NONE", "RECOMMENDED", "REQUIRED"],
-          "description": "none=无建议；recommended=推荐（最常用，LLM 决定是否采用）；required=仅限不用专属 UI 无法表达的场景"
+          "description": "枚举在线路上始终使用大写。"
         },
         "views": {
           "type": "array",
-          "items": { "$ref": "#/$defs/viewHint" },
+          "items": { "$ref": "#/$defs/viewHintV11" },
+          "maxItems": 5
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "mode": { "const": "NONE" } },
+            "required": ["mode"]
+          },
+          "then": { "properties": { "views": { "maxItems": 0 } } }
+        },
+        {
+          "if": {
+            "properties": { "mode": { "enum": ["RECOMMENDED", "REQUIRED"] } },
+            "required": ["mode"]
+          },
+          "then": { "properties": { "views": { "minItems": 1 } } }
+        }
+      ]
+    },
+    "presentationV10": {
+      "title": "PresentationHint 1.0 compatibility input",
+      "type": "object",
+      "required": ["mode", "views"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": { "enum": ["NONE", "RECOMMENDED", "REQUIRED"] },
+        "views": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/viewHintV10" },
           "maxItems": 5
         }
       }
     },
-    "viewHint": {
-      "title": "ViewHint",
-      "description": "单条视图建议：数据字段到图语义的映射，不含任何绘制细节（无 ECharts/G6/HTML/JS）",
+    "viewHintV11": {
+      "oneOf": [
+        { "$ref": "#/$defs/chartView" },
+        { "$ref": "#/$defs/tableView" },
+        { "$ref": "#/$defs/timelineView" },
+        { "$ref": "#/$defs/relationGraphView" }
+      ]
+    },
+    "chartView": {
+      "title": "ChartViewHint",
+      "type": "object",
+      "required": ["id", "type", "subType", "mapping"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/viewId" },
+        "type": { "const": "chart" },
+        "subType": { "enum": ["bar", "line", "area", "pie", "scatter"] },
+        "title": { "$ref": "#/$defs/title" },
+        "description": { "$ref": "#/$defs/description" },
+        "mapping": { "$ref": "#/$defs/chartMapping" },
+        "options": { "$ref": "#/$defs/chartOptions" },
+        "priority": { "$ref": "#/$defs/priority" },
+        "drillDown": { "$ref": "#/$defs/drillDown" }
+      }
+    },
+    "tableView": {
+      "title": "TableViewHint",
       "type": "object",
       "required": ["id", "type", "mapping"],
       "additionalProperties": false,
       "properties": {
-        "id": { "type": "string", "minLength": 1, "description": "视图唯一标识，ui_render(resultRef, viewId) 引用" },
-        "type": {
-          "enum": ["chart", "relation_graph", "timeline", "table"],
-          "description": "视图类型，对应前端 Renderer：chart→ECharts、relation_graph→AntV G6、timeline/table→Vue"
-        },
-        "subType": {
-          "description": "类型子类。chart: bar/line/area/pie/scatter；timeline: vertical；relation_graph: network；table 可省略",
-          "type": "string"
-        },
-        "title": { "type": "string", "description": "视图标题" },
-        "description": { "type": "string", "description": "视图说明" },
+        "id": { "$ref": "#/$defs/viewId" },
+        "type": { "const": "table" },
+        "subType": { "const": "standard" },
+        "title": { "$ref": "#/$defs/title" },
+        "description": { "$ref": "#/$defs/description" },
+        "mapping": { "$ref": "#/$defs/tableMapping" },
+        "options": { "$ref": "#/$defs/tableOptions" },
+        "priority": { "$ref": "#/$defs/priority" },
+        "drillDown": { "$ref": "#/$defs/drillDown" }
+      }
+    },
+    "timelineView": {
+      "title": "TimelineViewHint",
+      "type": "object",
+      "required": ["id", "type", "subType", "mapping"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/viewId" },
+        "type": { "const": "timeline" },
+        "subType": { "const": "vertical" },
+        "title": { "$ref": "#/$defs/title" },
+        "description": { "$ref": "#/$defs/description" },
+        "mapping": { "$ref": "#/$defs/timelineMapping" },
+        "options": { "$ref": "#/$defs/timelineOptions" },
+        "priority": { "$ref": "#/$defs/priority" },
+        "drillDown": { "$ref": "#/$defs/drillDown" }
+      }
+    },
+    "relationGraphView": {
+      "title": "RelationGraphViewHint",
+      "type": "object",
+      "required": ["id", "type", "subType", "mapping"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/viewId" },
+        "type": { "const": "relation_graph" },
+        "subType": { "const": "network" },
+        "title": { "$ref": "#/$defs/title" },
+        "description": { "$ref": "#/$defs/description" },
+        "mapping": { "$ref": "#/$defs/relationGraphMapping" },
+        "options": { "$ref": "#/$defs/relationGraphOptions" },
+        "priority": { "$ref": "#/$defs/priority" },
+        "drillDown": { "$ref": "#/$defs/drillDown" }
+      }
+    },
+    "viewHintV10": {
+      "title": "LegacyViewHint",
+      "type": "object",
+      "required": ["id", "type", "mapping"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/viewId" },
+        "type": { "enum": ["chart", "relation_graph", "timeline", "table"] },
+        "subType": { "type": "string" },
+        "title": { "$ref": "#/$defs/title" },
+        "description": { "$ref": "#/$defs/description" },
         "mapping": {
-          "description": "字段映射（硬要求：引用的字段名必须存在于 data 行中）。chart: {category,value}；timeline: {time,title,description?,group?}；relation_graph: {source,target,label?}；table: {columns:[{field,label}]或省略自动推导",
           "type": "object",
           "additionalProperties": { "type": ["string", "array"] }
         },
-        "options": {
-          "description": "展示选项白名单：orientation/order/limit/showLegend/showLabels/group/sort",
-          "type": "object",
-          "additionalProperties": true
-        },
-        "priority": { "type": "integer", "description": "优先级，数值越大越靠前" },
+        "options": { "type": "object" },
+        "priority": { "$ref": "#/$defs/priority" },
         "drillDown": { "$ref": "#/$defs/drillDown" }
-      },
-      "allOf": [
-        {
-          "if": { "properties": { "type": { "const": "chart" } }, "required": ["type"] },
-          "then": {
-            "properties": {
-              "mapping": {
-                "type": "object",
-                "required": ["category", "value"],
-                "properties": {
-                  "category": { "type": "string" },
-                  "value": { "type": "string" }
-                }
-              }
-            }
-          }
-        },
-        {
-          "if": { "properties": { "type": { "const": "timeline" } }, "required": ["type"] },
-          "then": {
-            "properties": {
-              "mapping": {
-                "type": "object",
-                "required": ["time", "title"],
-                "properties": {
-                  "time": { "type": "string", "description": "ISO-8601 时间字符串" },
-                  "title": { "type": "string" },
-                  "description": { "type": "string" },
-                  "group": { "type": "string" }
-                }
-              }
-            }
-          }
-        },
-        {
-          "if": { "properties": { "type": { "const": "relation_graph" } }, "required": ["type"] },
-          "then": {
-            "properties": {
-              "mapping": {
-                "type": "object",
-                "required": ["source", "target"],
-                "properties": {
-                  "source": { "type": "string" },
-                  "target": { "type": "string" },
-                  "label": { "type": "string" }
-                }
-              }
-            }
-          }
-        }
-      ]
+      }
     },
-    "drillDown": {
-      "title": "DrillDown",
-      "description": "点击视图元素触发的对话式下钻声明。前端做确定性模板替换生成追问，走正常对话链路；数据提供方必须同时在 resultMeta.attributes 回填模板所需查询参数",
+    "chartMapping": {
       "type": "object",
-      "required": ["enabled", "dimension", "promptTemplate"],
+      "required": ["category", "value"],
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean", "description": "false 或缺省整个 drillDown 时点击无动作" },
-        "dimension": {
-          "type": "string",
-          "description": "点击命中的数据维度字段名（通常是 mapping 的类目轴字段），用于从被点击行提取占位值"
-        },
-        "label": { "type": "string", "description": "悬停提示文案，默认'深入分析'" },
-        "promptTemplate": {
-          "type": "string",
-          "description": "追问模板，{占位符} 替换规则：数据行同名字段优先，其次 resultMeta.attributes 同名键。占位符仅做字面替换"
+        "category": { "$ref": "#/$defs/fieldName" },
+        "value": { "$ref": "#/$defs/fieldName" }
+      }
+    },
+    "tableMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": { "$ref": "#/$defs/tableColumn" }
         }
       }
     },
+    "tableColumn": {
+      "type": "object",
+      "required": ["field", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "field": { "$ref": "#/$defs/fieldName" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 100 }
+      }
+    },
+    "timelineMapping": {
+      "type": "object",
+      "required": ["time", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "time": { "$ref": "#/$defs/fieldName" },
+        "title": { "$ref": "#/$defs/fieldName" },
+        "description": { "$ref": "#/$defs/fieldName" },
+        "group": { "$ref": "#/$defs/fieldName" }
+      }
+    },
+    "relationGraphMapping": {
+      "type": "object",
+      "required": ["source", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "source": { "$ref": "#/$defs/fieldName" },
+        "target": { "$ref": "#/$defs/fieldName" },
+        "label": { "$ref": "#/$defs/fieldName" },
+        "sourceLabel": { "$ref": "#/$defs/fieldName" }
+      }
+    },
+    "chartOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "orientation": { "enum": ["vertical", "horizontal"] },
+        "order": { "enum": ["none", "asc", "desc"] },
+        "limit": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "showLegend": { "type": "boolean" },
+        "showLabels": { "type": "boolean" }
+      }
+    },
+    "tableOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "sort": { "$ref": "#/$defs/fieldName" },
+        "order": { "enum": ["asc", "desc"] }
+      }
+    },
+    "timelineOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": { "type": "integer", "minimum": 1, "maximum": 500 },
+        "order": { "enum": ["asc", "desc"] },
+        "group": { "type": "boolean" }
+      }
+    },
+    "relationGraphOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "showLabels": { "type": "boolean" }
+      }
+    },
+    "drillDown": {
+      "title": "DrillDown",
+      "type": "object",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "dimension": { "$ref": "#/$defs/fieldName" },
+        "label": { "type": "string", "maxLength": 100 },
+        "promptTemplate": { "type": "string", "minLength": 1, "maxLength": 2000 }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "enabled": { "const": true } },
+            "required": ["enabled"]
+          },
+          "then": { "required": ["dimension", "promptTemplate"] }
+        }
+      ]
+    },
     "resultMeta": {
       "title": "ResultMeta",
-      "description": "运行时元数据，模型无需理解",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -181,37 +371,37 @@
     },
     "error": {
       "title": "McpBusinessError",
-      "description": "业务错误。禁止包含密码、Token、内部堆栈、连接字符串等敏感信息",
+      "description": "业务错误，不得包含密码、Token、内部堆栈或连接字符串。",
       "type": "object",
       "required": ["code", "message"],
       "additionalProperties": false,
       "properties": {
-        "code": { "type": "string", "description": "错误码，如 ENTITY_NOT_FOUND" },
-        "message": { "type": "string", "description": "人类可读错误说明" },
-        "retryable": { "type": "boolean", "description": "是否可重试" },
-        "details": {
-          "type": "object",
-          "additionalProperties": true,
-          "description": "非敏感补充信息"
-        }
+        "code": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "message": { "type": "string", "minLength": 1, "maxLength": 2000 },
+        "retryable": { "type": "boolean" },
+        "details": { "type": "object", "additionalProperties": true }
       }
-    }
+    },
+    "viewId": { "type": "string", "minLength": 1, "maxLength": 100 },
+    "fieldName": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "title": { "type": "string", "maxLength": 200 },
+    "description": { "type": "string", "maxLength": 2000 },
+    "priority": { "type": "integer", "minimum": -1000, "maximum": 1000 }
   },
   "examples": [
     {
-      "specVersion": "1.0",
+      "specVersion": "1.1",
       "success": true,
       "data": [
         { "city": "北京", "count": 18 },
-        { "city": "上海", "count": 11 },
-        { "city": "杭州", "count": 6 }
+        { "city": "上海", "count": 11 }
       ],
       "summary": {
-        "count": 3,
-        "total": 3,
+        "count": 2,
+        "total": 2,
         "truncated": false,
         "description": "按城市统计活动次数",
-        "highlights": ["北京18次", "上海11次", "杭州6次"]
+        "highlights": ["北京18次", "上海11次"]
       },
       "presentation": {
         "mode": "RECOMMENDED",
@@ -221,23 +411,18 @@
             "type": "chart",
             "subType": "bar",
             "title": "各城市活动次数",
-            "description": "按城市汇总",
             "mapping": { "category": "city", "value": "count" },
-            "options": {},
+            "options": { "order": "desc", "showLegend": false },
             "priority": 10
           }
         ]
-      },
-      "resultMeta": null,
-      "error": null
+      }
     },
     {
-      "specVersion": "1.0",
+      "specVersion": "1.1",
       "success": false,
       "data": null,
-      "summary": null,
       "presentation": { "mode": "NONE", "views": [] },
-      "resultMeta": null,
       "error": {
         "code": "ENTITY_NOT_FOUND",
         "message": "未找到指定人员",

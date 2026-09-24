@@ -1,0 +1,55 @@
+server:
+  port: "${AGENTSCOPE_SERVER_PORT:8082}"
+
+spring:
+  application:
+    name: ac-agentscope-client
+
+ac:
+  deployment:
+    # Set true only when shared result, AG-UI replay, and AgentScope state stores are installed.
+    distributed: "${AC_DISTRIBUTED:false}"
+  ag-ui:
+    retention: 30m
+    replay-limit: 512
+    maximum-runs: 10000
+  agentscope:
+    agent:
+      name: ac-rich-agent
+      system-prompt: >-
+        You are a careful assistant. Use MCP tools for factual work. When an MCP observation
+        contains resultRef and recommended views, call ui_render with that resultRef and one viewId.
+        Never invent resultRef, viewId, tenant, user, thread, run, or tool-call identifiers.
+    model:
+      base-url: "${AGENTSCOPE_OPENAI_BASE_URL:http://192.168.5.68:6116/v1}"
+      endpoint-path: "${AGENTSCOPE_OPENAI_ENDPOINT:/chat/completions}"
+      api-key: "${AGENTSCOPE_OPENAI_API_KEY:}"
+      name: "${AGENTSCOPE_OPENAI_MODEL:trs-m6}"
+      # Some OpenAI-compatible gateways drop streaming POST bodies over JDK HTTP/2.
+      http-version: "${AGENTSCOPE_OPENAI_HTTP_VERSION:HTTP_1_1}"
+    result-store:
+      ttl: 45m
+      maximum-entries: 10000
+      maximum-entries-per-tenant: 1000
+      maximum-bytes-per-result: 2097152
+      maximum-bytes-per-tenant: 268435456
+    # Replace the default InMemoryAgentStateStore bean with Redis/MySQL in multi-replica deployments.
+    security:
+      tenant-header: "${AGENTSCOPE_TENANT_HEADER:X-Tenant-Id}"
+      user-header: "${AGENTSCOPE_USER_HEADER:X-User-Id}"
+    mcp:
+      servers:
+        - code: knowledge
+          name: AC Knowledge MCP
+          base-url: "${AGENTSCOPE_MCP_BASE_URL:http://localhost:8081}"
+          endpoint: "${AGENTSCOPE_MCP_ENDPOINT:/mcp}"
+          timeout: 30s
+          enabled: true
+          tool-prefix: ""
+          auth:
+            type: NONE
+  result-api:
+    rate-limit:
+      requests: 120
+      window: 1m
+      maximum-subjects: 100000
