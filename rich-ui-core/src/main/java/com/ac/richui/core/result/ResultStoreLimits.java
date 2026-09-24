@@ -3,7 +3,9 @@ package com.ac.richui.core.result;
 import java.time.Duration;
 import java.util.Objects;
 
-/** Hard storage boundaries applied before a full MCP result is retained. */
+/**
+ * 保存完整 MCP 结果前应用的有效期、容量和租户配额限制。
+ */
 public record ResultStoreLimits(
         Duration ttl,
         int maximumEntries,
@@ -11,6 +13,9 @@ public record ResultStoreLimits(
         long maximumBytesPerResult,
         long maximumBytesPerTenant) {
 
+    /**
+     * 校验有效期、条目数和字节配额的边界。
+     */
     public ResultStoreLimits {
         Objects.requireNonNull(ttl, "ttl must not be null");
         if (ttl.isZero() || ttl.isNegative()) throw new IllegalArgumentException("ttl must be positive");

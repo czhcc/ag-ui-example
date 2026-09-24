@@ -17,6 +17,7 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
+/** 验证事件流的注册幂等性、序号和重放行为。 */
 class AgUiEventStreamTest {
     @Test
     void isolatesRunsEnforcesIdempotencyAndReplaysAfterEventId() {

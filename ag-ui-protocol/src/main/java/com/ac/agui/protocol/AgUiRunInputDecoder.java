@@ -16,12 +16,15 @@ import com.agui.community.core.tool.Tool;
 import com.agui.community.core.tool.ToolParameters;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/** Strict decoder for the official AG-UI JSON request shape. */
+/**
+ * 按 AG-UI 请求格式和大小限制严格解码运行输入。
+ */
 public final class AgUiRunInputDecoder {
     private static final int MAX_BODY_CHARS = 256_000;
     private static final int MAX_MESSAGES = 200;
@@ -29,10 +32,16 @@ public final class AgUiRunInputDecoder {
     private static final int MAX_CONTEXT = 64;
     private final ObjectMapper mapper;
 
+    /**
+     * 使用指定 JSON 映射器创建请求解码器。
+     */
     public AgUiRunInputDecoder(ObjectMapper mapper) {
         this.mapper = Objects.requireNonNull(mapper, "mapper must not be null");
     }
 
+    /**
+     * 校验并解析运行请求中的标识、消息、工具、上下文和恢复信息。
+     */
     public AgUiRunAgentInput decode(JsonNode root) {
         if (root == null || !root.isObject()) throw invalid("Request body must be a JSON object");
         if (root.toString().length() > MAX_BODY_CHARS) throw invalid("Request body is too large");
@@ -60,11 +69,13 @@ public final class AgUiRunInputDecoder {
             switch (role) {
                 case "user" -> result.add(new UserMessage(id, required(content, "user message content"), name));
                 case "system" -> result.add(new SystemMessage(id, required(content, "system message content"), name));
-                case "developer" -> result.add(new DeveloperMessage(id, required(content, "developer message content"), name));
+                case "developer" ->
+                        result.add(new DeveloperMessage(id, required(content, "developer message content"), name));
                 case "reasoning" -> result.add(new ReasoningMessage(id,
                         required(content, "reasoning message content"), name,
                         optionalText(item, "encryptedValue", 64_000)));
-                case "assistant" -> result.add(new AssistantMessage(id, content, name, toolCalls(item.path("toolCalls"))));
+                case "assistant" ->
+                        result.add(new AssistantMessage(id, content, name, toolCalls(item.path("toolCalls"))));
                 case "tool" -> result.add(new ToolMessage(id,
                         required(content, "tool message content"),
                         requiredText(item, "toolCallId", 128), optionalText(item, "error", 2_000)));

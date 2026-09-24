@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
 
+/** 验证多副本模式对共享存储的要求。 */
 class DistributedStorageGuardTest {
     @Test
     void rejectsProcessLocalStoresOnlyInDistributedMode() {

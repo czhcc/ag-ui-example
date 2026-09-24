@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /** Runs on the core-only test classpath; runtime frameworks must remain absent. */
+/** 检查公共核心模块不依赖特定 Runtime、Web 或存储实现。 */
 class PortableCoreBoundaryTest {
     @Test
     void coreLoadsWithoutRuntimeFrameworks() {

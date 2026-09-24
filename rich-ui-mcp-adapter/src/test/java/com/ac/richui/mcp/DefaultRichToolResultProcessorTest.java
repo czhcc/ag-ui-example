@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/** 验证处理器保存完整结果，同时仅返回安全观测和结果引用。 */
 class DefaultRichToolResultProcessorTest {
     @Test
     void storesFullDataButReturnsOnlySafeObservationAndReference() {

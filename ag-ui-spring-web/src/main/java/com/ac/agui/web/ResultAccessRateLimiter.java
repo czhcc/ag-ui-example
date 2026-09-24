@@ -6,7 +6,7 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** Per-subject fixed-window limiter with bounded identity tracking. */
+/** 按访问主体进行固定时间窗口限流，并限制主体跟踪数量。 */
 public final class ResultAccessRateLimiter {
     private final ConcurrentHashMap<SubjectKey, Window> windows = new ConcurrentHashMap<>();
     private final int maximumRequests;
@@ -14,6 +14,7 @@ public final class ResultAccessRateLimiter {
     private final int maximumSubjects;
     private final Clock clock;
 
+    /** 配置每个主体在窗口内的最大请求数及跟踪主体上限。 */
     public ResultAccessRateLimiter(int maximumRequests, Duration window, int maximumSubjects) {
         this(maximumRequests, window, maximumSubjects, Clock.systemUTC());
     }
@@ -30,6 +31,7 @@ public final class ResultAccessRateLimiter {
         this.clock = Objects.requireNonNull(clock, "clock must not be null");
     }
 
+    /** 获取指定访问主体的限流结果并计入当前请求。 */
     public Decision acquire(AccessSubject subject) {
         long now = clock.millis();
         SubjectKey key = new SubjectKey(subject.tenantId(), subject.userId());
@@ -54,6 +56,7 @@ public final class ResultAccessRateLimiter {
         return decision[0];
     }
 
+    /** 限流判断、请求上限和建议重试等待时间。 */
     public record Decision(boolean allowed, int limit, long retryAfterSeconds) { }
     private record SubjectKey(String tenantId, String userId) { }
     private record Window(long startedAtMillis, int count) { }

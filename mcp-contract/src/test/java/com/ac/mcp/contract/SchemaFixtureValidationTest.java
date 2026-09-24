@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
+/** 按清单验证 JSON Schema 的有效、无效和兼容版本样例。 */
 class SchemaFixtureValidationTest {
     private final ObjectMapper mapper = new ObjectMapper();
     private final JsonSchemaFactory schemas = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V202012);

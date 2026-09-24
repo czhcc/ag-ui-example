@@ -7,8 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/** 将 AG-UI 协议异常映射为相应 HTTP 状态和错误响应。 */
 @RestControllerAdvice
 public final class AgUiProtocolExceptionHandler {
+    /** 按协议错误代码返回 HTTP 状态、代码和消息。 */
     @ExceptionHandler(AgUiProtocolException.class)
     public ResponseEntity<Map<String, String>> protocol(AgUiProtocolException exception) {
         HttpStatus status = switch (exception.code()) {

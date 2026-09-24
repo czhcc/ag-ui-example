@@ -3,7 +3,9 @@ package com.ac.richui.core.text;
 import java.util.List;
 import java.util.regex.Pattern;
 
-/** Deterministic baseline redaction for text entering models, events, or logs. */
+/**
+ * 对进入模型、事件或日志的文本执行确定性基础脱敏。
+ */
 public final class SensitiveTextSanitizer implements TextSanitizer {
     private static final String REDACTED = "[REDACTED]";
     private static final List<Pattern> SECRET_ASSIGNMENTS = List.of(
@@ -14,6 +16,9 @@ public final class SensitiveTextSanitizer implements TextSanitizer {
     private static final Pattern MOBILE = Pattern.compile("(?<!\\d)1[3-9]\\d{9}(?!\\d)");
     private static final Pattern ID_CARD = Pattern.compile("(?<!\\d)\\d{17}[0-9Xx](?!\\d)");
 
+    /**
+     * 清除控制字符并遮盖令牌、密码、邮箱、手机号和身份证号。
+     */
     @Override
     public String sanitize(String value) {
         if (value == null || value.isBlank()) {

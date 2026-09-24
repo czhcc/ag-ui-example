@@ -6,12 +6,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/** Runtime-neutral lifecycle event with a deliberately safe, bounded payload. */
+/**
+ * 与运行时无关的生命周期事件，携带受控的属性载荷。
+ */
 public record StandardRuntimeEvent(
         String type,
         Map<String, Object> attributes,
         Instant timestamp) implements RichRuntimeEvent {
 
+    /**
+     * 校验事件类型，并补齐属性和时间戳。
+     */
     public StandardRuntimeEvent {
         Objects.requireNonNull(type, "type must not be null");
         if (type.isBlank()) {
@@ -23,10 +28,16 @@ public record StandardRuntimeEvent(
         timestamp = timestamp == null ? Instant.now() : timestamp;
     }
 
+    /**
+     * 使用当前时间创建带属性的标准事件。
+     */
     public StandardRuntimeEvent(String type, Map<String, Object> attributes) {
         this(type, attributes, Instant.now());
     }
 
+    /**
+     * 创建不带属性的标准事件。
+     */
     public static StandardRuntimeEvent of(String type) {
         return new StandardRuntimeEvent(type, Map.of());
     }

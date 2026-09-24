@@ -6,6 +6,7 @@ import com.ac.mcp.contract.presentation.TableMapping;
 import com.ac.mcp.contract.presentation.TimelineMapping;
 import com.ac.mcp.contract.presentation.ViewHint;
 import com.ac.mcp.contract.result.McpResult;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.RecordComponent;
 import java.time.temporal.TemporalAccessor;
@@ -16,9 +17,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/** Validates every row, mapped field, and view-specific field type. */
+/**
+ * 校验结果的每行数据、视图字段映射及各视图要求的字段类型。
+ */
 public final class PresentationValidator {
 
+    /**
+     * 验证结果数据是否满足指定视图的渲染要求。
+     */
     public void validate(ViewHint view, McpResult<?> result) {
         Objects.requireNonNull(view, "view must not be null");
         Objects.requireNonNull(result, "result must not be null");
@@ -65,7 +71,8 @@ public final class PresentationValidator {
                 requireScalar(view, row, graph.source(), index);
                 requireScalar(view, row, graph.target(), index);
             }
-            case TableMapping ignored -> { }
+            case TableMapping ignored -> {
+            }
         }
     }
 
@@ -146,7 +153,8 @@ public final class PresentationValidator {
         return new IllegalArgumentException("Invalid presentation '" + view.id() + "': " + detail);
     }
 
-    private record FieldValue(boolean present, Object value) { }
+    private record FieldValue(boolean present, Object value) {
+    }
 
     private enum ValueKind {
         STRING, NUMBER, BOOLEAN, TEMPORAL, OTHER_SCALAR, STRUCTURED;

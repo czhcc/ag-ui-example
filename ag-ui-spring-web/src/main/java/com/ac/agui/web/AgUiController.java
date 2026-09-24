@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/** 提供 AG-UI 运行、能力查询和取消接口，并将运行事件作为 SSE 返回。 */
 @RestController
 @RequestMapping("/api/agent")
 public final class AgUiController {
@@ -40,6 +41,7 @@ public final class AgUiController {
     @Value("${ac.ag-ui.run-timeout:2m}")
     private Duration runTimeout = Duration.ofMinutes(2);
 
+    /** 使用请求解码、事件存储、运行处理及身份解析组件创建控制器。 */
     public AgUiController(AgUiRunInputDecoder decoder, AgUiRunStateStore events,
                           AgUiRunHandler handler, AgUiSubjectResolver subjects) {
         this.decoder = decoder;
@@ -48,6 +50,7 @@ public final class AgUiController {
         this.subjects = subjects;
     }
 
+    /** 注册或重连运行，并返回支持事件重放与心跳的 SSE 流。 */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<Flux<ServerSentEvent<String>>> run(
             @RequestBody JsonNode body,
@@ -88,6 +91,7 @@ public final class AgUiController {
                 .body(response);
     }
 
+    /** 返回当前服务支持的 AG-UI 事件与可选能力。 */
     @GetMapping("/capabilities")
     public Map<String, Object> capabilities() {
         return Map.of(
@@ -104,6 +108,7 @@ public final class AgUiController {
                 "reconnect", Map.of("lastEventId", true, "idempotentRunId", true));
     }
 
+    /** 取消指定运行并补发取消终态。 */
     @DeleteMapping("/threads/{threadId}/runs/{runId}")
     public ResponseEntity<Void> cancel(@PathVariable("threadId") String threadId,
                                        @PathVariable("runId") String runId,

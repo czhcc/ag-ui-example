@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+/** 验证 MCP 错误、结构化内容、文本降级及无效契约的解码优先级。 */
 class DefaultMcpResultDecoderTest {
     private final DefaultMcpResultDecoder decoder = new DefaultMcpResultDecoder(new ObjectMapper());
 

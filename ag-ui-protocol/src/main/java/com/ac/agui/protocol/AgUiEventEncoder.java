@@ -18,16 +18,25 @@ import com.agui.community.core.interrupt.InterruptOutcome;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.util.Objects;
 
-/** Compact JSON encoder with exact AG-UI wire names and lowercase roles. */
+/**
+ * 将官方 AG-UI 事件编码为使用协议字段名和小写角色值的紧凑 JSON。
+ */
 public final class AgUiEventEncoder {
     private final ObjectMapper mapper;
 
+    /**
+     * 使用指定 JSON 映射器创建事件编码器。
+     */
     public AgUiEventEncoder(ObjectMapper mapper) {
         this.mapper = Objects.requireNonNull(mapper, "mapper must not be null");
     }
 
+    /**
+     * 按 AG-UI 线协议编码指定事件。
+     */
     public String encode(Event event) {
         ObjectNode json = mapper.createObjectNode();
         json.put("type", event.type().value());

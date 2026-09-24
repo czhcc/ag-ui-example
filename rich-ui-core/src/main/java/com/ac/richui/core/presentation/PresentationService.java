@@ -5,10 +5,15 @@ import com.ac.richui.core.context.AccessSubject;
 import com.ac.richui.core.context.RunScope;
 import com.ac.richui.core.result.ResultReference;
 
-/** Validates a requested view and creates a transport-independent surface. */
+/**
+ * 校验请求的视图并生成与传输方式无关的 Surface。
+ */
 @FunctionalInterface
 public interface PresentationService {
 
+    /**
+     * 在访问授权和字段校验通过后创建 Surface。
+     */
     SurfaceSpec render(
             RunScope scope,
             AccessSubject subject,

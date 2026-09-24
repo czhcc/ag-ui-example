@@ -1,6 +1,7 @@
 package com.ac.richui.core.result;
 
 import com.ac.mcp.contract.result.McpResult;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.RecordComponent;
 import java.nio.charset.StandardCharsets;
@@ -8,8 +9,13 @@ import java.time.temporal.TemporalAccessor;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-/** Cycle-safe UTF-8 estimate suitable for enforcing an upper storage boundary. */
+/**
+ * 以可处理循环引用的 UTF-8 保守估算控制结果存储上限。
+ */
 public final class ConservativeResultSizeEstimator implements ResultSizeEstimator {
+    /**
+     * 估算结果大小，超过阈值后可提前停止遍历。
+     */
     @Override
     public long estimateBytes(McpResult<?> result, long stopAfterBytes) {
         return estimate(result, stopAfterBytes, new IdentityHashMap<>(), 0);
@@ -68,5 +74,7 @@ public final class ConservativeResultSizeEstimator implements ResultSizeEstimato
         return left + right;
     }
 
-    private long utf8(String value) { return value.getBytes(StandardCharsets.UTF_8).length; }
+    private long utf8(String value) {
+        return value.getBytes(StandardCharsets.UTF_8).length;
+    }
 }

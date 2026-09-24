@@ -1,4 +1,7 @@
 package com.ac.richui.core.result;
 
-/** Marker SPI for a ResultStore whose data and quota accounting are shared by all replicas. */
-public interface SharedResultStore extends ResultStore { }
+/**
+ * 标识数据和配额统计在所有应用副本之间共享的结果存储。
+ */
+public interface SharedResultStore extends ResultStore {
+}

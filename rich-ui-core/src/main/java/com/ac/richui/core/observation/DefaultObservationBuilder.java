@@ -7,23 +7,35 @@ import com.ac.richui.core.text.BoundedText;
 import com.ac.richui.core.text.SensitiveTextSanitizer;
 import com.ac.richui.core.text.TextSanitizer;
 import com.ac.richui.core.tool.ToolIdentity;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
-/** Builds a bounded observation and never copies full result data. */
+/**
+ * 从工具结果构建有界观测，不复制完整业务数据。
+ */
 public final class DefaultObservationBuilder implements ObservationBuilder {
     private final ObservationPolicy policy;
     private final TextSanitizer sanitizer;
 
+    /**
+     * 使用默认观测限制和敏感信息脱敏器。
+     */
     public DefaultObservationBuilder() {
         this(ObservationPolicy.defaults(), new SensitiveTextSanitizer());
     }
 
+    /**
+     * 使用指定观测策略和文本脱敏器。
+     */
     public DefaultObservationBuilder(ObservationPolicy policy, TextSanitizer sanitizer) {
         this.policy = Objects.requireNonNull(policy, "policy must not be null");
         this.sanitizer = Objects.requireNonNull(sanitizer, "sanitizer must not be null");
     }
 
+    /**
+     * 将业务状态、摘要和结果引用整理为供 Agent 使用的安全观测。
+     */
     @Override
     public AgentObservation build(RunScope scope, ToolIdentity tool,
                                   ResultReference reference, McpResult<?> result) {

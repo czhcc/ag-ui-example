@@ -3,6 +3,7 @@ package com.ac.mcp.contract.result;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+/** 验证 MCP 结果版本默认值及成功、失败字段约束。 */
 class McpResultTest {
     @Test void defaultsSpecVersion() {
         var result = McpResult.success("ok", null, null, null);

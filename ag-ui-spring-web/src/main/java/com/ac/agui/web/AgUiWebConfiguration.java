@@ -9,13 +9,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/** 装配 AG-UI Web 层的默认解码器、事件流、结果服务及存储检查组件。 */
 @Configuration
 public class AgUiWebConfiguration {
+    /** 创建 AG-UI 请求解码器。 */
     @Bean
     public AgUiRunInputDecoder agUiRunInputDecoder(ObjectMapper mapper) {
         return new AgUiRunInputDecoder(mapper);
     }
 
+    /** 未提供自定义事件存储时创建进程内事件流。 */
     @Bean
     @ConditionalOnMissingBean(AgUiRunStateStore.class)
     public AgUiRunStateStore agUiEventStream(
@@ -26,18 +29,21 @@ public class AgUiWebConfiguration {
         return new AgUiEventStream(mapper, retention, replayLimit, maximumRuns);
     }
 
+    /** 使用应用注入的运行处理器和身份解析器创建控制器。 */
     @Bean
     public AgUiController agUiController(AgUiRunInputDecoder decoder, AgUiRunStateStore events,
                                          AgUiRunHandler handler, AgUiSubjectResolver subjects) {
         return new AgUiController(decoder, events, handler, subjects);
     }
 
+    /** 未提供审计器时创建默认日志审计器。 */
     @Bean
     @ConditionalOnMissingBean(ResultAccessAuditor.class)
     public ResultAccessAuditor resultAccessAuditor() {
         return new LoggingResultAccessAuditor();
     }
 
+    /** 根据配置创建结果读取限流器。 */
     @Bean
     public ResultAccessRateLimiter resultAccessRateLimiter(
             @Value("${ac.result-api.rate-limit.requests:120}") int requests,
@@ -46,6 +52,7 @@ public class AgUiWebConfiguration {
         return new ResultAccessRateLimiter(requests, window, maximumSubjects);
     }
 
+    /** 创建带授权、限流及审计的结果读取服务。 */
     @Bean
     public ResultApiService resultApiService(ResultStore results, AgUiSubjectResolver subjects,
                                              ResultAccessRateLimiter rateLimiter,
@@ -53,6 +60,7 @@ public class AgUiWebConfiguration {
         return new ResultApiService(results, subjects, rateLimiter, auditor);
     }
 
+    /** 创建多副本模式下的共享存储检查组件。 */
     @Bean
     public DistributedStorageGuard distributedStorageGuard(
             @Value("${ac.deployment.distributed:false}") boolean distributed,

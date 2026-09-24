@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/** 验证视图字段映射和数据类型校验。 */
 class PresentationValidatorTest {
     private final PresentationValidator validator = new PresentationValidator();
     private final ChartViewHint view = new ChartViewHint(

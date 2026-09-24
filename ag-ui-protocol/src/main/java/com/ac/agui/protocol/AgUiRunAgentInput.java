@@ -5,11 +5,14 @@ import com.agui.community.core.agent.RunAgentInput;
 import com.agui.community.core.interrupt.Resume;
 import com.agui.community.core.message.Message;
 import com.agui.community.core.tool.Tool;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/** Complete wire input, including parentRunId which java-core 0.1.1 does not yet expose. */
+/**
+ * 完整的 AG-UI 线协议输入，补充 java-core 0.1.1 尚未提供的 parentRunId。
+ */
 public record AgUiRunAgentInput(
         String threadId,
         String runId,
@@ -21,6 +24,9 @@ public record AgUiRunAgentInput(
         Object forwardedProps,
         List<Resume> resume) {
 
+    /**
+     * 校验运行标识并保存各列表字段的不可变副本。
+     */
     public AgUiRunAgentInput {
         threadId = requireText(threadId, "threadId");
         runId = requireText(runId, "runId");
@@ -31,11 +37,16 @@ public record AgUiRunAgentInput(
         resume = resume == null ? List.of() : List.copyOf(resume);
     }
 
+    /**
+     * 转换为官方 Java SDK 的运行输入类型。
+     */
     public RunAgentInput officialInput() {
         return new RunAgentInput(threadId, runId, state, messages, tools, context, forwardedProps, resume);
     }
 
-    /** Only these values may influence presentation; identity and authorization never come from the body. */
+    /**
+     * 仅保留可影响展示的白名单转发参数，不从请求正文获取身份或授权信息。
+     */
     public Map<String, Object> trustedForwardedProps() {
         if (!(forwardedProps instanceof Map<?, ?> source)) return Map.of();
         var safe = new java.util.LinkedHashMap<String, Object>();

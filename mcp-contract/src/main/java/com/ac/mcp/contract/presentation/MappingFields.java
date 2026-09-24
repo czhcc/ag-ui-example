@@ -5,8 +5,12 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * 字段映射内部共用的校验和字段名收集工具。
+ */
 final class MappingFields {
-    private MappingFields() { }
+    private MappingFields() {
+    }
 
     static String required(String value, String name) {
         Objects.requireNonNull(value, name + " must not be null");

@@ -4,6 +4,7 @@ import com.ac.richui.core.text.SensitiveTextSanitizer;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+/** 验证敏感文本脱敏规则。 */
 class SensitiveTextSanitizerTest {
     @Test
     void removesSecretAndPersonalDataCanariesBeforePublication() {

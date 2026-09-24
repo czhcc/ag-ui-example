@@ -5,14 +5,16 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Runtime-neutral projection of a native tool result. Structured content is
- * preferred; text is retained for plain tools and JSON fallback parsing.
+ * 原生工具结果的公共表示；优先使用结构化内容，文本供普通工具和降级解析使用。
  */
 public record RawToolResult(
         boolean error,
         Map<String, Object> structuredContent,
         String textContent) {
 
+    /**
+     * 保存结构化内容的不可变副本，并规范化空文本。
+     */
     public RawToolResult {
         structuredContent = structuredContent == null
                 ? Map.of()
@@ -20,10 +22,16 @@ public record RawToolResult(
         textContent = textContent == null ? "" : textContent;
     }
 
+    /**
+     * 判断是否存在结构化内容。
+     */
     public boolean hasStructuredContent() {
         return !structuredContent.isEmpty();
     }
 
+    /**
+     * 判断是否存在非空文本内容。
+     */
     public boolean hasTextContent() {
         return !textContent.isBlank();
     }

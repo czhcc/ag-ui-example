@@ -13,9 +13,12 @@ import com.ac.richui.core.tool.ProcessedToolResult;
 import com.ac.richui.core.tool.RawToolResult;
 import com.ac.richui.core.tool.RichToolResultProcessor;
 import com.ac.richui.core.tool.ToolIdentity;
+
 import java.util.Objects;
 
-/** Shared MCP rich-result pipeline used by runtime-specific tool wrappers. */
+/**
+ * 供不同 Runtime 工具包装层共用的 MCP Rich Result 处理流程。
+ */
 public final class DefaultRichToolResultProcessor implements RichToolResultProcessor {
     private static final int MAXIMUM_PLAIN_OBSERVATION_CHARS = 4_000;
     private static final int MAXIMUM_PUBLIC_SUMMARY_CHARS = 500;
@@ -25,12 +28,18 @@ public final class DefaultRichToolResultProcessor implements RichToolResultProce
     private final ObservationBuilder observations;
     private final TextSanitizer sanitizer;
 
+    /**
+     * 使用默认敏感文本脱敏器创建结果处理器。
+     */
     public DefaultRichToolResultProcessor(McpResultDecoder decoder,
                                           ResultStore resultStore,
                                           ObservationBuilder observations) {
         this(decoder, resultStore, observations, new SensitiveTextSanitizer());
     }
 
+    /**
+     * 使用指定解码器、存储、观测构建器和脱敏器创建处理器。
+     */
     public DefaultRichToolResultProcessor(McpResultDecoder decoder,
                                           ResultStore resultStore,
                                           ObservationBuilder observations,
@@ -41,6 +50,9 @@ public final class DefaultRichToolResultProcessor implements RichToolResultProce
         this.sanitizer = Objects.requireNonNull(sanitizer, "sanitizer must not be null");
     }
 
+    /**
+     * 解码工具结果，并为各类结果生成安全观测及必要的存储引用。
+     */
     @Override
     public ProcessedToolResult process(RunScope scope, ToolIdentity tool, RawToolResult raw) {
         Objects.requireNonNull(scope, "scope must not be null");

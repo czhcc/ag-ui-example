@@ -14,6 +14,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.junit.jupiter.api.Assertions.*;
 
+/** 验证 AG-UI 控制器的运行、重连和取消生命周期。 */
 class AgUiControllerLifecycleTest {
     private final ObjectMapper mapper = new ObjectMapper();
     private final RunScope owner = new RunScope("tenant", "user", "thread", "run", null);

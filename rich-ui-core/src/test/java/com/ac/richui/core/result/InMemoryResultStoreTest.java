@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/** 验证内存结果存储的访问控制、过期和容量限制。 */
 class InMemoryResultStoreTest {
     private final RunScope scope = new RunScope("tenant-a", "user-a", "thread-a", "run-a", "call-a");
     private final ToolIdentity tool = new ToolIdentity("crm", "search");

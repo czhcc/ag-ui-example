@@ -3,7 +3,9 @@ package com.ac.mcp.contract.presentation;
 import java.util.List;
 import java.util.Objects;
 
-/** Validated presentation contract; transport adapters decide how to encode it. */
+/**
+ * 经校验的 Rich UI Surface 描述，具体传输编码由适配层决定。
+ */
 public record SurfaceSpec(
         String profile,
         String profileVersion,
@@ -14,6 +16,9 @@ public record SurfaceSpec(
     public static final String PROFILE = "ac.rich-ui";
     public static final String PROFILE_VERSION = "1.0";
 
+    /**
+     * 校验 Profile、Surface 标识、数据引用和组件列表。
+     */
     public SurfaceSpec {
         if (!PROFILE.equals(profile)) {
             throw new IllegalArgumentException("Unsupported profile: " + profile);
@@ -29,6 +34,9 @@ public record SurfaceSpec(
         }
     }
 
+    /**
+     * 使用当前 Profile 及版本创建 Surface 描述。
+     */
     public SurfaceSpec(String surfaceId, String dataRef, List<ComponentSpec> components) {
         this(PROFILE, PROFILE_VERSION, surfaceId, dataRef, components);
     }

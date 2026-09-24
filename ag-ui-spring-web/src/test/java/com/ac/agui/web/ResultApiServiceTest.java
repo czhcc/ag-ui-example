@@ -26,6 +26,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 
+/** 验证结果读取的授权、限流、错误响应和审计行为。 */
 class ResultApiServiceTest {
     private static final RunScope OWNER =
             new RunScope("tenant", "owner", "thread", "run", "call");

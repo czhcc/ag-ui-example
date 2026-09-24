@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
-/** Per-owner/thread/run replay stream with event IDs and idempotent registration. */
+/** 按访问主体、线程和运行隔离的进程内事件流，支持幂等注册与事件重放。 */
 public final class AgUiEventStream implements AgUiRunStateStore {
     private final Map<RunKey, RunState> runs = new ConcurrentHashMap<>();
     private final ObjectMapper mapper;
@@ -27,6 +27,7 @@ public final class AgUiEventStream implements AgUiRunStateStore {
     private final int replayLimit;
     private final int maximumRuns;
 
+    /** 配置事件保留时间、重放条数和最大运行数。 */
     public AgUiEventStream(ObjectMapper mapper,
                            @Value("${ac.ag-ui.retention:30m}") Duration retention,
                            @Value("${ac.ag-ui.replay-limit:512}") int replayLimit,
@@ -38,6 +39,7 @@ public final class AgUiEventStream implements AgUiRunStateStore {
         this.maximumRuns = Math.max(128, maximumRuns);
     }
 
+    /** 以请求指纹幂等注册运行，仅首次注册获得执行权。 */
     @Override
     public Registration register(RunScope scope, AgUiRunAgentInput input, String fingerprint) {
         prune();
@@ -66,6 +68,7 @@ public final class AgUiEventStream implements AgUiRunStateStore {
         return new Registration(scope, execute);
     }
 
+    /** 从指定事件序号后重放，并订阅后续事件。 */
     @Override
     public Flux<EncodedEvent> open(RunScope scope, String lastEventId) {
         RunState state = require(scope);
@@ -79,6 +82,7 @@ public final class AgUiEventStream implements AgUiRunStateStore {
         return state.events.asFlux().filter(event -> event.sequence() > after);
     }
 
+    /** 转换并发布指定运行范围内的内部事件。 */
     @Override
     public void publish(RunScope scope, RichRuntimeEvent event) {
         RunState state = runs.get(RunKey.from(scope));
@@ -90,6 +94,7 @@ public final class AgUiEventStream implements AgUiRunStateStore {
         }
     }
 
+    /** 尚无终态时发布运行完成事件。 */
     @Override
     public void finishIfMissing(RunScope scope, String status) {
         RunState state = runs.get(RunKey.from(scope));
@@ -101,6 +106,7 @@ public final class AgUiEventStream implements AgUiRunStateStore {
         }
     }
 
+    /** 尚无终态时发布运行错误事件。 */
     @Override
     public void failIfMissing(RunScope scope, String code) {
         RunState state = runs.get(RunKey.from(scope));
@@ -145,6 +151,7 @@ public final class AgUiEventStream implements AgUiRunStateStore {
                 && entry.getValue().translator.terminal());
     }
 
+    /** 单次运行的事件序号、转换器和重放缓存。 */
     private static final class RunState {
         private final RunScope scope;
         private final String fingerprint;
@@ -166,6 +173,7 @@ public final class AgUiEventStream implements AgUiRunStateStore {
         private void touch() { updatedAt = Instant.now(); }
     }
 
+    /** 按归属主体、线程和运行标识隔离的存储键。 */
     private record RunKey(String tenantId, String userId, String threadId, String runId) {
         static RunKey from(RunScope scope) {
             return new RunKey(scope.tenantId(), scope.userId(), scope.threadId(), scope.runId());

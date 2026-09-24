@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
+/** 对照黄金轨迹验证 AG-UI 事件的编码结果。 */
 class AgUiGoldenTraceTest {
     private final ObjectMapper mapper = new ObjectMapper();
 

@@ -24,6 +24,7 @@ import com.agui.community.core.interrupt.SuccessOutcome;
 import com.agui.community.core.message.Role;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,7 +32,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-/** Stateful correlation from runtime-neutral events to official AG-UI events. */
+/**
+ * 将公共运行事件按消息、工具调用和终态关联后转换为官方 AG-UI 事件。
+ */
 public final class AgUiEventTranslator {
     private final RunScope scope;
     private final AgUiRunAgentInput input;
@@ -46,6 +49,9 @@ public final class AgUiEventTranslator {
     private final Set<String> emittedToolResults = new java.util.HashSet<>();
     private final Set<SurfaceKey> emittedSurfaces = new java.util.HashSet<>();
 
+    /**
+     * 为指定运行范围和输入创建有状态的事件转换器。
+     */
     public AgUiEventTranslator(RunScope scope, AgUiRunAgentInput input, ObjectMapper mapper) {
         this.scope = Objects.requireNonNull(scope, "scope must not be null");
         this.input = Objects.requireNonNull(input, "input must not be null");
@@ -53,6 +59,9 @@ public final class AgUiEventTranslator {
         this.messageId = scope.runId() + ":assistant";
     }
 
+    /**
+     * 转换单个内部事件，并按协议顺序返回零个或多个 AG-UI 事件。
+     */
     public synchronized List<Event> translate(RichRuntimeEvent runtimeEvent) {
         Objects.requireNonNull(runtimeEvent, "runtimeEvent must not be null");
         if (terminal) return List.of();
@@ -89,14 +98,23 @@ public final class AgUiEventTranslator {
         };
     }
 
+    /**
+     * 尚无终态时补发运行完成事件。
+     */
     public synchronized List<Event> finishIfMissing(String status) {
         return terminal ? List.of() : finish(new SuccessOutcome(), Map.of("status", status), System.currentTimeMillis());
     }
 
+    /**
+     * 尚无终态时补发运行错误事件。
+     */
     public synchronized List<Event> failIfMissing(String code) {
         return terminal ? List.of() : error(code, System.currentTimeMillis());
     }
 
+    /**
+     * 判断运行是否已发送完成或错误终态。
+     */
     public synchronized boolean terminal() {
         return terminal;
     }
@@ -221,5 +239,6 @@ public final class AgUiEventTranslator {
         return instant == null ? System.currentTimeMillis() : instant.toEpochMilli();
     }
 
-    private record SurfaceKey(String dataRef, List<String> componentIds) { }
+    private record SurfaceKey(String dataRef, List<String> componentIds) {
+    }
 }

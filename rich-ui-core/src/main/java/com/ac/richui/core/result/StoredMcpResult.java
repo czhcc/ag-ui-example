@@ -3,10 +3,13 @@ package com.ac.richui.core.result;
 import com.ac.mcp.contract.result.McpResult;
 import com.ac.richui.core.context.RunScope;
 import com.ac.richui.core.tool.ToolIdentity;
+
 import java.time.Instant;
 import java.util.Objects;
 
-/** Full result plus immutable ownership and expiry metadata. */
+/**
+ * 完整 MCP 结果及其不可变的归属、大小和有效期信息。
+ */
 public record StoredMcpResult(
         ResultReference reference,
         RunScope scope,
@@ -16,6 +19,9 @@ public record StoredMcpResult(
         Instant createdAt,
         Instant expiresAt) {
 
+    /**
+     * 校验结果引用、归属信息、大小和时间戳。
+     */
     public StoredMcpResult {
         Objects.requireNonNull(reference, "reference must not be null");
         Objects.requireNonNull(scope, "scope must not be null");

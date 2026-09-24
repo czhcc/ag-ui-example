@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/** 验证 Agent 观测的内容约束和敏感信息处理。 */
 class DefaultObservationBuilderTest {
     @Test
     void redactsAndBoundsSummaryWithoutCopyingData() {

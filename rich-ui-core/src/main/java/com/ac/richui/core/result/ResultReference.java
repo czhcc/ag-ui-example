@@ -2,9 +2,14 @@ package com.ac.richui.core.result;
 
 import java.util.Objects;
 
-/** Opaque identifier for data stored outside model and event payloads. */
+/**
+ * 指向独立存储结果的不透明引用，供模型和事件载荷引用。
+ */
 public record ResultReference(String value) {
 
+    /**
+     * 校验引用值的长度和非空约束。
+     */
     public ResultReference {
         Objects.requireNonNull(value, "value must not be null");
         if (value.isBlank() || value.length() > 200) {
@@ -12,6 +17,9 @@ public record ResultReference(String value) {
         }
     }
 
+    /**
+     * 返回引用的字符串值。
+     */
     @Override
     public String toString() {
         return value;

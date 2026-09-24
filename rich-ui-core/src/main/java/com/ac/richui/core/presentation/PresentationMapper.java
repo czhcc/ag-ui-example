@@ -4,15 +4,21 @@ import com.ac.mcp.contract.presentation.ComponentSpec;
 import com.ac.mcp.contract.presentation.SurfaceSpec;
 import com.ac.mcp.contract.presentation.ViewHint;
 import com.ac.richui.core.result.ResultReference;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-/** Maps validated ViewHint data into the versioned ac.rich-ui surface profile. */
+/**
+ * 将已校验的视图建议映射为带版本的 ac.rich-ui Surface 描述。
+ */
 public final class PresentationMapper {
 
+    /**
+     * 为指定结果引用和视图创建声明式 Surface。
+     */
     public SurfaceSpec map(ResultReference reference, ViewHint view) {
         Objects.requireNonNull(reference, "reference must not be null");
         Objects.requireNonNull(view, "view must not be null");

@@ -8,20 +8,26 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.Map;
 import java.util.Objects;
 
 /**
- * Applies one deterministic rule set: isError wins, structured content wins
- * over text, text JSON is a fallback, and plain text remains a plain result.
+ * 按固定优先级解码 MCP 结果：先处理 isError，再取结构化内容，最后降级解析文本。
  */
 public final class DefaultMcpResultDecoder implements McpResultDecoder {
     private final ObjectMapper objectMapper;
 
+    /**
+     * 使用指定 JSON 映射器创建解码器。
+     */
     public DefaultMcpResultDecoder(ObjectMapper objectMapper) {
         this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper must not be null");
     }
 
+    /**
+     * 将原始工具结果识别为 Rich Result、业务错误、MCP 错误或普通结果。
+     */
     @Override
     public DecodedMcpResult decode(RawToolResult raw) {
         Objects.requireNonNull(raw, "raw must not be null");
@@ -38,11 +44,12 @@ public final class DefaultMcpResultDecoder implements McpResultDecoder {
         try {
             JsonNode json = objectMapper.readTree(raw.textContent());
             if (json != null && json.isObject()) {
-                Map<String, Object> value = objectMapper.convertValue(json, new TypeReference<>() { });
+                Map<String, Object> value = objectMapper.convertValue(json, new TypeReference<>() {
+                });
                 return decodeObject(value);
             }
         } catch (JsonProcessingException ignored) {
-            // A non-JSON text result is a valid generic MCP result.
+            // 非 JSON 文本也是有效的普通 MCP 工具结果。
         }
         return new DecodedMcpResult(DecodedMcpResult.Kind.PLAIN_RESULT, null, raw.textContent());
     }
@@ -57,7 +64,8 @@ public final class DefaultMcpResultDecoder implements McpResultDecoder {
             return new DecodedMcpResult(DecodedMcpResult.Kind.RICH_RESULT, generic, "工具返回结构化结果");
         }
         try {
-            McpResult<?> result = objectMapper.convertValue(value, new TypeReference<McpResult<Object>>() { });
+            McpResult<?> result = objectMapper.convertValue(value, new TypeReference<McpResult<Object>>() {
+            });
             return new DecodedMcpResult(
                     result.success() ? DecodedMcpResult.Kind.RICH_RESULT : DecodedMcpResult.Kind.BUSINESS_ERROR,
                     result,

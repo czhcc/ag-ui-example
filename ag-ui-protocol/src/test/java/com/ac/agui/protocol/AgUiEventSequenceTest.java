@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
+/** 验证运行、消息和工具调用事件的顺序与关联。 */
 class AgUiEventSequenceTest {
     @Test
     void emitsOneCanonicalSequenceAndExactlyOneTerminalEvent() {

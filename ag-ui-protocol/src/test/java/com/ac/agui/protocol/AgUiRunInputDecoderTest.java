@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
+/** 验证 AG-UI 运行请求的解码与输入约束。 */
 class AgUiRunInputDecoderTest {
     @Test
     void decodesCompleteWireModelIntoOfficialTypes() throws Exception {

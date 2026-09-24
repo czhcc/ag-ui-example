@@ -17,7 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 
-/** Shared secure implementation for both runtime-specific Result API controllers. */
+/** 供两套 Runtime 应用复用的安全结果读取服务。 */
 public final class ResultApiService {
     private static final String CACHE_CONTROL = "private, no-store, max-age=0";
     private final ResultStore results;
@@ -26,6 +26,7 @@ public final class ResultApiService {
     private final ResultAccessAuditor auditor;
     private final Clock clock;
 
+    /** 使用系统时钟和指定的存储、身份解析、限流及审计组件创建服务。 */
     public ResultApiService(ResultStore results, AgUiSubjectResolver subjects,
                             ResultAccessRateLimiter rateLimiter, ResultAccessAuditor auditor) {
         this(results, subjects, rateLimiter, auditor, Clock.systemUTC());
@@ -40,6 +41,7 @@ public final class ResultApiService {
         this.clock = Objects.requireNonNull(clock, "clock must not be null");
     }
 
+    /** 校验身份和运行归属后读取结果，应用限流、审计及 HTTP 错误映射。 */
     public ResponseEntity<?> get(String resultRef, String threadId, String runId, ServerHttpRequest request) {
         AccessSubject subject;
         try {
@@ -105,7 +107,9 @@ public final class ResultApiService {
                 threadId, runId, resultRef, outcome, status));
     }
 
+    /** 成功读取时返回的结果数据与过期时间。 */
     public record ResultPayload(String resultRef, String serverCode, String toolName,
                                 Object data, Object summary, Object resultMeta, long expiresAtEpochMs) { }
+    /** 结果读取失败时返回的错误代码和说明。 */
     public record ErrorPayload(String code, String message) { }
 }
