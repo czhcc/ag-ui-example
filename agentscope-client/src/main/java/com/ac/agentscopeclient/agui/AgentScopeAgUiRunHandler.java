@@ -1,7 +1,7 @@
 package com.ac.agentscopeclient.agui;
 
 import com.ac.agui.protocol.AgUiRunAgentInput;
-import com.ac.agui.web.AgUiRunHandler;
+import com.ac.agui.web.spi.AgUiRunHandler;
 import com.ac.richui.core.context.RunScope;
 import com.ac.runtime.agentscope.AgentScopeAgUiRuntime;
 import org.springframework.stereotype.Component;

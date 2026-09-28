@@ -1,7 +1,9 @@
-package com.ac.agui.web;
+package com.ac.agui.web.api;
 
 import com.ac.agui.protocol.AgUiRunAgentInput;
 import com.ac.agui.protocol.AgUiRunInputDecoder;
+import com.ac.agui.web.spi.AgUiRunHandler;
+import com.ac.agui.web.stream.AgUiEventStream;
 import com.ac.richui.core.context.AccessSubject;
 import com.ac.richui.core.context.RunScope;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +14,7 @@ import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /** 验证 AG-UI 控制器的运行、重连和取消生命周期。 */

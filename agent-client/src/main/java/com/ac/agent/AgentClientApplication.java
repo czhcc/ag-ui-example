@@ -1,8 +1,8 @@
 package com.ac.agent;
 
 import com.ac.agent.mcp.config.McpServerProperties;
-import com.ac.agui.web.AgUiProtocolExceptionHandler;
-import com.ac.agui.web.AgUiWebConfiguration;
+import com.ac.agui.web.api.AgUiProtocolExceptionHandler;
+import com.ac.agui.web.config.AgUiWebConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

@@ -1,6 +1,7 @@
-package com.ac.agui.web;
+package com.ac.agui.web.result;
 
 import com.ac.agui.protocol.AgUiProtocolException;
+import com.ac.agui.web.spi.AgUiSubjectResolver;
 import com.ac.richui.core.context.AccessSubject;
 import com.ac.richui.core.context.RunScope;
 import com.ac.richui.core.result.ResultAccessDeniedException;

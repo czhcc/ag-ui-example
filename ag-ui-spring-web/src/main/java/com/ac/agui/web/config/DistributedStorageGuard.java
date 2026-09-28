@@ -1,5 +1,7 @@
-package com.ac.agui.web;
+package com.ac.agui.web.config;
 
+import com.ac.agui.web.stream.AgUiRunStateStore;
+import com.ac.agui.web.stream.SharedAgUiRunStateStore;
 import com.ac.richui.core.result.ResultStore;
 import com.ac.richui.core.result.SharedResultStore;
 

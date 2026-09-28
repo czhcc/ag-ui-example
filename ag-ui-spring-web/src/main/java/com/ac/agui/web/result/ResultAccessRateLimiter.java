@@ -1,10 +1,10 @@
-package com.ac.agui.web;
+package com.ac.agui.web.result;
 
 import com.ac.richui.core.context.AccessSubject;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
 
 /** 按访问主体进行固定时间窗口限流，并限制主体跟踪数量。 */
 public final class ResultAccessRateLimiter {

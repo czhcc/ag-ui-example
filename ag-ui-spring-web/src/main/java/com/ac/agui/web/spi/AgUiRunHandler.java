@@ -1,4 +1,4 @@
-package com.ac.agui.web;
+package com.ac.agui.web.spi;
 
 import com.ac.agui.protocol.AgUiRunAgentInput;
 import com.ac.richui.core.context.RunScope;

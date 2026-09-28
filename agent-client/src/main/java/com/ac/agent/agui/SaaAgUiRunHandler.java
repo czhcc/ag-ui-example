@@ -4,7 +4,7 @@ import com.ac.agent.agent.AgentContext;
 import com.ac.agent.agent.AgentService;
 import com.ac.agui.protocol.AgUiProtocolException;
 import com.ac.agui.protocol.AgUiRunAgentInput;
-import com.ac.agui.web.AgUiRunHandler;
+import com.ac.agui.web.spi.AgUiRunHandler;
 import com.ac.richui.core.context.RunScope;
 import com.ac.richui.core.text.BoundedText;
 import com.ac.richui.core.text.SensitiveTextSanitizer;

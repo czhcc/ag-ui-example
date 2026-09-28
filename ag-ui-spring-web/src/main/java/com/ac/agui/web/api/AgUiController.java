@@ -1,7 +1,10 @@
-package com.ac.agui.web;
+package com.ac.agui.web.api;
 
 import com.ac.agui.protocol.AgUiRunAgentInput;
 import com.ac.agui.protocol.AgUiRunInputDecoder;
+import com.ac.agui.web.spi.AgUiRunHandler;
+import com.ac.agui.web.spi.AgUiSubjectResolver;
+import com.ac.agui.web.stream.AgUiRunStateStore;
 import com.ac.richui.core.context.AccessSubject;
 import com.ac.richui.core.context.RunScope;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,13 +15,13 @@ import java.time.Duration;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

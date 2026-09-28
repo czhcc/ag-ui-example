@@ -1,6 +1,6 @@
 package com.ac.agentscopeclient.web;
 
-import com.ac.agui.web.ResultApiService;
+import com.ac.agui.web.result.ResultApiService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;

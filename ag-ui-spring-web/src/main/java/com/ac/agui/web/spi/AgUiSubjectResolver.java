@@ -1,4 +1,4 @@
-package com.ac.agui.web;
+package com.ac.agui.web.spi;
 
 import com.ac.richui.core.context.AccessSubject;
 import org.springframework.http.server.reactive.ServerHttpRequest;

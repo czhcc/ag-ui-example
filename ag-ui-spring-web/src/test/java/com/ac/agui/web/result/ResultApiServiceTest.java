@@ -1,9 +1,7 @@
-package com.ac.agui.web;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+package com.ac.agui.web.result;
 
 import com.ac.agui.protocol.AgUiProtocolException;
+import com.ac.agui.web.spi.AgUiSubjectResolver;
 import com.ac.mcp.contract.presentation.PresentationHint;
 import com.ac.mcp.contract.result.McpResult;
 import com.ac.richui.core.context.AccessSubject;
@@ -18,13 +16,16 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 /** 验证结果读取的授权、限流、错误响应和审计行为。 */
 class ResultApiServiceTest {

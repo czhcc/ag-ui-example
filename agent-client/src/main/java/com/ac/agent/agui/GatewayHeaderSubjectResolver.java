@@ -1,7 +1,7 @@
 package com.ac.agent.agui;
 
 import com.ac.agui.protocol.AgUiProtocolException;
-import com.ac.agui.web.AgUiSubjectResolver;
+import com.ac.agui.web.spi.AgUiSubjectResolver;
 import com.ac.richui.core.context.AccessSubject;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;

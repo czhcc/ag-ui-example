@@ -1,8 +1,4 @@
-package com.ac.agui.web;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+package com.ac.agui.web.stream;
 
 import com.ac.agui.protocol.AgUiRunAgentInput;
 import com.ac.richui.core.context.RunScope;
@@ -16,6 +12,10 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** 验证事件流的注册幂等性、序号和重放行为。 */
 class AgUiEventStreamTest {

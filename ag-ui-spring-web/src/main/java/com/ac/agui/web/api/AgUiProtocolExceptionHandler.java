@@ -1,4 +1,4 @@
-package com.ac.agui.web;
+package com.ac.agui.web.api;
 
 import com.ac.agui.protocol.AgUiProtocolException;
 import java.util.Map;

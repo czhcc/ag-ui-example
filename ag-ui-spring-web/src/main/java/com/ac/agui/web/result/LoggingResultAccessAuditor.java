@@ -1,4 +1,4 @@
-package com.ac.agui.web;
+package com.ac.agui.web.result;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
