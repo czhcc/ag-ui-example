@@ -1,0 +1,51 @@
+{
+  "specVersion": "1.2",
+  "success": true,
+  "data": [
+    {
+      "step": 1,
+      "sourceId": "person-001",
+      "targetId": "person-002",
+      "relationType": "KNOWS"
+    },
+    {
+      "step": 2,
+      "sourceId": "person-002",
+      "targetId": "org-root",
+      "relationType": "WORKS_AT"
+    }
+  ],
+  "summary": {
+    "count": 2,
+    "total": 2,
+    "truncated": false,
+    "description": "phase-two fixture",
+    "highlights": []
+  },
+  "presentation": {
+    "mode": "RECOMMENDED",
+    "views": [
+      {
+        "id": "person-org-path",
+        "type": "relationship_path",
+        "subType": "ordered",
+        "title": "关联路径",
+        "mapping": {
+          "step": "step",
+          "source": "sourceId",
+          "target": "targetId",
+          "label": "relationType"
+        },
+        "options": {
+          "limit": 30,
+          "showLabels": true
+        }
+      }
+    ]
+  },
+  "resultMeta": {
+    "requestId": "phase-two-fixture",
+    "generatedAt": "2026-09-29T00:00:00Z",
+    "attributes": {}
+  }
+}

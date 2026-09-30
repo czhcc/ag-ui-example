@@ -1,0 +1,1 @@
+{"type":"CUSTOM","name":"ui.surface.create","value":{"profile":"ac.rich-ui","profileVersion":"1.1","surfaceId":"surface-metric","dataRef":"result-metric","components":[{"id":"activity-metrics","type":"Metric","props":{"subType":"single","encoding":{"label":"label","value":"value"}}}]}}

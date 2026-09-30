@@ -21,8 +21,8 @@ public record McpResult<T>(
         @JsonInclude(JsonInclude.Include.NON_NULL)
         McpBusinessError error) {
 
-    public static final String CURRENT_SPEC_VERSION = "1.1";
-    public static final Set<String> SUPPORTED_SPEC_VERSIONS = Set.of("1.0", CURRENT_SPEC_VERSION);
+    public static final String CURRENT_SPEC_VERSION = "1.2";
+    public static final Set<String> SUPPORTED_SPEC_VERSIONS = Set.of("1.0", "1.1", CURRENT_SPEC_VERSION);
 
     /**
      * 规范化契约版本和展示建议，并校验成功与失败结果的字段组合。

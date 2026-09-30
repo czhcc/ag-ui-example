@@ -4,6 +4,11 @@ import com.ac.richui.core.observation.DefaultObservationBuilder;
 import com.ac.richui.core.observation.ObservationBuilder;
 import com.ac.richui.core.presentation.DefaultPresentationService;
 import com.ac.richui.core.presentation.PresentationService;
+import com.ac.richui.core.presentation.PresentationMapper;
+import com.ac.richui.core.presentation.PresentationValidator;
+import com.ac.richui.core.presentation.SurfaceRegistry;
+import com.ac.richui.core.presentation.InMemorySurfaceRegistry;
+import com.ac.richui.core.presentation.SharedSurfaceRegistry;
 import com.ac.richui.core.result.InMemoryResultStore;
 import com.ac.richui.core.result.ResultStore;
 import com.ac.richui.core.result.ResultStoreLimits;
@@ -47,8 +52,20 @@ public class AgentConfig {
     }
 
     @Bean
-    public PresentationService presentationService(ResultStore resultStore) {
-        return new DefaultPresentationService(resultStore);
+    @ConditionalOnMissingBean(SurfaceRegistry.class)
+    public SurfaceRegistry surfaceRegistry(
+            @Value("${ac.result-store.ttl:45m}") Duration ttl,
+            @Value("${ac.result-store.maximum-entries:10000}") int maximumEntries) {
+        return new InMemorySurfaceRegistry(ttl, maximumEntries);
+    }
+
+    @Bean
+    public PresentationService presentationService(ResultStore resultStore, SurfaceRegistry surfaces,
+            @Value("${ac.deployment.distributed:false}") boolean distributed) {
+        if (distributed && !(surfaces instanceof SharedSurfaceRegistry))
+            throw new IllegalStateException("Distributed deployment requires SharedSurfaceRegistry");
+        return new DefaultPresentationService(resultStore, new PresentationValidator(),
+                new PresentationMapper(), surfaces);
     }
 
     @Bean

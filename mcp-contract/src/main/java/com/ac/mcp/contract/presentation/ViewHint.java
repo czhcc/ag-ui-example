@@ -13,9 +13,16 @@ import java.util.Map;
         @JsonSubTypes.Type(value = ChartViewHint.class, name = "chart"),
         @JsonSubTypes.Type(value = RelationGraphViewHint.class, name = "relation_graph"),
         @JsonSubTypes.Type(value = TimelineViewHint.class, name = "timeline"),
-        @JsonSubTypes.Type(value = TableViewHint.class, name = "table")
+        @JsonSubTypes.Type(value = TableViewHint.class, name = "table"),
+        @JsonSubTypes.Type(value = MetricViewHint.class, name = "metric"),
+        @JsonSubTypes.Type(value = EntityCardViewHint.class, name = "entity_card"),
+        @JsonSubTypes.Type(value = TreeViewHint.class, name = "tree"),
+        @JsonSubTypes.Type(value = HeatmapViewHint.class, name = "heatmap"),
+        @JsonSubTypes.Type(value = RelationshipPathViewHint.class, name = "relationship_path"),
+        @JsonSubTypes.Type(value = EvidenceChainViewHint.class, name = "evidence_chain")
 })
-public sealed interface ViewHint permits ChartViewHint, RelationGraphViewHint, TimelineViewHint, TableViewHint {
+public sealed interface ViewHint permits ChartViewHint, RelationGraphViewHint, TimelineViewHint, TableViewHint,
+        MetricViewHint, EntityCardViewHint, TreeViewHint, HeatmapViewHint, RelationshipPathViewHint, EvidenceChainViewHint {
     /**
      * 返回视图标识。
      */

@@ -27,6 +27,12 @@ public final class PresentationMapper {
             case "relation_graph" -> "RelationGraph";
             case "timeline" -> "Timeline";
             case "table" -> "Table";
+            case "metric" -> "Metric";
+            case "entity_card" -> "EntityCard";
+            case "tree" -> "Tree";
+            case "heatmap" -> "Heatmap";
+            case "relationship_path" -> "RelationshipPath";
+            case "evidence_chain" -> "EvidenceChain";
             default -> throw new IllegalArgumentException("Unsupported view type: " + view.type());
         };
         Map<String, Object> props = new LinkedHashMap<>();
@@ -46,7 +52,11 @@ public final class PresentationMapper {
             props.put("drillDown", Map.copyOf(drillDown));
         }
         String surfaceId = "surface_" + UUID.randomUUID().toString().replace("-", "");
-        return new SurfaceSpec(surfaceId, reference.value(),
-                List.of(new ComponentSpec(view.id(), type, Map.copyOf(props))));
+        String version = switch (view.type()) {
+            case "chart", "relation_graph", "timeline", "table" -> "1.0";
+            default -> "1.1";
+        };
+        return new SurfaceSpec(SurfaceSpec.PROFILE, version, surfaceId, reference.value(),
+                List.of(new ComponentSpec(view.id(), type, Map.copyOf(props))), "1.1".equals(version) ? 1 : 0);
     }
 }

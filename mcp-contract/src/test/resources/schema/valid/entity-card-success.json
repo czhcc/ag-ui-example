@@ -1,0 +1,51 @@
+{
+  "specVersion": "1.2",
+  "success": true,
+  "data": [
+    {
+      "id": "person-001",
+      "name": "张三",
+      "kind": "PERSON",
+      "summary": "示例人员"
+    },
+    {
+      "id": "person-002",
+      "name": "李四",
+      "kind": "PERSON",
+      "summary": "示例关联人员"
+    }
+  ],
+  "summary": {
+    "count": 2,
+    "total": 2,
+    "truncated": false,
+    "description": "phase-two fixture",
+    "highlights": []
+  },
+  "presentation": {
+    "mode": "RECOMMENDED",
+    "views": [
+      {
+        "id": "entity-cards",
+        "type": "entity_card",
+        "subType": "standard",
+        "title": "实体检索结果",
+        "mapping": {
+          "id": "id",
+          "name": "name",
+          "kind": "kind",
+          "summary": "summary"
+        },
+        "options": {
+          "limit": 50,
+          "showSummary": true
+        }
+      }
+    ]
+  },
+  "resultMeta": {
+    "requestId": "phase-two-fixture",
+    "generatedAt": "2026-09-29T00:00:00Z",
+    "attributes": {}
+  }
+}

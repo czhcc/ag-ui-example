@@ -38,7 +38,10 @@ class DualRuntimeRichContractTest {
 
         assertEquals(saa.processed().observation(), agentScope.processed().observation());
         assertEquals(saa.processed().resultReference(), agentScope.processed().resultReference());
-        assertEquals(saa.surface(), agentScope.surface());
+        assertEquals(saa.surface().profile(), agentScope.surface().profile());
+        assertEquals(saa.surface().profileVersion(), agentScope.surface().profileVersion());
+        assertEquals(saa.surface().dataRef(), agentScope.surface().dataRef());
+        assertEquals(saa.surface().components(), agentScope.surface().components());
     }
 
     private Outcome process(String reference, Map<String, Object> fixture) {

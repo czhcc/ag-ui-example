@@ -1,0 +1,83 @@
+{
+  "specVersion": "1.2",
+  "success": true,
+  "data": [
+    {
+      "city": "北京",
+      "eventType": "BUSINESS",
+      "count": 4
+    },
+    {
+      "city": "北京",
+      "eventType": "WORK",
+      "count": 2
+    },
+    {
+      "city": "北京",
+      "eventType": "SOCIAL",
+      "count": 1
+    },
+    {
+      "city": "北京",
+      "eventType": "TRAVEL",
+      "count": 1
+    },
+    {
+      "city": "上海",
+      "eventType": "BUSINESS",
+      "count": 3
+    },
+    {
+      "city": "上海",
+      "eventType": "WORK",
+      "count": 1
+    },
+    {
+      "city": "上海",
+      "eventType": "SOCIAL",
+      "count": 1
+    },
+    {
+      "city": "杭州",
+      "eventType": "BUSINESS",
+      "count": 2
+    },
+    {
+      "city": "杭州",
+      "eventType": "WORK",
+      "count": 1
+    }
+  ],
+  "summary": {
+    "count": 9,
+    "total": 9,
+    "truncated": false,
+    "description": "phase-two fixture",
+    "highlights": []
+  },
+  "presentation": {
+    "mode": "RECOMMENDED",
+    "views": [
+      {
+        "id": "activity-heatmap",
+        "type": "heatmap",
+        "subType": "matrix",
+        "title": "城市与活动类型",
+        "mapping": {
+          "x": "city",
+          "y": "eventType",
+          "value": "count"
+        },
+        "options": {
+          "limit": 1000,
+          "showLabels": true
+        }
+      }
+    ]
+  },
+  "resultMeta": {
+    "requestId": "phase-two-fixture",
+    "generatedAt": "2026-09-29T00:00:00Z",
+    "attributes": {}
+  }
+}

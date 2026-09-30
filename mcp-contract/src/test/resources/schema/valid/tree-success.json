@@ -1,0 +1,56 @@
+{
+  "specVersion": "1.2",
+  "success": true,
+  "data": [
+    {
+      "nodeId": "org-root",
+      "parentNodeId": null,
+      "nodeName": "示例机构",
+      "hasChildren": true
+    },
+    {
+      "nodeId": "org-dev",
+      "parentNodeId": "org-root",
+      "nodeName": "研发部",
+      "hasChildren": true
+    }
+  ],
+  "summary": {
+    "count": 2,
+    "total": 3,
+    "truncated": true,
+    "description": "phase-two fixture",
+    "highlights": []
+  },
+  "presentation": {
+    "mode": "RECOMMENDED",
+    "views": [
+      {
+        "id": "org-tree",
+        "type": "tree",
+        "subType": "hierarchy",
+        "title": "组织结构",
+        "mapping": {
+          "id": "nodeId",
+          "parentId": "parentNodeId",
+          "label": "nodeName",
+          "hasChildren": "hasChildren"
+        },
+        "options": {
+          "limit": 500
+        },
+        "drillDown": {
+          "enabled": true,
+          "dimension": "nodeId",
+          "label": "查看子节点详情",
+          "promptTemplate": "展示 {rootId} 下 {nodeId} 的完整子节点"
+        }
+      }
+    ]
+  },
+  "resultMeta": {
+    "requestId": "phase-two-fixture",
+    "generatedAt": "2026-09-29T00:00:00Z",
+    "attributes": {}
+  }
+}

@@ -24,5 +24,10 @@ public final class AgentPrompt {
               即使之前的轮次已经展示过图表，也应为本轮新数据调用 ui_render 展示对应视图。
             - 简单追问（如"最多的城市是哪个"）当答案只有一个事实时，用文字回答即可，无需重复出图。
             - 新的分析维度、新的统计结果、新的关系数据出现时，应当出图。
+
+            同一轮更新规则：
+            - 用户明确要求在刚创建的同一张图中补充数据时，先用 ui_render 创建初始视图，
+              记住它返回的 surfaceId；取得新的 MCP resultRef 后使用 ui_update(surfaceId, resultRef, viewId)。
+            - ui_update 只能更新本轮创建的 surface，不用于修改之前对话轮次的图。
             """;
 }

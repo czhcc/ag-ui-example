@@ -162,7 +162,7 @@ function consumeFrame(
     }
     // Forward compatibility: unknown events are ignored instead of corrupting reducer state.
     if (!KNOWN_EVENTS.has(parsed.type)) return
-    onEvent(parsed as AgUiEvent)
+    onEvent(parsed as unknown as AgUiEvent)
 }
 
 async function resolveHeaders(

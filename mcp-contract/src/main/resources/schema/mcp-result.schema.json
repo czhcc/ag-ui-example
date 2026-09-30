@@ -4,40 +4,90 @@
   "title": "McpResult",
   "description": "平台 MCP Data Tool 统一返回契约。1.1 是当前严格版本；1.0 仅作为迁移兼容输入。协议/传输层错误使用 MCP isError，业务失败使用 success=false + error。",
   "oneOf": [
-    { "$ref": "#/$defs/envelopeV11" },
-    { "$ref": "#/$defs/envelopeV10" }
+    {
+      "$ref": "#/$defs/envelopeV12"
+    },
+    {
+      "$ref": "#/$defs/envelopeV11"
+    },
+    {
+      "$ref": "#/$defs/envelopeV10"
+    }
   ],
   "$defs": {
     "envelopeV11": {
       "title": "McpResult 1.1",
       "type": "object",
-      "required": ["specVersion", "success", "data", "presentation"],
+      "required": [
+        "specVersion",
+        "success",
+        "data",
+        "presentation"
+      ],
       "additionalProperties": false,
       "properties": {
-        "specVersion": { "const": "1.1" },
-        "success": { "type": "boolean" },
-        "data": { "$ref": "#/$defs/data" },
-        "summary": { "$ref": "#/$defs/summary" },
-        "presentation": { "$ref": "#/$defs/presentationV11" },
-        "resultMeta": { "$ref": "#/$defs/resultMeta" },
-        "error": { "$ref": "#/$defs/error" }
+        "specVersion": {
+          "const": "1.1"
+        },
+        "success": {
+          "type": "boolean"
+        },
+        "data": {
+          "$ref": "#/$defs/data"
+        },
+        "summary": {
+          "$ref": "#/$defs/summary"
+        },
+        "presentation": {
+          "$ref": "#/$defs/presentationV11"
+        },
+        "resultMeta": {
+          "$ref": "#/$defs/resultMeta"
+        },
+        "error": {
+          "$ref": "#/$defs/error"
+        }
       },
       "allOf": [
         {
           "if": {
-            "properties": { "success": { "const": true } },
-            "required": ["success"]
+            "properties": {
+              "success": {
+                "const": true
+              }
+            },
+            "required": [
+              "success"
+            ]
           },
-          "then": { "not": { "required": ["error"] } }
+          "then": {
+            "not": {
+              "required": [
+                "error"
+              ]
+            }
+          }
         },
         {
           "if": {
-            "properties": { "success": { "const": false } },
-            "required": ["success"]
+            "properties": {
+              "success": {
+                "const": false
+              }
+            },
+            "required": [
+              "success"
+            ]
           },
           "then": {
-            "required": ["error"],
-            "properties": { "data": { "type": "null" } }
+            "required": [
+              "error"
+            ],
+            "properties": {
+              "data": {
+                "type": "null"
+              }
+            }
           }
         }
       ]
@@ -46,48 +96,90 @@
       "title": "McpResult 1.0 compatibility input",
       "description": "只用于滚动升级期间读取既有 1.0 payload；新生产者不得继续输出 1.0。",
       "type": "object",
-      "required": ["specVersion", "success"],
+      "required": [
+        "specVersion",
+        "success"
+      ],
       "additionalProperties": false,
       "properties": {
-        "specVersion": { "const": "1.0" },
-        "success": { "type": "boolean" },
-        "data": { "$ref": "#/$defs/data" },
+        "specVersion": {
+          "const": "1.0"
+        },
+        "success": {
+          "type": "boolean"
+        },
+        "data": {
+          "$ref": "#/$defs/data"
+        },
         "summary": {
           "oneOf": [
-            { "$ref": "#/$defs/summary" },
-            { "type": "null" }
+            {
+              "$ref": "#/$defs/summary"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
-        "presentation": { "$ref": "#/$defs/presentationV10" },
+        "presentation": {
+          "$ref": "#/$defs/presentationV10"
+        },
         "resultMeta": {
           "oneOf": [
-            { "$ref": "#/$defs/resultMeta" },
-            { "type": "null" }
+            {
+              "$ref": "#/$defs/resultMeta"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "error": {
           "oneOf": [
-            { "$ref": "#/$defs/error" },
-            { "type": "null" }
+            {
+              "$ref": "#/$defs/error"
+            },
+            {
+              "type": "null"
+            }
           ]
         }
       },
       "allOf": [
         {
           "if": {
-            "properties": { "success": { "const": false } },
-            "required": ["success"]
+            "properties": {
+              "success": {
+                "const": false
+              }
+            },
+            "required": [
+              "success"
+            ]
           },
           "then": {
-            "required": ["error"],
-            "properties": { "error": { "$ref": "#/$defs/error" } }
+            "required": [
+              "error"
+            ],
+            "properties": {
+              "error": {
+                "$ref": "#/$defs/error"
+              }
+            }
           }
         }
       ]
     },
     "data": {
       "description": "真实业务数据。富视图推荐使用对象数组，字段名必须与 mapping 引用的字段完全一致。",
-      "type": ["object", "array", "string", "number", "boolean", "null"]
+      "type": [
+        "object",
+        "array",
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
     },
     "summary": {
       "title": "ResultSummary",
@@ -95,13 +187,27 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "count": { "type": "integer", "minimum": 0 },
-        "total": { "type": "integer", "minimum": 0 },
-        "truncated": { "type": "boolean" },
-        "description": { "type": "string", "maxLength": 2000 },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 2000
+        },
         "highlights": {
           "type": "array",
-          "items": { "type": "string", "maxLength": 500 },
+          "items": {
+            "type": "string",
+            "maxLength": 500
+          },
           "maxItems": 20
         }
       }
@@ -109,153 +215,342 @@
     "presentationV11": {
       "title": "PresentationHint 1.1",
       "type": "object",
-      "required": ["mode", "views"],
+      "required": [
+        "mode",
+        "views"
+      ],
       "additionalProperties": false,
       "properties": {
         "mode": {
-          "enum": ["NONE", "RECOMMENDED", "REQUIRED"],
+          "enum": [
+            "NONE",
+            "RECOMMENDED",
+            "REQUIRED"
+          ],
           "description": "枚举在线路上始终使用大写。"
         },
         "views": {
           "type": "array",
-          "items": { "$ref": "#/$defs/viewHintV11" },
+          "items": {
+            "$ref": "#/$defs/viewHintV11"
+          },
           "maxItems": 5
         }
       },
       "allOf": [
         {
           "if": {
-            "properties": { "mode": { "const": "NONE" } },
-            "required": ["mode"]
+            "properties": {
+              "mode": {
+                "const": "NONE"
+              }
+            },
+            "required": [
+              "mode"
+            ]
           },
-          "then": { "properties": { "views": { "maxItems": 0 } } }
+          "then": {
+            "properties": {
+              "views": {
+                "maxItems": 0
+              }
+            }
+          }
         },
         {
           "if": {
-            "properties": { "mode": { "enum": ["RECOMMENDED", "REQUIRED"] } },
-            "required": ["mode"]
+            "properties": {
+              "mode": {
+                "enum": [
+                  "RECOMMENDED",
+                  "REQUIRED"
+                ]
+              }
+            },
+            "required": [
+              "mode"
+            ]
           },
-          "then": { "properties": { "views": { "minItems": 1 } } }
+          "then": {
+            "properties": {
+              "views": {
+                "minItems": 1
+              }
+            }
+          }
         }
       ]
     },
     "presentationV10": {
       "title": "PresentationHint 1.0 compatibility input",
       "type": "object",
-      "required": ["mode", "views"],
+      "required": [
+        "mode",
+        "views"
+      ],
       "additionalProperties": false,
       "properties": {
-        "mode": { "enum": ["NONE", "RECOMMENDED", "REQUIRED"] },
+        "mode": {
+          "enum": [
+            "NONE",
+            "RECOMMENDED",
+            "REQUIRED"
+          ]
+        },
         "views": {
           "type": "array",
-          "items": { "$ref": "#/$defs/viewHintV10" },
+          "items": {
+            "$ref": "#/$defs/viewHintV10"
+          },
           "maxItems": 5
         }
       }
     },
     "viewHintV11": {
       "oneOf": [
-        { "$ref": "#/$defs/chartView" },
-        { "$ref": "#/$defs/tableView" },
-        { "$ref": "#/$defs/timelineView" },
-        { "$ref": "#/$defs/relationGraphView" }
+        {
+          "$ref": "#/$defs/chartView"
+        },
+        {
+          "$ref": "#/$defs/tableView"
+        },
+        {
+          "$ref": "#/$defs/timelineView"
+        },
+        {
+          "$ref": "#/$defs/relationGraphView"
+        }
       ]
     },
     "chartView": {
       "title": "ChartViewHint",
       "type": "object",
-      "required": ["id", "type", "subType", "mapping"],
+      "required": [
+        "id",
+        "type",
+        "subType",
+        "mapping"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "#/$defs/viewId" },
-        "type": { "const": "chart" },
-        "subType": { "enum": ["bar", "line", "area", "pie", "scatter"] },
-        "title": { "$ref": "#/$defs/title" },
-        "description": { "$ref": "#/$defs/description" },
-        "mapping": { "$ref": "#/$defs/chartMapping" },
-        "options": { "$ref": "#/$defs/chartOptions" },
-        "priority": { "$ref": "#/$defs/priority" },
-        "drillDown": { "$ref": "#/$defs/drillDown" }
+        "id": {
+          "$ref": "#/$defs/viewId"
+        },
+        "type": {
+          "const": "chart"
+        },
+        "subType": {
+          "enum": [
+            "bar",
+            "line",
+            "area",
+            "pie",
+            "scatter"
+          ]
+        },
+        "title": {
+          "$ref": "#/$defs/title"
+        },
+        "description": {
+          "$ref": "#/$defs/description"
+        },
+        "mapping": {
+          "$ref": "#/$defs/chartMapping"
+        },
+        "options": {
+          "$ref": "#/$defs/chartOptions"
+        },
+        "priority": {
+          "$ref": "#/$defs/priority"
+        },
+        "drillDown": {
+          "$ref": "#/$defs/drillDown"
+        }
       }
     },
     "tableView": {
       "title": "TableViewHint",
       "type": "object",
-      "required": ["id", "type", "mapping"],
+      "required": [
+        "id",
+        "type",
+        "mapping"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "#/$defs/viewId" },
-        "type": { "const": "table" },
-        "subType": { "const": "standard" },
-        "title": { "$ref": "#/$defs/title" },
-        "description": { "$ref": "#/$defs/description" },
-        "mapping": { "$ref": "#/$defs/tableMapping" },
-        "options": { "$ref": "#/$defs/tableOptions" },
-        "priority": { "$ref": "#/$defs/priority" },
-        "drillDown": { "$ref": "#/$defs/drillDown" }
+        "id": {
+          "$ref": "#/$defs/viewId"
+        },
+        "type": {
+          "const": "table"
+        },
+        "subType": {
+          "const": "standard"
+        },
+        "title": {
+          "$ref": "#/$defs/title"
+        },
+        "description": {
+          "$ref": "#/$defs/description"
+        },
+        "mapping": {
+          "$ref": "#/$defs/tableMapping"
+        },
+        "options": {
+          "$ref": "#/$defs/tableOptions"
+        },
+        "priority": {
+          "$ref": "#/$defs/priority"
+        },
+        "drillDown": {
+          "$ref": "#/$defs/drillDown"
+        }
       }
     },
     "timelineView": {
       "title": "TimelineViewHint",
       "type": "object",
-      "required": ["id", "type", "subType", "mapping"],
+      "required": [
+        "id",
+        "type",
+        "subType",
+        "mapping"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "#/$defs/viewId" },
-        "type": { "const": "timeline" },
-        "subType": { "const": "vertical" },
-        "title": { "$ref": "#/$defs/title" },
-        "description": { "$ref": "#/$defs/description" },
-        "mapping": { "$ref": "#/$defs/timelineMapping" },
-        "options": { "$ref": "#/$defs/timelineOptions" },
-        "priority": { "$ref": "#/$defs/priority" },
-        "drillDown": { "$ref": "#/$defs/drillDown" }
+        "id": {
+          "$ref": "#/$defs/viewId"
+        },
+        "type": {
+          "const": "timeline"
+        },
+        "subType": {
+          "const": "vertical"
+        },
+        "title": {
+          "$ref": "#/$defs/title"
+        },
+        "description": {
+          "$ref": "#/$defs/description"
+        },
+        "mapping": {
+          "$ref": "#/$defs/timelineMapping"
+        },
+        "options": {
+          "$ref": "#/$defs/timelineOptions"
+        },
+        "priority": {
+          "$ref": "#/$defs/priority"
+        },
+        "drillDown": {
+          "$ref": "#/$defs/drillDown"
+        }
       }
     },
     "relationGraphView": {
       "title": "RelationGraphViewHint",
       "type": "object",
-      "required": ["id", "type", "subType", "mapping"],
+      "required": [
+        "id",
+        "type",
+        "subType",
+        "mapping"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "#/$defs/viewId" },
-        "type": { "const": "relation_graph" },
-        "subType": { "const": "network" },
-        "title": { "$ref": "#/$defs/title" },
-        "description": { "$ref": "#/$defs/description" },
-        "mapping": { "$ref": "#/$defs/relationGraphMapping" },
-        "options": { "$ref": "#/$defs/relationGraphOptions" },
-        "priority": { "$ref": "#/$defs/priority" },
-        "drillDown": { "$ref": "#/$defs/drillDown" }
+        "id": {
+          "$ref": "#/$defs/viewId"
+        },
+        "type": {
+          "const": "relation_graph"
+        },
+        "subType": {
+          "const": "network"
+        },
+        "title": {
+          "$ref": "#/$defs/title"
+        },
+        "description": {
+          "$ref": "#/$defs/description"
+        },
+        "mapping": {
+          "$ref": "#/$defs/relationGraphMapping"
+        },
+        "options": {
+          "$ref": "#/$defs/relationGraphOptions"
+        },
+        "priority": {
+          "$ref": "#/$defs/priority"
+        },
+        "drillDown": {
+          "$ref": "#/$defs/drillDown"
+        }
       }
     },
     "viewHintV10": {
       "title": "LegacyViewHint",
       "type": "object",
-      "required": ["id", "type", "mapping"],
+      "required": [
+        "id",
+        "type",
+        "mapping"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "#/$defs/viewId" },
-        "type": { "enum": ["chart", "relation_graph", "timeline", "table"] },
-        "subType": { "type": "string" },
-        "title": { "$ref": "#/$defs/title" },
-        "description": { "$ref": "#/$defs/description" },
+        "id": {
+          "$ref": "#/$defs/viewId"
+        },
+        "type": {
+          "enum": [
+            "chart",
+            "relation_graph",
+            "timeline",
+            "table"
+          ]
+        },
+        "subType": {
+          "type": "string"
+        },
+        "title": {
+          "$ref": "#/$defs/title"
+        },
+        "description": {
+          "$ref": "#/$defs/description"
+        },
         "mapping": {
           "type": "object",
-          "additionalProperties": { "type": ["string", "array"] }
+          "additionalProperties": {
+            "type": [
+              "string",
+              "array"
+            ]
+          }
         },
-        "options": { "type": "object" },
-        "priority": { "$ref": "#/$defs/priority" },
-        "drillDown": { "$ref": "#/$defs/drillDown" }
+        "options": {
+          "type": "object"
+        },
+        "priority": {
+          "$ref": "#/$defs/priority"
+        },
+        "drillDown": {
+          "$ref": "#/$defs/drillDown"
+        }
       }
     },
     "chartMapping": {
       "type": "object",
-      "required": ["category", "value"],
+      "required": [
+        "category",
+        "value"
+      ],
       "additionalProperties": false,
       "properties": {
-        "category": { "$ref": "#/$defs/fieldName" },
-        "value": { "$ref": "#/$defs/fieldName" }
+        "category": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "value": {
+          "$ref": "#/$defs/fieldName"
+        }
       }
     },
     "tableMapping": {
@@ -266,96 +561,200 @@
           "type": "array",
           "minItems": 1,
           "maxItems": 50,
-          "items": { "$ref": "#/$defs/tableColumn" }
+          "items": {
+            "$ref": "#/$defs/tableColumn"
+          }
         }
       }
     },
     "tableColumn": {
       "type": "object",
-      "required": ["field", "label"],
+      "required": [
+        "field",
+        "label"
+      ],
       "additionalProperties": false,
       "properties": {
-        "field": { "$ref": "#/$defs/fieldName" },
-        "label": { "type": "string", "minLength": 1, "maxLength": 100 }
+        "field": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
       }
     },
     "timelineMapping": {
       "type": "object",
-      "required": ["time", "title"],
+      "required": [
+        "time",
+        "title"
+      ],
       "additionalProperties": false,
       "properties": {
-        "time": { "$ref": "#/$defs/fieldName" },
-        "title": { "$ref": "#/$defs/fieldName" },
-        "description": { "$ref": "#/$defs/fieldName" },
-        "group": { "$ref": "#/$defs/fieldName" }
+        "time": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "title": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "description": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "group": {
+          "$ref": "#/$defs/fieldName"
+        }
       }
     },
     "relationGraphMapping": {
       "type": "object",
-      "required": ["source", "target"],
+      "required": [
+        "source",
+        "target"
+      ],
       "additionalProperties": false,
       "properties": {
-        "source": { "$ref": "#/$defs/fieldName" },
-        "target": { "$ref": "#/$defs/fieldName" },
-        "label": { "$ref": "#/$defs/fieldName" },
-        "sourceLabel": { "$ref": "#/$defs/fieldName" }
+        "source": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "target": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "label": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "sourceLabel": {
+          "$ref": "#/$defs/fieldName"
+        }
       }
     },
     "chartOptions": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "orientation": { "enum": ["vertical", "horizontal"] },
-        "order": { "enum": ["none", "asc", "desc"] },
-        "limit": { "type": "integer", "minimum": 1, "maximum": 1000 },
-        "showLegend": { "type": "boolean" },
-        "showLabels": { "type": "boolean" }
+        "orientation": {
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "order": {
+          "enum": [
+            "none",
+            "asc",
+            "desc"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "showLegend": {
+          "type": "boolean"
+        },
+        "showLabels": {
+          "type": "boolean"
+        }
       }
     },
     "tableOptions": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "limit": { "type": "integer", "minimum": 1, "maximum": 1000 },
-        "sort": { "$ref": "#/$defs/fieldName" },
-        "order": { "enum": ["asc", "desc"] }
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "sort": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "order": {
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        }
       }
     },
     "timelineOptions": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "limit": { "type": "integer", "minimum": 1, "maximum": 500 },
-        "order": { "enum": ["asc", "desc"] },
-        "group": { "type": "boolean" }
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        },
+        "order": {
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        },
+        "group": {
+          "type": "boolean"
+        }
       }
     },
     "relationGraphOptions": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "limit": { "type": "integer", "minimum": 1, "maximum": 1000 },
-        "showLabels": { "type": "boolean" }
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "showLabels": {
+          "type": "boolean"
+        }
       }
     },
     "drillDown": {
       "title": "DrillDown",
       "type": "object",
-      "required": ["enabled"],
+      "required": [
+        "enabled"
+      ],
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean" },
-        "dimension": { "$ref": "#/$defs/fieldName" },
-        "label": { "type": "string", "maxLength": 100 },
-        "promptTemplate": { "type": "string", "minLength": 1, "maxLength": 2000 }
+        "enabled": {
+          "type": "boolean"
+        },
+        "dimension": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "promptTemplate": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
       },
       "allOf": [
         {
           "if": {
-            "properties": { "enabled": { "const": true } },
-            "required": ["enabled"]
+            "properties": {
+              "enabled": {
+                "const": true
+              }
+            },
+            "required": [
+              "enabled"
+            ]
           },
-          "then": { "required": ["dimension", "promptTemplate"] }
+          "then": {
+            "required": [
+              "dimension",
+              "promptTemplate"
+            ]
+          }
         }
       ]
     },
@@ -364,44 +763,730 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "requestId": { "type": "string" },
-        "generatedAt": { "type": "string", "format": "date-time" },
-        "attributes": { "type": "object", "additionalProperties": true }
+        "requestId": {
+          "type": "string"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": true
+        }
       }
     },
     "error": {
       "title": "McpBusinessError",
       "description": "业务错误，不得包含密码、Token、内部堆栈或连接字符串。",
       "type": "object",
-      "required": ["code", "message"],
+      "required": [
+        "code",
+        "message"
+      ],
       "additionalProperties": false,
       "properties": {
-        "code": { "type": "string", "minLength": 1, "maxLength": 100 },
-        "message": { "type": "string", "minLength": 1, "maxLength": 2000 },
-        "retryable": { "type": "boolean" },
-        "details": { "type": "object", "additionalProperties": true }
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "details": {
+          "type": "object",
+          "additionalProperties": true
+        }
       }
     },
-    "viewId": { "type": "string", "minLength": 1, "maxLength": 100 },
-    "fieldName": { "type": "string", "minLength": 1, "maxLength": 200 },
-    "title": { "type": "string", "maxLength": 200 },
-    "description": { "type": "string", "maxLength": 2000 },
-    "priority": { "type": "integer", "minimum": -1000, "maximum": 1000 }
+    "viewId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "fieldName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 1000
+    },
+    "envelopeV12": {
+      "title": "McpResult 1.2",
+      "type": "object",
+      "required": [
+        "specVersion",
+        "success",
+        "data",
+        "presentation"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "specVersion": {
+          "const": "1.2"
+        },
+        "success": {
+          "type": "boolean"
+        },
+        "data": {
+          "$ref": "#/$defs/data"
+        },
+        "summary": {
+          "$ref": "#/$defs/summary"
+        },
+        "presentation": {
+          "$ref": "#/$defs/presentationV12"
+        },
+        "resultMeta": {
+          "$ref": "#/$defs/resultMeta"
+        },
+        "error": {
+          "$ref": "#/$defs/error"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "success": {
+                "const": true
+              }
+            },
+            "required": [
+              "success"
+            ]
+          },
+          "then": {
+            "not": {
+              "required": [
+                "error"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "success": {
+                "const": false
+              }
+            },
+            "required": [
+              "success"
+            ]
+          },
+          "then": {
+            "required": [
+              "error"
+            ],
+            "properties": {
+              "data": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "presentationV12": {
+      "title": "PresentationHint 1.2",
+      "type": "object",
+      "required": [
+        "mode",
+        "views"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "NONE",
+            "RECOMMENDED",
+            "REQUIRED"
+          ],
+          "description": "枚举在线路上始终使用大写。"
+        },
+        "views": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/viewHintV12"
+          },
+          "maxItems": 5
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "NONE"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "views": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "enum": [
+                  "RECOMMENDED",
+                  "REQUIRED"
+                ]
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "views": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "viewHintV12": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/chartView"
+        },
+        {
+          "$ref": "#/$defs/tableView"
+        },
+        {
+          "$ref": "#/$defs/timelineView"
+        },
+        {
+          "$ref": "#/$defs/relationGraphView"
+        },
+        {
+          "$ref": "#/$defs/metricView"
+        },
+        {
+          "$ref": "#/$defs/entityCardView"
+        },
+        {
+          "$ref": "#/$defs/treeView"
+        },
+        {
+          "$ref": "#/$defs/heatmapView"
+        },
+        {
+          "$ref": "#/$defs/relationshipPathView"
+        },
+        {
+          "$ref": "#/$defs/evidenceChainView"
+        }
+      ]
+    },
+    "metricMapping": {
+      "type": "object",
+      "required": [
+        "label",
+        "value"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "value": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "unit": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "change": {
+          "$ref": "#/$defs/fieldName"
+        }
+      }
+    },
+    "metricOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "showChange": {
+          "type": "boolean"
+        }
+      }
+    },
+    "metricView": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "subType",
+        "mapping"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/viewId"
+        },
+        "type": {
+          "const": "metric"
+        },
+        "subType": {
+          "const": "single"
+        },
+        "title": {
+          "$ref": "#/$defs/title"
+        },
+        "description": {
+          "$ref": "#/$defs/description"
+        },
+        "mapping": {
+          "$ref": "#/$defs/metricMapping"
+        },
+        "options": {
+          "$ref": "#/$defs/metricOptions"
+        },
+        "priority": {
+          "$ref": "#/$defs/priority"
+        },
+        "drillDown": {
+          "$ref": "#/$defs/drillDown"
+        }
+      }
+    },
+    "entityCardMapping": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "name": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "kind": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "summary": {
+          "$ref": "#/$defs/fieldName"
+        }
+      }
+    },
+    "entityCardOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "showSummary": {
+          "type": "boolean"
+        }
+      }
+    },
+    "entityCardView": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "subType",
+        "mapping"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/viewId"
+        },
+        "type": {
+          "const": "entity_card"
+        },
+        "subType": {
+          "const": "standard"
+        },
+        "title": {
+          "$ref": "#/$defs/title"
+        },
+        "description": {
+          "$ref": "#/$defs/description"
+        },
+        "mapping": {
+          "$ref": "#/$defs/entityCardMapping"
+        },
+        "options": {
+          "$ref": "#/$defs/entityCardOptions"
+        },
+        "priority": {
+          "$ref": "#/$defs/priority"
+        },
+        "drillDown": {
+          "$ref": "#/$defs/drillDown"
+        }
+      }
+    },
+    "treeMapping": {
+      "type": "object",
+      "required": [
+        "id",
+        "parentId",
+        "label"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "parentId": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "label": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "hasChildren": {
+          "$ref": "#/$defs/fieldName"
+        }
+      }
+    },
+    "treeOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        }
+      }
+    },
+    "treeView": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "subType",
+        "mapping"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/viewId"
+        },
+        "type": {
+          "const": "tree"
+        },
+        "subType": {
+          "const": "hierarchy"
+        },
+        "title": {
+          "$ref": "#/$defs/title"
+        },
+        "description": {
+          "$ref": "#/$defs/description"
+        },
+        "mapping": {
+          "$ref": "#/$defs/treeMapping"
+        },
+        "options": {
+          "$ref": "#/$defs/treeOptions"
+        },
+        "priority": {
+          "$ref": "#/$defs/priority"
+        },
+        "drillDown": {
+          "$ref": "#/$defs/drillDown"
+        }
+      }
+    },
+    "heatmapMapping": {
+      "type": "object",
+      "required": [
+        "x",
+        "y",
+        "value"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "y": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "value": {
+          "$ref": "#/$defs/fieldName"
+        }
+      }
+    },
+    "heatmapOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "showLabels": {
+          "type": "boolean"
+        }
+      }
+    },
+    "heatmapView": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "subType",
+        "mapping"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/viewId"
+        },
+        "type": {
+          "const": "heatmap"
+        },
+        "subType": {
+          "const": "matrix"
+        },
+        "title": {
+          "$ref": "#/$defs/title"
+        },
+        "description": {
+          "$ref": "#/$defs/description"
+        },
+        "mapping": {
+          "$ref": "#/$defs/heatmapMapping"
+        },
+        "options": {
+          "$ref": "#/$defs/heatmapOptions"
+        },
+        "priority": {
+          "$ref": "#/$defs/priority"
+        },
+        "drillDown": {
+          "$ref": "#/$defs/drillDown"
+        }
+      }
+    },
+    "relationshipPathMapping": {
+      "type": "object",
+      "required": [
+        "step",
+        "source",
+        "target"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "step": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "source": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "target": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "label": {
+          "$ref": "#/$defs/fieldName"
+        }
+      }
+    },
+    "relationshipPathOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "showLabels": {
+          "type": "boolean"
+        }
+      }
+    },
+    "relationshipPathView": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "subType",
+        "mapping"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/viewId"
+        },
+        "type": {
+          "const": "relationship_path"
+        },
+        "subType": {
+          "const": "ordered"
+        },
+        "title": {
+          "$ref": "#/$defs/title"
+        },
+        "description": {
+          "$ref": "#/$defs/description"
+        },
+        "mapping": {
+          "$ref": "#/$defs/relationshipPathMapping"
+        },
+        "options": {
+          "$ref": "#/$defs/relationshipPathOptions"
+        },
+        "priority": {
+          "$ref": "#/$defs/priority"
+        },
+        "drillDown": {
+          "$ref": "#/$defs/drillDown"
+        }
+      }
+    },
+    "evidenceChainMapping": {
+      "type": "object",
+      "required": [
+        "step",
+        "id",
+        "title",
+        "source"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "step": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "id": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "title": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "source": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "summary": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "evidenceRef": {
+          "$ref": "#/$defs/fieldName"
+        }
+      }
+    },
+    "evidenceChainOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "showSource": {
+          "type": "boolean"
+        }
+      }
+    },
+    "evidenceChainView": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "subType",
+        "mapping"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/viewId"
+        },
+        "type": {
+          "const": "evidence_chain"
+        },
+        "subType": {
+          "const": "ordered"
+        },
+        "title": {
+          "$ref": "#/$defs/title"
+        },
+        "description": {
+          "$ref": "#/$defs/description"
+        },
+        "mapping": {
+          "$ref": "#/$defs/evidenceChainMapping"
+        },
+        "options": {
+          "$ref": "#/$defs/evidenceChainOptions"
+        },
+        "priority": {
+          "$ref": "#/$defs/priority"
+        },
+        "drillDown": {
+          "$ref": "#/$defs/drillDown"
+        }
+      }
+    }
   },
   "examples": [
     {
       "specVersion": "1.1",
       "success": true,
       "data": [
-        { "city": "北京", "count": 18 },
-        { "city": "上海", "count": 11 }
+        {
+          "city": "北京",
+          "count": 18
+        },
+        {
+          "city": "上海",
+          "count": 11
+        }
       ],
       "summary": {
         "count": 2,
         "total": 2,
         "truncated": false,
         "description": "按城市统计活动次数",
-        "highlights": ["北京18次", "上海11次"]
+        "highlights": [
+          "北京18次",
+          "上海11次"
+        ]
       },
       "presentation": {
         "mode": "RECOMMENDED",
@@ -411,8 +1496,14 @@
             "type": "chart",
             "subType": "bar",
             "title": "各城市活动次数",
-            "mapping": { "category": "city", "value": "count" },
-            "options": { "order": "desc", "showLegend": false },
+            "mapping": {
+              "category": "city",
+              "value": "count"
+            },
+            "options": {
+              "order": "desc",
+              "showLegend": false
+            },
             "priority": 10
           }
         ]
@@ -422,7 +1513,10 @@
       "specVersion": "1.1",
       "success": false,
       "data": null,
-      "presentation": { "mode": "NONE", "views": [] },
+      "presentation": {
+        "mode": "NONE",
+        "views": []
+      },
       "error": {
         "code": "ENTITY_NOT_FOUND",
         "message": "未找到指定人员",

@@ -2,6 +2,7 @@ package com.ac.mcp.contract.presentation;
 
 import java.util.List;
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * 经校验的 Rich UI Surface 描述，具体传输编码由适配层决定。
@@ -11,7 +12,8 @@ public record SurfaceSpec(
         String profileVersion,
         String surfaceId,
         String dataRef,
-        List<ComponentSpec> components) {
+        List<ComponentSpec> components,
+        @JsonInclude(JsonInclude.Include.NON_DEFAULT) int revision) {
 
     public static final String PROFILE = "ac.rich-ui";
     public static final String PROFILE_VERSION = "1.0";
@@ -23,8 +25,11 @@ public record SurfaceSpec(
         if (!PROFILE.equals(profile)) {
             throw new IllegalArgumentException("Unsupported profile: " + profile);
         }
-        if (!PROFILE_VERSION.equals(profileVersion)) {
+        if (!PROFILE_VERSION.equals(profileVersion) && !"1.1".equals(profileVersion)) {
             throw new IllegalArgumentException("Unsupported profileVersion: " + profileVersion);
+        }
+        if ("1.1".equals(profileVersion) && revision < 1) {
+            throw new IllegalArgumentException("Profile 1.1 requires a positive revision");
         }
         surfaceId = requireText(surfaceId, "surfaceId");
         dataRef = requireText(dataRef, "dataRef");
@@ -38,7 +43,12 @@ public record SurfaceSpec(
      * 使用当前 Profile 及版本创建 Surface 描述。
      */
     public SurfaceSpec(String surfaceId, String dataRef, List<ComponentSpec> components) {
-        this(PROFILE, PROFILE_VERSION, surfaceId, dataRef, components);
+        this(PROFILE, PROFILE_VERSION, surfaceId, dataRef, components, 0);
+    }
+
+    public SurfaceSpec(String profile, String profileVersion, String surfaceId,
+                       String dataRef, List<ComponentSpec> components) {
+        this(profile, profileVersion, surfaceId, dataRef, components, 0);
     }
 
     private static String requireText(String value, String name) {

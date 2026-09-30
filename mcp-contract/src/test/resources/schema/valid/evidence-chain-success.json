@@ -1,0 +1,57 @@
+{
+  "specVersion": "1.2",
+  "success": true,
+  "data": [
+    {
+      "step": 1,
+      "evidenceId": "ev-001",
+      "title": "登记记录",
+      "source": "mock-registry",
+      "summary": "测试用登记摘要",
+      "evidenceRef": "ev-001"
+    },
+    {
+      "step": 2,
+      "evidenceId": "ev-002",
+      "title": "活动记录",
+      "source": "mock-activity",
+      "summary": "测试用活动摘要",
+      "evidenceRef": "ev-002"
+    }
+  ],
+  "summary": {
+    "count": 2,
+    "total": 2,
+    "truncated": false,
+    "description": "phase-two fixture",
+    "highlights": []
+  },
+  "presentation": {
+    "mode": "RECOMMENDED",
+    "views": [
+      {
+        "id": "person-evidence",
+        "type": "evidence_chain",
+        "subType": "ordered",
+        "title": "证据链",
+        "mapping": {
+          "step": "step",
+          "id": "evidenceId",
+          "title": "title",
+          "source": "source",
+          "summary": "summary",
+          "evidenceRef": "evidenceRef"
+        },
+        "options": {
+          "limit": 50,
+          "showSource": true
+        }
+      }
+    ]
+  },
+  "resultMeta": {
+    "requestId": "phase-two-fixture",
+    "generatedAt": "2026-09-29T00:00:00Z",
+    "attributes": {}
+  }
+}

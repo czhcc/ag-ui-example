@@ -32,8 +32,12 @@ function buildDrillQuestion(categoryValue: unknown): DrillDownEvent | null {
         ...row,
         ...(props.result.resultMeta?.attributes ?? {}),
     }
-    const question = drillDown.value.promptTemplate.replace(/\{(\w+)\}/g,
-        (_, key: string) => String(context[key] ?? ''))
+    let missing = false
+    const question = drillDown.value.promptTemplate.replace(/\{(\w+)\}/g, (_, key: string) => {
+        if (context[key] == null || String(context[key]).trim() === '') { missing = true; return '' }
+        return String(context[key])
+    })
+    if (missing || !question.trim()) return null
     return {
         question,
         surfaceId: props.component.id,

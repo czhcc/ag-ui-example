@@ -61,6 +61,20 @@ public final class McpResults {
         return envelope(true, data, summary, presentation, null, attributes);
     }
 
+    /** Phase-two demo tools opt in to 1.2 without changing existing 1.1 producers. */
+    public static Map<String, Object> successV12(Object data, Map<String, Object> summary,
+                                                 Map<String, Object> presentation, Map<String, Object> attributes) {
+        var result = success(data, summary, presentation, attributes);
+        result.put("specVersion", "1.2");
+        return result;
+    }
+
+    public static Map<String, Object> failureV12(String code, String message) {
+        var result = failure(code, message, false);
+        result.put("specVersion", "1.2");
+        return result;
+    }
+
     public static Map<String, Object> summary(int count, int total, boolean truncated,
                                               String description, List<String> highlights) {
         var summary = new LinkedHashMap<String, Object>();

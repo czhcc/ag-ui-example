@@ -8,7 +8,6 @@ import com.ac.richui.core.result.ResultReference;
 /**
  * 校验请求的视图并生成与传输方式无关的 Surface。
  */
-@FunctionalInterface
 public interface PresentationService {
 
     /**
@@ -19,4 +18,10 @@ public interface PresentationService {
             AccessSubject subject,
             ResultReference resultReference,
             String viewId);
+
+    /** Replace a surface with a validated result from its creating run. */
+    default SurfaceSpec update(RunScope scope, AccessSubject subject, String surfaceId,
+                               ResultReference resultReference, String viewId) {
+        throw new UnsupportedOperationException("Surface update is not configured");
+    }
 }

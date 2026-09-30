@@ -122,6 +122,7 @@ export interface UiSurface {
     surfaceId: string
     dataRef: string
     components: SurfaceComponent[]
+    revision?: number
     threadId?: string
     runId?: string
     validationIssue?: SurfaceValidationIssue

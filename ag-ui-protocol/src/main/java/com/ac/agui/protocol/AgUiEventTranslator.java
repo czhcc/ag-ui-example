@@ -5,6 +5,8 @@ import com.ac.richui.core.event.RichRuntimeEvent;
 import com.ac.richui.core.event.CustomRuntimeEvent;
 import com.ac.richui.core.event.StandardRuntimeEvent;
 import com.ac.richui.core.event.SurfaceCreated;
+import com.ac.richui.core.event.SurfaceUpdated;
+import com.ac.richui.core.event.SurfaceUpdated;
 import com.agui.community.core.event.CustomEvent;
 import com.agui.community.core.event.Event;
 import com.agui.community.core.event.RunErrorEvent;
@@ -70,6 +72,14 @@ public final class AgUiEventTranslator {
                     created.surface().components().stream().map(component -> component.id()).toList());
             if (!emittedSurfaces.add(key)) return List.of();
             return List.of(new CustomEvent("ui.surface.create", created.surface(), epoch(created.timestamp()), null));
+        }
+        if (runtimeEvent instanceof SurfaceUpdated updated) {
+            return List.of(new CustomEvent("ui.surface.update", updated.surface(),
+                    epoch(updated.timestamp()), null));
+        }
+        if (runtimeEvent instanceof SurfaceUpdated updated) {
+            return List.of(new CustomEvent("ui.surface.update", updated.surface(),
+                    epoch(updated.timestamp()), null));
         }
         if (runtimeEvent instanceof CustomRuntimeEvent custom) {
             return List.of(new CustomEvent(

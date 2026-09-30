@@ -41,14 +41,17 @@ public final class AgentScopeUiRenderTool implements AgentTool {
             String viewId = required(param.getInput(), "viewId");
             var subject = AccessSubject.of(scope.tenantId(), scope.userId());
             var surface = presentations.render(scope, subject, new ResultReference(resultRef), viewId);
-            run.emit("ui.surface.create", Map.of(
-                    "profile", surface.profile(),
-                    "profileVersion", surface.profileVersion(),
-                    "surfaceId", surface.surfaceId(),
-                    "dataRef", surface.dataRef(),
-                    "components", surface.components()));
+            var payload = new java.util.LinkedHashMap<String, Object>();
+            payload.put("profile", surface.profile());
+            payload.put("profileVersion", surface.profileVersion());
+            payload.put("surfaceId", surface.surfaceId());
+            payload.put("dataRef", surface.dataRef());
+            payload.put("components", surface.components());
+            if (surface.revision() > 0) payload.put("revision", surface.revision());
+            run.emit("ui.surface.create", payload);
             return ToolResultBlock.text(
-                    "The validated UI surface was added to this run. Explain only the key conclusion.");
+                    "The validated UI surface was added to this run. surfaceId=" + surface.surfaceId()
+                            + ". Explain only the key conclusion.");
         });
     }
 

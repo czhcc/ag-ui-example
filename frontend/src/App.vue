@@ -33,10 +33,13 @@ let logSequence = 0
 
 sessionStorage.setItem('agent-thread-id', threadId.value)
 
-const identityHeaders = computed<Record<string, string>>(() => import.meta.env.DEV ? {
-  'X-Tenant-Id': import.meta.env.VITE_TENANT_ID || 'local-tenant',
-  'X-User-Id': import.meta.env.VITE_USER_ID || 'local-user',
-} : {})
+const identityHeaders = computed<Record<string, string>>(() => {
+  if (!import.meta.env.DEV) return {} as Record<string, string>
+  return {
+    'X-Tenant-Id': import.meta.env.VITE_TENANT_ID || 'local-tenant',
+    'X-User-Id': import.meta.env.VITE_USER_ID || 'local-user',
+  }
+})
 
 function pushLog(message: DisplayMessage, kind: RunLogEntry['kind'], title: string, detail?: string) {
   message.logs.push({
@@ -48,10 +51,10 @@ function pushLog(message: DisplayMessage, kind: RunLogEntry['kind'], title: stri
   })
 }
 
-async function send() {
-  const content = input.value.trim()
+async function send(contentOverride?: string) {
+  const content = (contentOverride ?? input.value).trim()
   if (!content || isSending.value) return
-  input.value = ''
+  if (contentOverride === undefined) input.value = ''
   errorMessage.value = ''
   const runId = `run-${createId()}`
   const user: DisplayMessage = {
@@ -214,7 +217,7 @@ onBeforeUnmount(() => controller.value?.abort())
               <div v-if="part.kind === 'text'" :class="['text-part', {failed: message.failed}]">
                 {{ part.text }}<i v-if="message.streaming && index === message.parts.length - 1" class="cursor"></i>
               </div>
-              <UiSurfacePart v-else :surface="part.surface" @drill-down="(item) => input = item.question"/>
+              <UiSurfacePart v-else :surface="part.surface" @drill-down="(item) => { void send(item.question) }"/>
             </template>
             <div v-if="message.role === 'assistant' && message.runId !== 'welcome'" class="message-actions">
               <RunLogPanel v-if="message.logs.length" :entries="message.logs"/>
@@ -229,7 +232,7 @@ onBeforeUnmount(() => controller.value?.abort())
         <div class="composer">
           <textarea v-model="input" rows="1" maxlength="8000" :disabled="isSending"
                     placeholder="输入问题；Enter 发送，Shift + Enter 换行" @keydown="onKeydown"></textarea>
-          <button type="button" :disabled="!input.trim() || isSending" @click="send">
+          <button type="button" :disabled="!input.trim() || isSending" @click="send()">
             {{ isSending ? '执行中' : '发送' }}
           </button>
         </div>

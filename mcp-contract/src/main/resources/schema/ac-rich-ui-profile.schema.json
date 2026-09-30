@@ -4,189 +4,394 @@
   "title": "ac.rich-ui AG-UI Custom Event Profile",
   "description": "AG-UI CUSTOM 事件中的 ac.rich-ui/1.0 payload。Schema 只约束项目扩展字段，并允许标准 AG-UI envelope 增加其他字段。",
   "oneOf": [
-    { "$ref": "#/$defs/surfaceCreateEvent" },
-    { "$ref": "#/$defs/surfaceUpdateEvent" },
-    { "$ref": "#/$defs/surfaceRemoveEvent" }
+    {
+      "$ref": "#/$defs/surfaceCreateEvent"
+    },
+    {
+      "$ref": "#/$defs/surfaceUpdateEvent"
+    },
+    {
+      "$ref": "#/$defs/surfaceRemoveEvent"
+    },
+    {
+      "$ref": "#/$defs/surfaceCreateEventV11"
+    },
+    {
+      "$ref": "#/$defs/surfaceUpdateEventV11"
+    },
+    {
+      "$ref": "#/$defs/surfaceRemoveEventV11"
+    }
   ],
   "$defs": {
     "surfaceCreateEvent": {
       "type": "object",
-      "required": ["type", "name", "value"],
+      "required": [
+        "type",
+        "name",
+        "value"
+      ],
       "properties": {
-        "type": { "const": "CUSTOM" },
-        "name": { "const": "ui.surface.create" },
-        "value": { "$ref": "#/$defs/createValue" }
+        "type": {
+          "const": "CUSTOM"
+        },
+        "name": {
+          "const": "ui.surface.create"
+        },
+        "value": {
+          "$ref": "#/$defs/createValue"
+        }
       }
     },
     "surfaceUpdateEvent": {
       "type": "object",
-      "required": ["type", "name", "value"],
+      "required": [
+        "type",
+        "name",
+        "value"
+      ],
       "properties": {
-        "type": { "const": "CUSTOM" },
-        "name": { "const": "ui.surface.update" },
-        "value": { "$ref": "#/$defs/updateValue" }
+        "type": {
+          "const": "CUSTOM"
+        },
+        "name": {
+          "const": "ui.surface.update"
+        },
+        "value": {
+          "$ref": "#/$defs/updateValue"
+        }
       }
     },
     "surfaceRemoveEvent": {
       "type": "object",
-      "required": ["type", "name", "value"],
+      "required": [
+        "type",
+        "name",
+        "value"
+      ],
       "properties": {
-        "type": { "const": "CUSTOM" },
-        "name": { "const": "ui.surface.remove" },
-        "value": { "$ref": "#/$defs/removeValue" }
+        "type": {
+          "const": "CUSTOM"
+        },
+        "name": {
+          "const": "ui.surface.remove"
+        },
+        "value": {
+          "$ref": "#/$defs/removeValue"
+        }
       }
     },
     "createValue": {
       "type": "object",
-      "required": ["profile", "profileVersion", "surfaceId", "dataRef", "components"],
+      "required": [
+        "profile",
+        "profileVersion",
+        "surfaceId",
+        "dataRef",
+        "components"
+      ],
       "additionalProperties": false,
       "properties": {
-        "profile": { "const": "ac.rich-ui" },
-        "profileVersion": { "const": "1.0" },
-        "surfaceId": { "$ref": "#/$defs/id" },
-        "dataRef": { "$ref": "#/$defs/id" },
+        "profile": {
+          "const": "ac.rich-ui"
+        },
+        "profileVersion": {
+          "const": "1.0"
+        },
+        "surfaceId": {
+          "$ref": "#/$defs/id"
+        },
+        "dataRef": {
+          "$ref": "#/$defs/id"
+        },
         "components": {
           "type": "array",
           "minItems": 1,
           "maxItems": 10,
-          "items": { "$ref": "#/$defs/component" }
+          "items": {
+            "$ref": "#/$defs/component"
+          }
         }
       }
     },
     "updateValue": {
       "type": "object",
-      "required": ["profile", "profileVersion", "surfaceId"],
+      "required": [
+        "profile",
+        "profileVersion",
+        "surfaceId"
+      ],
       "additionalProperties": false,
       "properties": {
-        "profile": { "const": "ac.rich-ui" },
-        "profileVersion": { "const": "1.0" },
-        "surfaceId": { "$ref": "#/$defs/id" },
-        "dataRef": { "$ref": "#/$defs/id" },
+        "profile": {
+          "const": "ac.rich-ui"
+        },
+        "profileVersion": {
+          "const": "1.0"
+        },
+        "surfaceId": {
+          "$ref": "#/$defs/id"
+        },
+        "dataRef": {
+          "$ref": "#/$defs/id"
+        },
         "components": {
           "type": "array",
           "minItems": 1,
           "maxItems": 10,
-          "items": { "$ref": "#/$defs/component" }
+          "items": {
+            "$ref": "#/$defs/component"
+          }
         }
       },
       "anyOf": [
-        { "required": ["dataRef"] },
-        { "required": ["components"] }
+        {
+          "required": [
+            "dataRef"
+          ]
+        },
+        {
+          "required": [
+            "components"
+          ]
+        }
       ]
     },
     "removeValue": {
       "type": "object",
-      "required": ["profile", "profileVersion", "surfaceId"],
+      "required": [
+        "profile",
+        "profileVersion",
+        "surfaceId"
+      ],
       "additionalProperties": false,
       "properties": {
-        "profile": { "const": "ac.rich-ui" },
-        "profileVersion": { "const": "1.0" },
-        "surfaceId": { "$ref": "#/$defs/id" }
+        "profile": {
+          "const": "ac.rich-ui"
+        },
+        "profileVersion": {
+          "const": "1.0"
+        },
+        "surfaceId": {
+          "$ref": "#/$defs/id"
+        }
       }
     },
     "component": {
       "oneOf": [
-        { "$ref": "#/$defs/chartComponent" },
-        { "$ref": "#/$defs/tableComponent" },
-        { "$ref": "#/$defs/timelineComponent" },
-        { "$ref": "#/$defs/relationGraphComponent" }
+        {
+          "$ref": "#/$defs/chartComponent"
+        },
+        {
+          "$ref": "#/$defs/tableComponent"
+        },
+        {
+          "$ref": "#/$defs/timelineComponent"
+        },
+        {
+          "$ref": "#/$defs/relationGraphComponent"
+        }
       ]
     },
     "chartComponent": {
       "type": "object",
-      "required": ["id", "type", "props"],
+      "required": [
+        "id",
+        "type",
+        "props"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "#/$defs/id" },
-        "type": { "const": "Chart" },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "const": "Chart"
+        },
         "props": {
           "type": "object",
-          "required": ["subType", "encoding"],
+          "required": [
+            "subType",
+            "encoding"
+          ],
           "additionalProperties": false,
           "properties": {
-            "subType": { "enum": ["bar", "line", "area", "pie", "scatter"] },
-            "title": { "$ref": "#/$defs/title" },
-            "description": { "$ref": "#/$defs/description" },
-            "encoding": { "$ref": "#/$defs/chartEncoding" },
-            "options": { "$ref": "#/$defs/chartOptions" },
-            "drillDown": { "$ref": "#/$defs/drillDown" }
+            "subType": {
+              "enum": [
+                "bar",
+                "line",
+                "area",
+                "pie",
+                "scatter"
+              ]
+            },
+            "title": {
+              "$ref": "#/$defs/title"
+            },
+            "description": {
+              "$ref": "#/$defs/description"
+            },
+            "encoding": {
+              "$ref": "#/$defs/chartEncoding"
+            },
+            "options": {
+              "$ref": "#/$defs/chartOptions"
+            },
+            "drillDown": {
+              "$ref": "#/$defs/drillDown"
+            }
           }
         }
       }
     },
     "tableComponent": {
       "type": "object",
-      "required": ["id", "type", "props"],
+      "required": [
+        "id",
+        "type",
+        "props"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "#/$defs/id" },
-        "type": { "const": "Table" },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "const": "Table"
+        },
         "props": {
           "type": "object",
-          "required": ["encoding"],
+          "required": [
+            "encoding"
+          ],
           "additionalProperties": false,
           "properties": {
-            "subType": { "const": "standard" },
-            "title": { "$ref": "#/$defs/title" },
-            "description": { "$ref": "#/$defs/description" },
-            "encoding": { "$ref": "#/$defs/tableEncoding" },
-            "options": { "$ref": "#/$defs/tableOptions" },
-            "drillDown": { "$ref": "#/$defs/drillDown" }
+            "subType": {
+              "const": "standard"
+            },
+            "title": {
+              "$ref": "#/$defs/title"
+            },
+            "description": {
+              "$ref": "#/$defs/description"
+            },
+            "encoding": {
+              "$ref": "#/$defs/tableEncoding"
+            },
+            "options": {
+              "$ref": "#/$defs/tableOptions"
+            },
+            "drillDown": {
+              "$ref": "#/$defs/drillDown"
+            }
           }
         }
       }
     },
     "timelineComponent": {
       "type": "object",
-      "required": ["id", "type", "props"],
+      "required": [
+        "id",
+        "type",
+        "props"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "#/$defs/id" },
-        "type": { "const": "Timeline" },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "const": "Timeline"
+        },
         "props": {
           "type": "object",
-          "required": ["subType", "encoding"],
+          "required": [
+            "subType",
+            "encoding"
+          ],
           "additionalProperties": false,
           "properties": {
-            "subType": { "const": "vertical" },
-            "title": { "$ref": "#/$defs/title" },
-            "description": { "$ref": "#/$defs/description" },
-            "encoding": { "$ref": "#/$defs/timelineEncoding" },
-            "options": { "$ref": "#/$defs/timelineOptions" },
-            "drillDown": { "$ref": "#/$defs/drillDown" }
+            "subType": {
+              "const": "vertical"
+            },
+            "title": {
+              "$ref": "#/$defs/title"
+            },
+            "description": {
+              "$ref": "#/$defs/description"
+            },
+            "encoding": {
+              "$ref": "#/$defs/timelineEncoding"
+            },
+            "options": {
+              "$ref": "#/$defs/timelineOptions"
+            },
+            "drillDown": {
+              "$ref": "#/$defs/drillDown"
+            }
           }
         }
       }
     },
     "relationGraphComponent": {
       "type": "object",
-      "required": ["id", "type", "props"],
+      "required": [
+        "id",
+        "type",
+        "props"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "#/$defs/id" },
-        "type": { "const": "RelationGraph" },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "const": "RelationGraph"
+        },
         "props": {
           "type": "object",
-          "required": ["subType", "encoding"],
+          "required": [
+            "subType",
+            "encoding"
+          ],
           "additionalProperties": false,
           "properties": {
-            "subType": { "const": "network" },
-            "title": { "$ref": "#/$defs/title" },
-            "description": { "$ref": "#/$defs/description" },
-            "encoding": { "$ref": "#/$defs/relationGraphEncoding" },
-            "options": { "$ref": "#/$defs/relationGraphOptions" },
-            "drillDown": { "$ref": "#/$defs/drillDown" }
+            "subType": {
+              "const": "network"
+            },
+            "title": {
+              "$ref": "#/$defs/title"
+            },
+            "description": {
+              "$ref": "#/$defs/description"
+            },
+            "encoding": {
+              "$ref": "#/$defs/relationGraphEncoding"
+            },
+            "options": {
+              "$ref": "#/$defs/relationGraphOptions"
+            },
+            "drillDown": {
+              "$ref": "#/$defs/drillDown"
+            }
           }
         }
       }
     },
     "chartEncoding": {
       "type": "object",
-      "required": ["category", "value"],
+      "required": [
+        "category",
+        "value"
+      ],
       "additionalProperties": false,
       "properties": {
-        "category": { "$ref": "#/$defs/fieldName" },
-        "value": { "$ref": "#/$defs/fieldName" }
+        "category": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "value": {
+          "$ref": "#/$defs/fieldName"
+        }
       }
     },
     "tableEncoding": {
@@ -199,11 +404,20 @@
           "maxItems": 50,
           "items": {
             "type": "object",
-            "required": ["field", "label"],
+            "required": [
+              "field",
+              "label"
+            ],
             "additionalProperties": false,
             "properties": {
-              "field": { "$ref": "#/$defs/fieldName" },
-              "label": { "type": "string", "minLength": 1, "maxLength": 100 }
+              "field": {
+                "$ref": "#/$defs/fieldName"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              }
             }
           }
         }
@@ -211,78 +425,833 @@
     },
     "timelineEncoding": {
       "type": "object",
-      "required": ["time", "title"],
+      "required": [
+        "time",
+        "title"
+      ],
       "additionalProperties": false,
       "properties": {
-        "time": { "$ref": "#/$defs/fieldName" },
-        "title": { "$ref": "#/$defs/fieldName" },
-        "description": { "$ref": "#/$defs/fieldName" },
-        "group": { "$ref": "#/$defs/fieldName" }
+        "time": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "title": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "description": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "group": {
+          "$ref": "#/$defs/fieldName"
+        }
       }
     },
     "relationGraphEncoding": {
       "type": "object",
-      "required": ["source", "target"],
+      "required": [
+        "source",
+        "target"
+      ],
       "additionalProperties": false,
       "properties": {
-        "source": { "$ref": "#/$defs/fieldName" },
-        "target": { "$ref": "#/$defs/fieldName" },
-        "label": { "$ref": "#/$defs/fieldName" },
-        "sourceLabel": { "$ref": "#/$defs/fieldName" }
+        "source": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "target": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "label": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "sourceLabel": {
+          "$ref": "#/$defs/fieldName"
+        }
       }
     },
     "chartOptions": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "orientation": { "enum": ["vertical", "horizontal"] },
-        "order": { "enum": ["none", "asc", "desc"] },
-        "limit": { "type": "integer", "minimum": 1, "maximum": 1000 },
-        "showLegend": { "type": "boolean" },
-        "showLabels": { "type": "boolean" }
+        "orientation": {
+          "enum": [
+            "vertical",
+            "horizontal"
+          ]
+        },
+        "order": {
+          "enum": [
+            "none",
+            "asc",
+            "desc"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "showLegend": {
+          "type": "boolean"
+        },
+        "showLabels": {
+          "type": "boolean"
+        }
       }
     },
     "tableOptions": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "limit": { "type": "integer", "minimum": 1, "maximum": 1000 },
-        "sort": { "$ref": "#/$defs/fieldName" },
-        "order": { "enum": ["asc", "desc"] }
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "sort": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "order": {
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        }
       }
     },
     "timelineOptions": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "limit": { "type": "integer", "minimum": 1, "maximum": 500 },
-        "order": { "enum": ["asc", "desc"] },
-        "group": { "type": "boolean" }
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        },
+        "order": {
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        },
+        "group": {
+          "type": "boolean"
+        }
       }
     },
     "relationGraphOptions": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "limit": { "type": "integer", "minimum": 1, "maximum": 1000 },
-        "showLabels": { "type": "boolean" }
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "showLabels": {
+          "type": "boolean"
+        }
       }
     },
     "drillDown": {
       "type": "object",
-      "required": ["enabled", "dimension", "promptTemplate"],
+      "required": [
+        "enabled",
+        "dimension",
+        "promptTemplate"
+      ],
       "additionalProperties": false,
       "properties": {
-        "enabled": { "const": true },
-        "dimension": { "$ref": "#/$defs/fieldName" },
-        "label": { "type": "string", "maxLength": 100 },
-        "promptTemplate": { "type": "string", "minLength": 1, "maxLength": 2000 }
+        "enabled": {
+          "const": true
+        },
+        "dimension": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "promptTemplate": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
       }
     },
-    "id": { "type": "string", "minLength": 1, "maxLength": 200 },
-    "fieldName": { "type": "string", "minLength": 1, "maxLength": 200 },
-    "title": { "type": "string", "maxLength": 200 },
-    "description": { "type": "string", "maxLength": 2000 }
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "fieldName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "surfaceCreateEventV11": {
+      "type": "object",
+      "required": [
+        "type",
+        "name",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "CUSTOM"
+        },
+        "name": {
+          "const": "ui.surface.create"
+        },
+        "value": {
+          "$ref": "#/$defs/createValueV11"
+        }
+      }
+    },
+    "createValueV11": {
+      "type": "object",
+      "required": [
+        "profile",
+        "profileVersion",
+        "surfaceId",
+        "dataRef",
+        "components",
+        "revision"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "profile": {
+          "const": "ac.rich-ui"
+        },
+        "profileVersion": {
+          "const": "1.1"
+        },
+        "surfaceId": {
+          "$ref": "#/$defs/id"
+        },
+        "dataRef": {
+          "$ref": "#/$defs/id"
+        },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "$ref": "#/$defs/componentV11"
+          }
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "surfaceUpdateEventV11": {
+      "type": "object",
+      "required": [
+        "type",
+        "name",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "CUSTOM"
+        },
+        "name": {
+          "const": "ui.surface.update"
+        },
+        "value": {
+          "$ref": "#/$defs/updateValueV11"
+        }
+      }
+    },
+    "updateValueV11": {
+      "type": "object",
+      "required": [
+        "profile",
+        "profileVersion",
+        "surfaceId",
+        "revision"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "profile": {
+          "const": "ac.rich-ui"
+        },
+        "profileVersion": {
+          "const": "1.1"
+        },
+        "surfaceId": {
+          "$ref": "#/$defs/id"
+        },
+        "dataRef": {
+          "$ref": "#/$defs/id"
+        },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "$ref": "#/$defs/componentV11"
+          }
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "dataRef"
+          ]
+        },
+        {
+          "required": [
+            "components"
+          ]
+        }
+      ]
+    },
+    "surfaceRemoveEventV11": {
+      "type": "object",
+      "required": [
+        "type",
+        "name",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "CUSTOM"
+        },
+        "name": {
+          "const": "ui.surface.remove"
+        },
+        "value": {
+          "$ref": "#/$defs/removeValueV11"
+        }
+      }
+    },
+    "removeValueV11": {
+      "type": "object",
+      "required": [
+        "profile",
+        "profileVersion",
+        "surfaceId",
+        "revision"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "profile": {
+          "const": "ac.rich-ui"
+        },
+        "profileVersion": {
+          "const": "1.1"
+        },
+        "surfaceId": {
+          "$ref": "#/$defs/id"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "componentV11": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/chartComponent"
+        },
+        {
+          "$ref": "#/$defs/tableComponent"
+        },
+        {
+          "$ref": "#/$defs/timelineComponent"
+        },
+        {
+          "$ref": "#/$defs/relationGraphComponent"
+        },
+        {
+          "$ref": "#/$defs/metricComponent"
+        },
+        {
+          "$ref": "#/$defs/entityCardComponent"
+        },
+        {
+          "$ref": "#/$defs/treeComponent"
+        },
+        {
+          "$ref": "#/$defs/heatmapComponent"
+        },
+        {
+          "$ref": "#/$defs/relationshipPathComponent"
+        },
+        {
+          "$ref": "#/$defs/evidenceChainComponent"
+        }
+      ]
+    },
+    "metricComponent": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "props"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "const": "Metric"
+        },
+        "props": {
+          "type": "object",
+          "required": [
+            "subType",
+            "encoding"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "subType": {
+              "const": "single"
+            },
+            "title": {
+              "$ref": "#/$defs/title"
+            },
+            "description": {
+              "$ref": "#/$defs/description"
+            },
+            "encoding": {
+              "type": "object",
+              "required": [
+                "label",
+                "value"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "label": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "value": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "unit": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "change": {
+                  "$ref": "#/$defs/fieldName"
+                }
+              }
+            },
+            "options": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 12
+                },
+                "showChange": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "drillDown": {
+              "$ref": "#/$defs/drillDown"
+            }
+          }
+        }
+      }
+    },
+    "entityCardComponent": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "props"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "const": "EntityCard"
+        },
+        "props": {
+          "type": "object",
+          "required": [
+            "subType",
+            "encoding"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "subType": {
+              "const": "standard"
+            },
+            "title": {
+              "$ref": "#/$defs/title"
+            },
+            "description": {
+              "$ref": "#/$defs/description"
+            },
+            "encoding": {
+              "type": "object",
+              "required": [
+                "id",
+                "name"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "name": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "kind": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "summary": {
+                  "$ref": "#/$defs/fieldName"
+                }
+              }
+            },
+            "options": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 50
+                },
+                "showSummary": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "drillDown": {
+              "$ref": "#/$defs/drillDown"
+            }
+          }
+        }
+      }
+    },
+    "treeComponent": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "props"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "const": "Tree"
+        },
+        "props": {
+          "type": "object",
+          "required": [
+            "subType",
+            "encoding"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "subType": {
+              "const": "hierarchy"
+            },
+            "title": {
+              "$ref": "#/$defs/title"
+            },
+            "description": {
+              "$ref": "#/$defs/description"
+            },
+            "encoding": {
+              "type": "object",
+              "required": [
+                "id",
+                "parentId",
+                "label"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "parentId": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "label": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "hasChildren": {
+                  "$ref": "#/$defs/fieldName"
+                }
+              }
+            },
+            "options": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 500
+                }
+              }
+            },
+            "drillDown": {
+              "$ref": "#/$defs/drillDown"
+            }
+          }
+        }
+      }
+    },
+    "heatmapComponent": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "props"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "const": "Heatmap"
+        },
+        "props": {
+          "type": "object",
+          "required": [
+            "subType",
+            "encoding"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "subType": {
+              "const": "matrix"
+            },
+            "title": {
+              "$ref": "#/$defs/title"
+            },
+            "description": {
+              "$ref": "#/$defs/description"
+            },
+            "encoding": {
+              "type": "object",
+              "required": [
+                "x",
+                "y",
+                "value"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "x": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "y": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "value": {
+                  "$ref": "#/$defs/fieldName"
+                }
+              }
+            },
+            "options": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000
+                },
+                "showLabels": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "drillDown": {
+              "$ref": "#/$defs/drillDown"
+            }
+          }
+        }
+      }
+    },
+    "relationshipPathComponent": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "props"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "const": "RelationshipPath"
+        },
+        "props": {
+          "type": "object",
+          "required": [
+            "subType",
+            "encoding"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "subType": {
+              "const": "ordered"
+            },
+            "title": {
+              "$ref": "#/$defs/title"
+            },
+            "description": {
+              "$ref": "#/$defs/description"
+            },
+            "encoding": {
+              "type": "object",
+              "required": [
+                "step",
+                "source",
+                "target"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "step": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "source": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "target": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "label": {
+                  "$ref": "#/$defs/fieldName"
+                }
+              }
+            },
+            "options": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 30
+                },
+                "showLabels": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "drillDown": {
+              "$ref": "#/$defs/drillDown"
+            }
+          }
+        }
+      }
+    },
+    "evidenceChainComponent": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "props"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "const": "EvidenceChain"
+        },
+        "props": {
+          "type": "object",
+          "required": [
+            "subType",
+            "encoding"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "subType": {
+              "const": "ordered"
+            },
+            "title": {
+              "$ref": "#/$defs/title"
+            },
+            "description": {
+              "$ref": "#/$defs/description"
+            },
+            "encoding": {
+              "type": "object",
+              "required": [
+                "step",
+                "id",
+                "title",
+                "source"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "step": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "id": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "title": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "source": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "summary": {
+                  "$ref": "#/$defs/fieldName"
+                },
+                "evidenceRef": {
+                  "$ref": "#/$defs/fieldName"
+                }
+              }
+            },
+            "options": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 50
+                },
+                "showSource": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "drillDown": {
+              "$ref": "#/$defs/drillDown"
+            }
+          }
+        }
+      }
+    }
   },
   "examples": [
     {
@@ -300,8 +1269,13 @@
             "props": {
               "subType": "bar",
               "title": "各城市活动次数",
-              "encoding": { "category": "city", "value": "count" },
-              "options": { "order": "desc" }
+              "encoding": {
+                "category": "city",
+                "value": "count"
+              },
+              "options": {
+                "order": "desc"
+              }
             }
           }
         ]

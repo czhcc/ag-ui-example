@@ -18,7 +18,8 @@ const renderer = computed(() => primary.value ? context.resolveRenderer(primary.
 const typeLabel = computed(() => primary.value?.props.title || primary.value?.type || 'UI surface')
 
 watch(
-    () => [props.surface.dataRef, props.surface.profile, props.surface.profileVersion, primary.value?.type],
+    () => [props.surface.dataRef, props.surface.profile, props.surface.profileVersion,
+        JSON.stringify(props.surface.components)],
     () => void load(),
     {immediate: true},
 )
@@ -38,14 +39,18 @@ async function load() {
     }
     status.value = 'loading'
     request = new AbortController()
+    const active = request
     try {
-        result.value = await context.fetchResult(props.surface.dataRef, {
+        const loaded = await context.fetchResult(props.surface.dataRef, {
             threadId: props.surface.threadId,
             runId: props.surface.runId,
-            signal: request.signal,
+            signal: active.signal,
         })
+        if (request !== active || active.signal.aborted) return
+        result.value = loaded
         status.value = 'ready'
     } catch (error) {
+        if (request !== active || active.signal.aborted) return
         if (error instanceof DOMException && error.name === 'AbortError') return
         if (error instanceof ResultUnavailableError) {
             status.value = error.reason === 'http-error' ? 'error' : error.reason
@@ -95,7 +100,7 @@ onBeforeUnmount(() => request?.abort())
         :is="renderer"
         :component="primary"
         :result="result"
-        @drill-down="(event: DrillDownEvent) => emit('drill-down', event)"
+        @drill-down="(event: DrillDownEvent) => emit('drill-down', {...event, surfaceId: surface.surfaceId})"
     />
   </section>
 </template>

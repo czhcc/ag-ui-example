@@ -1,0 +1,47 @@
+{
+  "specVersion": "1.2",
+  "success": true,
+  "data": [
+    {
+      "label": "活动总数",
+      "value": 16,
+      "unit": "次"
+    },
+    {
+      "label": "涉及城市",
+      "value": 3,
+      "unit": "个"
+    }
+  ],
+  "summary": {
+    "count": 2,
+    "total": 2,
+    "truncated": false,
+    "description": "phase-two fixture",
+    "highlights": []
+  },
+  "presentation": {
+    "mode": "RECOMMENDED",
+    "views": [
+      {
+        "id": "activity-metrics",
+        "type": "metric",
+        "subType": "single",
+        "title": "活动概览",
+        "mapping": {
+          "label": "label",
+          "value": "value",
+          "unit": "unit"
+        },
+        "options": {
+          "limit": 12
+        }
+      }
+    ]
+  },
+  "resultMeta": {
+    "requestId": "phase-two-fixture",
+    "generatedAt": "2026-09-29T00:00:00Z",
+    "attributes": {}
+  }
+}

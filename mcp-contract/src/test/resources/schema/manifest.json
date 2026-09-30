@@ -1,23 +1,144 @@
 {
   "cases": [
-    { "schema": "mcp-result", "path": "valid/chart-success.json", "valid": true },
-    { "schema": "mcp-result", "path": "valid/table-success.json", "valid": true },
-    { "schema": "mcp-result", "path": "valid/timeline-success.json", "valid": true },
-    { "schema": "mcp-result", "path": "valid/relation-graph-success.json", "valid": true },
-    { "schema": "mcp-result", "path": "valid/business-failure.json", "valid": true },
-    { "schema": "mcp-result", "path": "invalid/success-missing-data.json", "valid": false },
-    { "schema": "mcp-result", "path": "invalid/success-with-error.json", "valid": false },
-    { "schema": "mcp-result", "path": "invalid/failure-with-data.json", "valid": false },
-    { "schema": "mcp-result", "path": "invalid/none-with-view.json", "valid": false },
-    { "schema": "mcp-result", "path": "invalid/chart-illegal-subtype.json", "valid": false },
-    { "schema": "mcp-result", "path": "invalid/chart-unknown-option.json", "valid": false },
-    { "schema": "mcp-result", "path": "invalid/table-invalid-columns.json", "valid": false },
-    { "schema": "mcp-result", "path": "compatible/legacy-v1-chart.json", "valid": true },
-    { "schema": "mcp-result", "path": "compatible/legacy-v1-failure.json", "valid": true },
-    { "schema": "ac-rich-ui-profile", "path": "profile/valid-surface-create.json", "valid": true },
-    { "schema": "ac-rich-ui-profile", "path": "profile/valid-surface-update.json", "valid": true },
-    { "schema": "ac-rich-ui-profile", "path": "profile/valid-surface-remove.json", "valid": true },
-    { "schema": "ac-rich-ui-profile", "path": "profile/invalid-component-type.json", "valid": false },
-    { "schema": "ac-rich-ui-profile", "path": "profile/invalid-empty-update.json", "valid": false }
+    {
+      "schema": "mcp-result",
+      "path": "valid/chart-success.json",
+      "valid": true
+    },
+    {
+      "schema": "mcp-result",
+      "path": "valid/table-success.json",
+      "valid": true
+    },
+    {
+      "schema": "mcp-result",
+      "path": "valid/timeline-success.json",
+      "valid": true
+    },
+    {
+      "schema": "mcp-result",
+      "path": "valid/relation-graph-success.json",
+      "valid": true
+    },
+    {
+      "schema": "mcp-result",
+      "path": "valid/business-failure.json",
+      "valid": true
+    },
+    {
+      "schema": "mcp-result",
+      "path": "invalid/success-missing-data.json",
+      "valid": false
+    },
+    {
+      "schema": "mcp-result",
+      "path": "invalid/success-with-error.json",
+      "valid": false
+    },
+    {
+      "schema": "mcp-result",
+      "path": "invalid/failure-with-data.json",
+      "valid": false
+    },
+    {
+      "schema": "mcp-result",
+      "path": "invalid/none-with-view.json",
+      "valid": false
+    },
+    {
+      "schema": "mcp-result",
+      "path": "invalid/chart-illegal-subtype.json",
+      "valid": false
+    },
+    {
+      "schema": "mcp-result",
+      "path": "invalid/chart-unknown-option.json",
+      "valid": false
+    },
+    {
+      "schema": "mcp-result",
+      "path": "invalid/table-invalid-columns.json",
+      "valid": false
+    },
+    {
+      "schema": "mcp-result",
+      "path": "compatible/legacy-v1-chart.json",
+      "valid": true
+    },
+    {
+      "schema": "mcp-result",
+      "path": "compatible/legacy-v1-failure.json",
+      "valid": true
+    },
+    {
+      "schema": "ac-rich-ui-profile",
+      "path": "profile/valid-surface-create.json",
+      "valid": true
+    },
+    {
+      "schema": "ac-rich-ui-profile",
+      "path": "profile/valid-surface-update.json",
+      "valid": true
+    },
+    {
+      "schema": "ac-rich-ui-profile",
+      "path": "profile/valid-surface-remove.json",
+      "valid": true
+    },
+    {
+      "schema": "ac-rich-ui-profile",
+      "path": "profile/invalid-component-type.json",
+      "valid": false
+    },
+    {
+      "schema": "ac-rich-ui-profile",
+      "path": "profile/invalid-empty-update.json",
+      "valid": false
+    },
+    {
+      "schema": "mcp-result",
+      "path": "valid/metric-success.json",
+      "valid": true
+    },
+    {
+      "schema": "mcp-result",
+      "path": "valid/entity-card-success.json",
+      "valid": true
+    },
+    {
+      "schema": "mcp-result",
+      "path": "valid/tree-success.json",
+      "valid": true
+    },
+    {
+      "schema": "mcp-result",
+      "path": "valid/heatmap-success.json",
+      "valid": true
+    },
+    {
+      "schema": "mcp-result",
+      "path": "valid/relationship-path-success.json",
+      "valid": true
+    },
+    {
+      "schema": "mcp-result",
+      "path": "valid/evidence-chain-success.json",
+      "valid": true
+    },
+    {
+      "schema": "ac-rich-ui-profile",
+      "path": "profile/valid-phase-two-create.json",
+      "valid": true
+    },
+    {
+      "schema": "ac-rich-ui-profile",
+      "path": "profile/valid-phase-two-update.json",
+      "valid": true
+    },
+    {
+      "schema": "ac-rich-ui-profile",
+      "path": "profile/invalid-phase-two-revision.json",
+      "valid": false
+    }
   ]
 }

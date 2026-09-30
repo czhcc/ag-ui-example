@@ -13,6 +13,7 @@ import type {
 
 const PROFILE = 'ac.rich-ui'
 const PROFILE_VERSION = '1.0'
+const PROFILE_VERSION_NEXT = '1.1'
 const MAX_TEXT = 256_000
 const MAX_REASONING = 16_000
 const MAX_TOOL_ARGS = 8_000
@@ -166,20 +167,23 @@ export function validateSurface(value: unknown, threadId?: string, runId?: strin
     const profileVersion = stringValue(value.profileVersion) ?? ''
     const dataRef = stringValue(value.dataRef) ?? ''
     const componentValues = Array.isArray(value.components) ? value.components : []
-    const surfaceKeysValid = hasOnlyKeys(value, ['profile', 'profileVersion', 'surfaceId', 'dataRef', 'components'])
+    const surfaceKeysValid = hasOnlyKeys(value, ['profile', 'profileVersion', 'surfaceId', 'dataRef', 'components', 'revision'])
     const components = componentValues.slice(0, MAX_COMPONENTS)
         .map(parseComponent).filter((item): item is SurfaceComponent => item !== null)
     let issue: SurfaceValidationIssue | undefined
     if (profile !== PROFILE) {
         issue = {code: 'UNKNOWN_PROFILE', message: `Unsupported UI profile: ${profile || 'missing'}`}
-    } else if (profileVersion !== PROFILE_VERSION) {
+    } else if (profileVersion !== PROFILE_VERSION && profileVersion !== PROFILE_VERSION_NEXT) {
         issue = {
             code: 'UNSUPPORTED_PROFILE_VERSION',
             message: `Unsupported ${PROFILE} version: ${profileVersion || 'missing'}`,
         }
     } else if (!surfaceKeysValid || !validId(surfaceId) || !validId(dataRef) || components.length === 0
         || components.length !== componentValues.length
-        || components.some((component) => !validKnownComponent(component))) {
+        || (profileVersion === PROFILE_VERSION_NEXT
+            && (!Number.isInteger(value.revision) || (value.revision as number) < 1))
+        || (profileVersion === PROFILE_VERSION && hasOwn(value, 'revision'))
+        || components.some((component) => !validKnownComponent(component, profileVersion))) {
         issue = {code: 'INVALID_SURFACE', message: 'The UI surface does not match the ac.rich-ui schema'}
     }
     return {
@@ -188,6 +192,7 @@ export function validateSurface(value: unknown, threadId?: string, runId?: strin
         surfaceId,
         dataRef,
         components,
+        revision: profileVersion === PROFILE_VERSION_NEXT ? value.revision as number : undefined,
         threadId,
         runId,
         validationIssue: issue,
@@ -223,6 +228,10 @@ function reduceCustom(
             warn(state, 'Ignored ui.surface.create without a valid surfaceId')
             return
         }
+        if (state.surfaces[surface.surfaceId]) {
+            warn(state, `Ignored duplicate surface ${surface.surfaceId}`)
+            return
+        }
         state.surfaces[surface.surfaceId] = surface
         addOnce(run.surfaceIds, surface.surfaceId)
         const message = latestAssistantMessage(state, run.id) ?? ensureMessage(
@@ -232,7 +241,7 @@ function reduceCustom(
     }
     if (name === 'ui.surface.update') {
         if (!isObject(value)
-            || !hasOnlyKeys(value, ['profile', 'profileVersion', 'surfaceId', 'dataRef', 'components'])
+            || !hasOnlyKeys(value, ['profile', 'profileVersion', 'surfaceId', 'dataRef', 'components', 'revision'])
             || !stringValue(value.profile) || !stringValue(value.profileVersion)
             || !validId(value.surfaceId)
             || (!hasOwn(value, 'dataRef') && !hasOwn(value, 'components'))) {
@@ -245,12 +254,23 @@ function reduceCustom(
             warn(state, `Ignored update for unknown surface ${id}`)
             return
         }
+        if (current.runId !== run.id || current.threadId !== run.threadId
+            || value.profile !== current.profile || value.profileVersion !== current.profileVersion) {
+            warn(state, `Ignored cross-run or cross-profile update for ${id}`)
+            return
+        }
+        if (current.profileVersion === PROFILE_VERSION_NEXT
+            && (!Number.isInteger(value.revision) || value.revision !== (current.revision ?? 0) + 1)) {
+            warn(state, `Ignored out-of-order update for ${id}`)
+            return
+        }
         const merged = validateSurface({
             profile: value.profile,
             profileVersion: value.profileVersion,
             surfaceId: id,
             dataRef: hasOwn(value, 'dataRef') ? value.dataRef : current.dataRef,
             components: hasOwn(value, 'components') ? value.components : current.components,
+            ...(current.profileVersion === PROFILE_VERSION_NEXT ? {revision: value.revision} : {}),
         }, run.threadId, run.id)
         if (!merged) return
         state.surfaces[id] = merged
@@ -259,13 +279,22 @@ function reduceCustom(
     }
     if (name === 'ui.surface.remove') {
         if (!isObject(value)
-            || !hasOnlyKeys(value, ['profile', 'profileVersion', 'surfaceId'])
-            || value.profile !== PROFILE || value.profileVersion !== PROFILE_VERSION
+            || !hasOnlyKeys(value, ['profile', 'profileVersion', 'surfaceId', 'revision'])
+            || value.profile !== PROFILE
+            || ![PROFILE_VERSION, PROFILE_VERSION_NEXT].includes(String(value.profileVersion))
             || !validId(value.surfaceId)) {
             warn(state, 'Ignored ui.surface.remove that does not match the profile schema')
             return
         }
         const id = value.surfaceId
+        const current = state.surfaces[id]
+        if (!current || current.runId !== run.id || current.threadId !== run.threadId
+            || current.profileVersion !== value.profileVersion
+            || (current.profileVersion === PROFILE_VERSION_NEXT
+                && (!Number.isInteger(value.revision) || value.revision !== (current.revision ?? 0) + 1))) {
+            warn(state, `Ignored invalid remove for ${id}`)
+            return
+        }
         delete state.surfaces[id]
         run.surfaceIds = run.surfaceIds.filter((surfaceId) => surfaceId !== id)
         for (const message of Object.values(state.messages)) {
@@ -356,9 +385,12 @@ function parseComponent(value: unknown): SurfaceComponent | null {
     return {id, type, props: {...value.props}}
 }
 
-function validKnownComponent(component: SurfaceComponent): boolean {
+function validKnownComponent(component: SurfaceComponent, version: string): boolean {
     const {type, props} = component
-    if (!['Chart', 'Table', 'Timeline', 'RelationGraph'].includes(type)) return true
+    if (!['Chart', 'Table', 'Timeline', 'RelationGraph'].includes(type)) {
+        if (version !== PROFILE_VERSION_NEXT) return false
+        return validPhaseTwoComponent(component)
+    }
     if (!hasOnlyKeys(props, ['subType', 'title', 'description', 'encoding', 'options', 'drillDown'])
         || !optionalString(props.title, 200)
         || !optionalString(props.description, 2_000)
@@ -392,6 +424,28 @@ function validKnownComponent(component: SurfaceComponent): boolean {
     return props.subType === 'network'
         && validFieldMap(props.encoding, ['source', 'target', 'label', 'sourceLabel'], ['source', 'target'])
         && validOptions(props.options, {limit: [1, 1_000], showLabels: 'boolean'})
+}
+
+function validPhaseTwoComponent(component: SurfaceComponent): boolean {
+    const {type, props} = component
+    if (!hasOnlyKeys(props, ['subType', 'title', 'description', 'encoding', 'options', 'drillDown'])
+        || !optionalString(props.title, 200) || !optionalString(props.description, 2_000)
+        || !isObject(props.encoding) || !validDrillDown(props.drillDown)) return false
+    const shapes: Record<string, {subType: string; allowed: string[]; required: string[];
+        limit: number; flag?: string}> = {
+        Metric: {subType: 'single', allowed: ['label', 'value', 'unit', 'change'], required: ['label', 'value'], limit: 12, flag: 'showChange'},
+        EntityCard: {subType: 'standard', allowed: ['id', 'name', 'kind', 'summary'], required: ['id', 'name'], limit: 50, flag: 'showSummary'},
+        Tree: {subType: 'hierarchy', allowed: ['id', 'parentId', 'label', 'hasChildren'], required: ['id', 'parentId', 'label'], limit: 500},
+        Heatmap: {subType: 'matrix', allowed: ['x', 'y', 'value'], required: ['x', 'y', 'value'], limit: 1000, flag: 'showLabels'},
+        RelationshipPath: {subType: 'ordered', allowed: ['step', 'source', 'target', 'label'], required: ['step', 'source', 'target'], limit: 30, flag: 'showLabels'},
+        EvidenceChain: {subType: 'ordered', allowed: ['step', 'id', 'title', 'source', 'summary', 'evidenceRef'], required: ['step', 'id', 'title', 'source'], limit: 50, flag: 'showSource'},
+    }
+    const shape = shapes[type]
+    if (!shape || props.subType !== shape.subType
+        || !validFieldMap(props.encoding, shape.allowed, shape.required)) return false
+    const rules: Record<string, OptionRule> = {limit: [1, shape.limit]}
+    if (shape.flag) rules[shape.flag] = 'boolean'
+    return validOptions(props.options, rules)
 }
 
 type OptionRule = readonly string[] | readonly [number, number] | 'boolean' | 'field'

@@ -6,6 +6,11 @@ import com.ac.richui.core.observation.DefaultObservationBuilder;
 import com.ac.richui.core.observation.ObservationBuilder;
 import com.ac.richui.core.presentation.DefaultPresentationService;
 import com.ac.richui.core.presentation.PresentationService;
+import com.ac.richui.core.presentation.PresentationMapper;
+import com.ac.richui.core.presentation.PresentationValidator;
+import com.ac.richui.core.presentation.SurfaceRegistry;
+import com.ac.richui.core.presentation.InMemorySurfaceRegistry;
+import com.ac.richui.core.presentation.SharedSurfaceRegistry;
 import com.ac.richui.core.result.InMemoryResultStore;
 import com.ac.richui.core.result.ResultStore;
 import com.ac.richui.core.result.ResultStoreLimits;
@@ -18,6 +23,7 @@ import com.ac.richui.mcp.McpResultDecoder;
 import com.ac.runtime.agentscope.AgentScopeAgUiRuntime;
 import com.ac.runtime.agentscope.AgentScopeRichMiddleware;
 import com.ac.runtime.agentscope.AgentScopeUiRenderTool;
+import com.ac.runtime.agentscope.AgentScopeUiUpdateTool;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.agent.Agent;
@@ -55,7 +61,20 @@ public class AgentScopeRuntimeConfiguration {
     }
 
     @Bean ObservationBuilder observationBuilder() { return new DefaultObservationBuilder(); }
-    @Bean PresentationService presentationService(ResultStore store) { return new DefaultPresentationService(store); }
+    @Bean
+    @ConditionalOnMissingBean(SurfaceRegistry.class)
+    SurfaceRegistry surfaceRegistry(
+            @Value("${ac.agentscope.result-store.ttl:45m}") Duration ttl,
+            @Value("${ac.agentscope.result-store.maximum-entries:10000}") int maximumEntries) {
+        return new InMemorySurfaceRegistry(ttl, maximumEntries);
+    }
+    @Bean PresentationService presentationService(ResultStore store, SurfaceRegistry surfaces,
+            @Value("${ac.deployment.distributed:false}") boolean distributed) {
+        if (distributed && !(surfaces instanceof SharedSurfaceRegistry))
+            throw new IllegalStateException("Distributed deployment requires SharedSurfaceRegistry");
+        return new DefaultPresentationService(store, new PresentationValidator(),
+                new PresentationMapper(), surfaces);
+    }
     @Bean McpCallToolResultAdapter mcpCallToolResultAdapter(ObjectMapper mapper) {
         return new McpCallToolResultAdapter(mapper);
     }
@@ -76,12 +95,17 @@ public class AgentScopeRuntimeConfiguration {
     @Bean AgentScopeUiRenderTool agentScopeUiRenderTool(PresentationService presentations) {
         return new AgentScopeUiRenderTool(presentations);
     }
+    @Bean AgentScopeUiUpdateTool agentScopeUiUpdateTool(PresentationService presentations) {
+        return new AgentScopeUiUpdateTool(presentations);
+    }
 
     @Bean
-    Toolkit agentScopeToolkit(AgentScopeMcpRegistry mcp, AgentScopeUiRenderTool uiRender) {
+    Toolkit agentScopeToolkit(AgentScopeMcpRegistry mcp, AgentScopeUiRenderTool uiRender,
+                              AgentScopeUiUpdateTool uiUpdate) {
         Toolkit toolkit = new Toolkit();
         mcp.tools().forEach(toolkit::registerAgentTool);
         toolkit.registerAgentTool(uiRender);
+        toolkit.registerAgentTool(uiUpdate);
         return toolkit;
     }
 

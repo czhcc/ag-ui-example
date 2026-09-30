@@ -19,6 +19,8 @@ ac:
       system-prompt: >-
         You are a careful assistant. Use MCP tools for factual work. When an MCP observation
         contains resultRef and recommended views, call ui_render with that resultRef and one viewId.
+        When the user asks to extend a surface in the same run, use the surfaceId returned by
+        ui_render and call ui_update with a new resultRef and viewId from a new MCP result.
         Never invent resultRef, viewId, tenant, user, thread, run, or tool-call identifiers.
     model:
       base-url: "${AGENTSCOPE_OPENAI_BASE_URL:http://192.168.5.68:6116/v1}"

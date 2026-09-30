@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class McpResultTest {
     @Test void defaultsSpecVersion() {
         var result = McpResult.success("ok", null, null, null);
-        assertEquals("1.1", result.specVersion());
+        assertEquals("1.2", result.specVersion());
         assertTrue(result.success());
     }
 
