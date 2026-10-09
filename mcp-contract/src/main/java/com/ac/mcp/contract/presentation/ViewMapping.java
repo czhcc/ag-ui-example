@@ -1,12 +1,14 @@
 package com.ac.mcp.contract.presentation;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Set;
 
 /**
  * 契约校验和渲染端共用的强类型字段映射。
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public sealed interface ViewMapping
         permits ChartMapping, TableMapping, TimelineMapping, RelationGraphMapping,
         MetricMapping, EntityCardMapping, TreeMapping, HeatmapMapping, RelationshipPathMapping, EvidenceChainMapping {

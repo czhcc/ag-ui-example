@@ -2,6 +2,7 @@ package com.ac.agent.config;
 
 import org.springframework.ai.model.NoopApiKey;
 import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.model.openai.autoconfigure.OpenAiChatProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -26,11 +27,12 @@ public class OpenAiCompatibleConfig {
             @Value("${spring.ai.openai.chat.completions-path}") String completionsPath,
             ObjectProvider<RestClient.Builder> restClientBuilderProvider,
             ObjectProvider<WebClient.Builder> webClientBuilderProvider,
-            ResponseErrorHandler responseErrorHandler) {
+            ResponseErrorHandler responseErrorHandler,
+            OpenAiChatProperties chatProperties) {
         return new ToolCallMergingOpenAiApi(baseUrl, new NoopApiKey(), new org.springframework.util.LinkedMultiValueMap<>(),
                 completionsPath, "/embeddings",
                 restClientBuilderProvider.getIfAvailable(RestClient::builder),
                 webClientBuilderProvider.getIfAvailable(WebClient::builder),
-                responseErrorHandler);
+                responseErrorHandler, chatProperties.getOptions().getExtraBody());
     }
 }

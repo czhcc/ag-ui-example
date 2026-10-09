@@ -19,6 +19,8 @@ import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
 
 /**
  * OpenAI-compatible API client that merges fragmented streaming tool-call chunks.
@@ -32,19 +34,51 @@ import java.util.List;
  * well-formed tool calls.</p>
  */
 public class ToolCallMergingOpenAiApi extends OpenAiApi {
+    private final Map<String, Object> defaultExtraBody;
 
     public ToolCallMergingOpenAiApi(String baseUrl, ApiKey apiKey, MultiValueMap<String, String> headers,
             String completionsPath, String embeddingsPath, RestClient.Builder restClientBuilder,
             WebClient.Builder webClientBuilder, ResponseErrorHandler responseErrorHandler) {
+        this(baseUrl, apiKey, headers, completionsPath, embeddingsPath, restClientBuilder,
+                webClientBuilder, responseErrorHandler, Map.of());
+    }
+
+    public ToolCallMergingOpenAiApi(String baseUrl, ApiKey apiKey, MultiValueMap<String, String> headers,
+            String completionsPath, String embeddingsPath, RestClient.Builder restClientBuilder,
+            WebClient.Builder webClientBuilder, ResponseErrorHandler responseErrorHandler,
+            Map<String, Object> defaultExtraBody) {
         super(baseUrl, apiKey, headers, completionsPath, embeddingsPath, restClientBuilder, webClientBuilder,
                 responseErrorHandler);
+        this.defaultExtraBody = defaultExtraBody == null ? Map.of() : Map.copyOf(defaultExtraBody);
+    }
+
+    @Override
+    public org.springframework.http.ResponseEntity<ChatCompletion> chatCompletionEntity(
+            ChatCompletionRequest chatRequest, MultiValueMap<String, String> additionalHttpHeader) {
+        return super.chatCompletionEntity(withDefaultExtraBody(chatRequest), additionalHttpHeader);
     }
 
     @Override
     public Flux<ChatCompletionChunk> chatCompletionStream(ChatCompletionRequest chatRequest,
             org.springframework.util.MultiValueMap<String, String> additionalHttpHeader) {
-        return super.chatCompletionStream(chatRequest, additionalHttpHeader)
+        return super.chatCompletionStream(withDefaultExtraBody(chatRequest), additionalHttpHeader)
                 .transformDeferred(ToolCallMergingOpenAiApi::mergeToolCallChunks);
+    }
+
+    // Spring AI 1.1.2 loses flattened extra_body fields while merging tool definitions.
+    // Restore configured defaults at the transport boundary, preserving request overrides.
+    ChatCompletionRequest withDefaultExtraBody(ChatCompletionRequest request) {
+        if (defaultExtraBody.isEmpty()) return request;
+        Map<String, Object> extras = new LinkedHashMap<>(defaultExtraBody);
+        extras.putAll(request.extraBody());
+        return new ChatCompletionRequest(request.messages(), request.model(), request.store(), request.metadata(),
+                request.frequencyPenalty(), request.logitBias(), request.logprobs(), request.topLogprobs(),
+                request.maxTokens(), request.maxCompletionTokens(), request.n(), request.outputModalities(),
+                request.audioParameters(), request.presencePenalty(), request.responseFormat(), request.seed(),
+                request.serviceTier(), request.stop(), request.stream(), request.streamOptions(), request.temperature(),
+                request.topP(), request.tools(), request.toolChoice(), request.parallelToolCalls(), request.user(),
+                request.reasoningEffort(), request.webSearchOptions(), request.verbosity(), request.promptCacheKey(),
+                request.safetyIdentifier(), extras);
     }
 
     private static Flux<ChatCompletionChunk> mergeToolCallChunks(Flux<ChatCompletionChunk> source) {

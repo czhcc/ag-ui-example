@@ -9,6 +9,18 @@ const surface = (revision: number, dataRef: string) => ({
     }}],
 })
 
+test('metric encoding rejects explicit null and accepts omitted optional fields', () => {
+    const state = createAgentUiState()
+    reduceAgentUiEvent(state, {type: 'RUN_STARTED', threadId: 'thread', runId: 'run'}, 'run')
+    const invalid = surface(1, 'result-1')
+    Object.assign(invalid.components[0].props.encoding, {change: null})
+    reduceAgentUiEvent(state, {type: 'CUSTOM', name: 'ui.surface.create', value: invalid}, 'run')
+    assert.equal(state.surfaces['surface-1'].validationIssue?.code, 'INVALID_SURFACE')
+    const valid = {...surface(1, 'result-2'), surfaceId: 'surface-2'}
+    reduceAgentUiEvent(state, {type: 'CUSTOM', name: 'ui.surface.create', value: valid}, 'run')
+    assert.equal(state.surfaces['surface-2'].validationIssue, undefined)
+})
+
 test('phase-two update requires the creating run and next revision', () => {
     const state = createAgentUiState()
     reduceAgentUiEvent(state, {type: 'RUN_STARTED', threadId: 'thread', runId: 'run-1'}, 'run-1')

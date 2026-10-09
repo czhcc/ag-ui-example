@@ -15,6 +15,8 @@ import java.time.Duration;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
 import org.springframework.http.codec.ServerSentEvent;
@@ -37,6 +39,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/api/agent")
 public final class AgUiController {
+    private static final Logger log = LoggerFactory.getLogger(AgUiController.class);
     private final AgUiRunInputDecoder decoder;
     private final AgUiRunStateStore events;
     private final AgUiRunHandler handler;
@@ -75,7 +78,11 @@ public final class AgUiController {
                 ? Mono.defer(() -> handler.execute(input, scope))
                     .timeout(runTimeout)
                     .doOnSuccess(ignored -> events.finishIfMissing(scope, "completed"))
-                    .doOnError(error -> events.failIfMissing(scope, error.getClass().getSimpleName()))
+                    .doOnError(error -> {
+                        log.warn("AG-UI run failed threadId={} runId={} errorCode={} runTimeout={}",
+                                scope.threadId(), scope.runId(), error.getClass().getSimpleName(), runTimeout);
+                        events.failIfMissing(scope, error.getClass().getSimpleName());
+                    })
                     .onErrorResume(error -> Mono.empty())
                     .thenMany(Flux.<ServerSentEvent<String>>empty())
                 : Flux.<ServerSentEvent<String>>empty();

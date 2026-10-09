@@ -4,13 +4,17 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 /** Stable fictional data for phase-two contract and UI verification. */
 @Service
-@Profile({"demo", "test"})
 public class PhaseTwoFixtureService {
+    public List<Map<String, Object>> knowledgeOverview() {
+        return List.of(row("label", "人员实体", "value", cards("person").size(), "unit", "个"),
+                row("label", "组织节点", "value", tree("org-root", "expanded").size(), "unit", "个"),
+                row("label", "证据记录", "value", evidence("person-001").size(), "unit", "条"));
+    }
+
     public List<Map<String, Object>> metrics(String personId) {
         if (!"person-001".equals(personId)) return List.of();
         return List.of(row("label", "活动总数", "value", 16, "unit", "次"),

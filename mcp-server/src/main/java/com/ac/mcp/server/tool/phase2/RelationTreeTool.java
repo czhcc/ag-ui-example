@@ -6,11 +6,9 @@ import com.ac.mcp.server.tool.PhaseTwoResults;
 import java.util.Map;
 import org.springframework.ai.mcp.annotation.McpTool;
 import org.springframework.ai.tool.annotation.ToolParam;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile({"demo", "test"})
 public class RelationTreeTool {
     private final PhaseTwoFixtureService service;
     public RelationTreeTool(PhaseTwoFixtureService service) { this.service = service; }

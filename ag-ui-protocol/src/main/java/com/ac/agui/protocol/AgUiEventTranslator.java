@@ -210,7 +210,10 @@ public final class AgUiEventTranslator {
         if (!runStarted) events.addAll(started(timestamp));
         events.addAll(endMessage(timestamp));
         terminal = true;
-        events.add(new RunErrorEvent("Agent run failed", code, timestamp, null));
+        String message = "TimeoutException".equals(code)
+                ? "智能体运行超时，请稍后重试。"
+                : "Agent run failed";
+        events.add(new RunErrorEvent(message, code, timestamp, null));
         return events;
     }
 

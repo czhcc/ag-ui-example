@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import {randomUUID} from 'node:crypto'
 import {readFileSync} from 'node:fs'
 import {streamAgent, fetchResult} from '../src/core/stream.ts'
+import {createAgentUiState, reduceAgentUiEvent} from '../src/core/reducer.ts'
 import type {AgUiEvent} from '../src/core/types.ts'
 
 const enabled = process.env.AC_LIVE_PHASE_TWO === '1'
@@ -13,7 +14,7 @@ const section = source.slice(source.indexOf('## 15.'))
 const prompts = new Map([...section.matchAll(/### 15\.(\d+)[^\r\n]*[\s\S]*?\r?\n> ([^\r\n]+)/g)]
     .map(match => [Number(match[1]), match[2]]))
 const cases = [
-    {number: 1, tool: 'kg_activity_metrics', component: 'Metric', count: 2},
+    {number: 1, tool: 'kg_knowledge_overview', component: 'Metric', count: 3},
     {number: 2, tool: 'kg_entity_cards', component: 'EntityCard', count: 2},
     {number: 3, tool: 'kg_relation_tree', component: 'Tree', count: 2},
     {number: 4, tool: 'kg_activity_heatmap', component: 'Heatmap', count: 9},
@@ -28,11 +29,13 @@ for (const item of cases) {
         const threadId = `phase-two-${randomUUID()}`
         const runId = `phase-two-${randomUUID()}`
         const events: AgUiEvent[] = []
+        const uiState = createAgentUiState()
         const signal = AbortSignal.timeout(140_000)
         await streamAgent({threadId, runId, state: {}, tools: [], context: [], forwardedProps: {},
             messages: [{id: randomUUID(), role: 'user', content: question}]},
         event => {
             events.push(event)
+            reduceAgentUiEvent(uiState, event, runId)
             if (process.env.AC_TRACE_PHASE_TWO === '1'
                 && ['TOOL_CALL_START', 'TOOL_CALL_ARGS', 'TOOL_CALL_RESULT', 'CUSTOM'].includes(event.type))
                 process.stdout.write(`${item.number}: ${JSON.stringify(event).slice(0, 700)}\n`)
@@ -44,8 +47,11 @@ for (const item of cases) {
         const matching = surfaces.find(event => event.type === 'CUSTOM'
             && (event.value as {components?: Array<{type: string}>})?.components?.[0]?.type === item.component)
         assert.ok(matching && matching.type === 'CUSTOM', `Missing ${item.component} surface`)
-        const surface = matching.value as {dataRef: string; profileVersion: string}
+        const surface = matching.value as {surfaceId: string; dataRef: string; profileVersion: string}
         assert.equal(surface.profileVersion, '1.1')
+        assert.ok(uiState.surfaces[surface.surfaceId], 'Frontend did not register the surface')
+        assert.equal(uiState.surfaces[surface.surfaceId]?.validationIssue, undefined,
+            `Surface rejected by frontend: ${JSON.stringify(uiState.surfaces[surface.surfaceId]?.validationIssue)}`)
         const result = await fetchResult(surface.dataRef, {threadId, runId, signal},
             {resultUrl: `${base}/api/results`, headers})
         assert.equal((result.data as unknown[]).length, item.count)

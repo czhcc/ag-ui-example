@@ -72,6 +72,8 @@ class AgUiControllerLifecycleTest {
         assertNotNull(frames);
         assertEquals(1, frames.stream().filter(e ->
                 e.data() != null && e.data().contains("RUN_ERROR")).count());
+        assertTrue(frames.toString().contains("TimeoutException"));
+        assertTrue(frames.toString().contains("智能体运行超时，请稍后重试。"));
         assertFalse(frames.toString().contains("RUN_FINISHED"));
     }
 

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** The six question fixtures are callable without a model or remote business service. */
+/** The question fixtures are callable without a model or remote business service. */
 class PhaseTwoToolsTest {
     private final PhaseTwoFixtureService data = new PhaseTwoFixtureService();
 
@@ -31,6 +31,17 @@ class PhaseTwoToolsTest {
         assertEquals("org-data", rows(expanded).get(2).get("nodeId"));
         assertEquals(true, ((Map<?, ?>) base.get("summary")).get("truncated"));
         assertEquals(false, ((Map<?, ?>) expanded.get("summary")).get("truncated"));
+    }
+
+    @Test void knowledgeOverviewCountsMatchTheDemoRecords() {
+        var result = new KnowledgeOverviewTool(data).query();
+        check(result, "knowledge-overview", "metric", 3);
+        var metrics = rows(result);
+        assertEquals(data.cards("person").size(), metrics.get(0).get("value"));
+        assertEquals(data.tree("org-root", "expanded").size(), metrics.get(1).get("value"));
+        assertEquals(data.evidence("person-001").size(), metrics.get(2).get("value"));
+        assertEquals(List.of("人员实体", "组织节点", "证据记录"),
+                metrics.stream().map(row -> row.get("label")).toList());
     }
 
     @Test void unknownAndInvalidInputsStayOutOfPresentation() {
