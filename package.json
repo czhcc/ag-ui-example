@@ -1,5 +1,12 @@
 {
   "name": "ai-mcp-platform-root",
   "private": true,
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "scripts": {
+    "build:apps": "pnpm --filter @ac/fund-flow-app build",
+    "test:mcp-apps-browser": "playwright test --config tests/mcp-apps/playwright.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.57.0"
+  }
 }

@@ -11,6 +11,7 @@
     <artifactId>agentscope-client</artifactId>
 
     <dependencies>
+        <dependency><groupId>com.ac</groupId><artifactId>mcp-apps-spring-web</artifactId></dependency>
         <dependency>
             <groupId>com.ac</groupId>
             <artifactId>mcp-contract</artifactId>

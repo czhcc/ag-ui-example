@@ -27,6 +27,14 @@ public final class DynamicMcpToolCallback implements ToolCallback {
     private final RichToolResultProcessor processor;
     private final RuntimeEventSink events;
     private final ObjectMapper mapper;
+    private com.ac.mcpapps.web.McpAppResultPublisher apps;
+
+    public DynamicMcpToolCallback(String serverCode, String remoteToolName, ToolDefinition definition,
+            McpClientManager clients, McpCallToolResultAdapter adapter, RichToolResultProcessor processor,
+            RuntimeEventSink events, ObjectMapper mapper, com.ac.mcpapps.web.McpAppResultPublisher apps) {
+        this(serverCode, remoteToolName, definition, clients, adapter, processor, events, mapper);
+        this.apps = apps;
+    }
 
     public DynamicMcpToolCallback(
             String serverCode,
@@ -65,6 +73,7 @@ public final class DynamicMcpToolCallback implements ToolCallback {
             McpSchema.CallToolRequest request = McpSchema.CallToolRequest.builder()
                     .name(remoteToolName)
                     .arguments(arguments)
+                    .meta(Map.of("ac.subject", Map.of("tenantId", scope.tenantId(), "userId", scope.userId())))
                     .build();
             var nativeResult = clients.getClient(serverCode).callTool(request);
             var processed = processor.process(
@@ -81,6 +90,7 @@ public final class DynamicMcpToolCallback implements ToolCallback {
                 attributes.put("resultRef", processed.resultReference().value());
             }
             events.publish(scope, new StandardRuntimeEvent("tool.result", attributes));
+            if (apps != null) apps.publish(scope, new ToolIdentity(serverCode, remoteToolName), processed, adapter.adapt(nativeResult));
             return processed.observation().content();
         } catch (RuntimeException exception) {
             throw exception;

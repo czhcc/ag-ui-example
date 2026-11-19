@@ -26,6 +26,12 @@ public final class SaaAgUiRunHandler implements AgUiRunHandler {
     private final AgentService agents;
     private final ObjectMapper mapper;
     private final SensitiveTextSanitizer sanitizer = new SensitiveTextSanitizer();
+    private com.ac.mcpapps.web.McpAppFollowups followups;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public SaaAgUiRunHandler(AgentService agents, ObjectMapper mapper, com.ac.mcpapps.web.McpAppFollowups followups) {
+        this(agents, mapper); this.followups = followups;
+    }
 
     public SaaAgUiRunHandler(AgentService agents, ObjectMapper mapper) {
         this.agents = agents;
@@ -34,6 +40,7 @@ public final class SaaAgUiRunHandler implements AgUiRunHandler {
 
     @Override
     public Mono<Void> execute(AgUiRunAgentInput input, RunScope scope) {
+        if (followups != null) input = followups.enrich(input, scope);
         AgentContext context = new AgentContext(scope.tenantId(), scope.userId(), scope.threadId(), scope.runId());
         if (!input.resume().isEmpty()) {
             if (input.parentRunId() == null) {

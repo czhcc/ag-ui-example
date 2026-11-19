@@ -17,6 +17,7 @@ public class McpToolCallbackFactory {
     private final RichToolResultProcessor processor;
     private final RuntimeEventSink events;
     private final ObjectMapper mapper;
+    private final com.ac.mcpapps.web.McpAppResultPublisher apps;
 
     public McpToolCallbackFactory(
             McpToolDefinitionAdapter definitions,
@@ -24,13 +25,14 @@ public class McpToolCallbackFactory {
             McpCallToolResultAdapter results,
             RichToolResultProcessor processor,
             RuntimeEventSink events,
-            ObjectMapper mapper) {
+            ObjectMapper mapper, com.ac.mcpapps.web.McpAppResultPublisher apps) {
         this.definitions = definitions;
         this.clients = clients;
         this.results = results;
         this.processor = processor;
         this.events = events;
         this.mapper = mapper;
+        this.apps = apps;
     }
 
     public ToolCallback create(String serverCode, String prefix, McpSchema.Tool tool) {
@@ -43,6 +45,6 @@ public class McpToolCallbackFactory {
                 results,
                 processor,
                 events,
-                mapper);
+                mapper, apps);
     }
 }

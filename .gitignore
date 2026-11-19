@@ -5,3 +5,6 @@ target/
 logs/
 node_modules/
 dist/
+.mcp-apps-*.log
+test-results/
+playwright-report/

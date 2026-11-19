@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
 @EnableConfigurationProperties(AgentScopeMcpProperties.class)
-@Import({AgUiWebConfiguration.class, AgUiProtocolExceptionHandler.class})
+@Import({AgUiWebConfiguration.class, AgUiProtocolExceptionHandler.class, com.ac.mcpapps.web.McpAppsConfiguration.class})
 public class AgentScopeClientApplication {
     public static void main(String[] args) {
         SpringApplication.run(AgentScopeClientApplication.class, args);

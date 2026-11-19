@@ -1,0 +1,27 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MCP App Sandbox</title><style>html,body,iframe{margin:0;width:100%;height:100%;border:0}</style></head><body><script>
+'use strict';
+const parentOrigin = new URL(location.href).searchParams.get('parentOrigin');
+let view;
+const send = message => parent.postMessage(message, parentOrigin);
+addEventListener('message', event => {
+  const message = event.data;
+  if (event.source === parent && event.origin === parentOrigin) {
+    if (message?.jsonrpc !== '2.0') return;
+    if (message.method === 'ui/notifications/sandbox-resource-ready') {
+      if (view || typeof message.params?.html !== 'string' || message.params.html.length > 5 * 1024 * 1024) return;
+      const doc = new DOMParser().parseFromString(message.params.html, 'text/html');
+      const policy = doc.createElement('meta'); policy.httpEquiv = 'Content-Security-Policy';
+      policy.content = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
+      doc.head.prepend(policy);
+      view = document.createElement('iframe'); view.setAttribute('sandbox', 'allow-scripts');
+      view.srcdoc = '<!DOCTYPE html>' + doc.documentElement.outerHTML;
+      document.body.append(view); return;
+    }
+    if (!message.method?.startsWith('ui/notifications/sandbox-') && view) view.contentWindow.postMessage(message, '*');
+  } else if (view && event.source === view.contentWindow && message?.jsonrpc === '2.0') {
+    if (JSON.stringify(message).length > 65536 || message.method?.startsWith('ui/notifications/sandbox-')) return;
+    send(message);
+  }
+});
+send({jsonrpc:'2.0', method:'ui/notifications/sandbox-proxy-ready', params:{}});
+</script></body></html>

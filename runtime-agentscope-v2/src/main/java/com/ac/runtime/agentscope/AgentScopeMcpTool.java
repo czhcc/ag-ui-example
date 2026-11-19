@@ -27,6 +27,24 @@ public final class AgentScopeMcpTool implements AgentTool {
     private final Invoker invoker;
     private final McpCallToolResultAdapter resultAdapter;
     private final RichToolResultProcessor processor;
+    @FunctionalInterface
+    public interface ResultObserver {
+        void accept(com.ac.richui.core.context.RunScope scope, com.ac.richui.core.tool.ProcessedToolResult result,
+                    com.ac.richui.core.tool.RawToolResult raw);
+    }
+    @FunctionalInterface
+    public interface ScopedInvoker {
+        Mono<McpSchema.CallToolResult> call(String name, Map<String, Object> args, com.ac.richui.core.context.RunScope scope);
+    }
+    private ResultObserver observer;
+    private ScopedInvoker scopedInvoker;
+    public AgentScopeMcpTool(String exposedName, String description, Map<String, Object> parameters,
+            String serverCode, String remoteToolName, ScopedInvoker invoker, McpCallToolResultAdapter adapter,
+            RichToolResultProcessor processor, ResultObserver observer) {
+        this(exposedName, description, parameters, serverCode, remoteToolName,
+                (name, args) -> Mono.error(new IllegalStateException("Scope required")), adapter, processor);
+        this.observer = observer; this.scopedInvoker = invoker;
+    }
 
     public AgentScopeMcpTool(
             String exposedName, String description, Map<String, Object> parameters,
@@ -55,9 +73,14 @@ public final class AgentScopeMcpTool implements AgentTool {
         }
         AgentScopeRunContext run = AgentScopeRuntimeContexts.require(param.getRuntimeContext());
         var scope = run.scope().withToolCallId(toolCallId);
-        return invoker.call(remoteToolName, param.getInput())
+        return (scopedInvoker == null ? invoker.call(remoteToolName, param.getInput())
+                : scopedInvoker.call(remoteToolName, param.getInput(), scope))
                 .map(resultAdapter::adapt)
-                .map(raw -> processor.process(scope, new ToolIdentity(serverCode, remoteToolName), raw))
+                .map(raw -> {
+                    var processed = processor.process(scope, new ToolIdentity(serverCode, remoteToolName), raw);
+                    if (observer != null) observer.accept(scope, processed, raw);
+                    return processed;
+                })
                 .map(processed -> {
                     Map<String, Object> event = new LinkedHashMap<>();
                     event.put("toolCallId", toolCallId);

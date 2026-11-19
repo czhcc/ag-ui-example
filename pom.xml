@@ -12,6 +12,8 @@
         <module>mcp-contract</module>
         <module>rich-ui-core</module>
         <module>rich-ui-mcp-adapter</module>
+        <module>mcp-apps-core</module>
+        <module>mcp-apps-spring-web</module>
         <module>ag-ui-protocol</module>
         <module>ag-ui-spring-web</module>
         <module>runtime-saa-adapter</module>
@@ -37,6 +39,8 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency><groupId>com.ac</groupId><artifactId>mcp-apps-core</artifactId><version>${project.version}</version></dependency>
+            <dependency><groupId>com.ac</groupId><artifactId>mcp-apps-spring-web</artifactId><version>${project.version}</version></dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>

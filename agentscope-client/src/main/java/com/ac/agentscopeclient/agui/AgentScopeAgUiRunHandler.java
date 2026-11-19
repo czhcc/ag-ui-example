@@ -10,6 +10,12 @@ import reactor.core.publisher.Mono;
 @Component
 public final class AgentScopeAgUiRunHandler implements AgUiRunHandler {
     private final AgentScopeAgUiRuntime runtime;
+    private com.ac.mcpapps.web.McpAppFollowups followups;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public AgentScopeAgUiRunHandler(AgentScopeAgUiRuntime runtime, com.ac.mcpapps.web.McpAppFollowups followups) {
+        this(runtime); this.followups = followups;
+    }
 
     public AgentScopeAgUiRunHandler(AgentScopeAgUiRuntime runtime) {
         this.runtime = runtime;
@@ -17,7 +23,7 @@ public final class AgentScopeAgUiRunHandler implements AgUiRunHandler {
 
     @Override
     public Mono<Void> execute(AgUiRunAgentInput input, RunScope scope) {
-        return runtime.execute(input, scope);
+        return runtime.execute(followups == null ? input : followups.enrich(input, scope), scope);
     }
 
     @Override

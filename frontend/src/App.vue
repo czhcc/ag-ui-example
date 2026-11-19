@@ -6,6 +6,8 @@ import {
   reduceAgentUiEvent,
   RunActivityPanel,
   streamAgent,
+  McpAppPart,
+  configureMcpApps,
 } from '@ac/agent-ui'
 import type {AgentUiState, AgUiEvent, MessagePart, RichMessage, RunAgentInput} from '@ac/agent-ui'
 import UiSurfacePart from '@ac/agent-ui/components/UiSurfacePart.vue'
@@ -24,14 +26,38 @@ const messages = ref<DisplayMessage[]>([
     parts: [{kind: 'text', text: '你好，我是智能分析助手。告诉我你想查询或分析什么，我会按需调用工具。'}],
   },
 ])
+const welcomeMessage = messages.value[0]!
 const input = ref('')
 const isSending = ref(false)
 const errorMessage = ref('')
 const controller = ref<AbortController | null>(null)
 const list = ref<HTMLElement | null>(null)
+configureMcpApps({
+  sandboxUrl: import.meta.env.VITE_MCP_APP_SANDBOX_URL || 'http://localhost:5174/proxy.html',
+  headers: () => identityHeaders.value,
+  isBusy: () => isSending.value,
+  onFollowup: async intent => {
+    if (intent.threadId !== threadId.value || isSending.value) throw new Error('APP_SESSION_BUSY')
+    await send(intent.question, intent)
+  },
+})
 let logSequence = 0
 
 sessionStorage.setItem('agent-thread-id', threadId.value)
+const historyKey = () => `agent-history:${threadId.value}`
+try {
+  const saved = JSON.parse(sessionStorage.getItem(historyKey()) ?? 'null')
+  if (Array.isArray(saved) && saved.length > 0 && saved.length <= 100
+    && saved.every(m => m && typeof m.id === 'string' && typeof m.runId === 'string'
+      && ['user', 'assistant'].includes(m.role) && Array.isArray(m.parts)
+      && m.parts.every((p: MessagePart) => p && ['text', 'surface', 'mcp_app'].includes(p.kind)))) {
+    messages.value = saved.map(m => ({...m, logs: [], streaming: false}))
+  }
+} catch {sessionStorage.removeItem(historyKey())}
+function saveHistory() {
+  const value = JSON.stringify(messages.value.slice(-100).map(m => ({...m, logs: [], streaming: false})))
+  if (value.length <= 256000) try {sessionStorage.setItem(historyKey(), value)} catch { /* optional storage quota */ }
+}
 
 const identityHeaders = computed<Record<string, string>>(() => {
   if (!import.meta.env.DEV) return {} as Record<string, string>
@@ -51,7 +77,7 @@ function pushLog(message: DisplayMessage, kind: RunLogEntry['kind'], title: stri
   })
 }
 
-async function send(contentOverride?: string) {
+async function send(contentOverride?: string, appIntent?: {appFollowupRef: string; parentRunId: string}) {
   const content = (contentOverride ?? input.value).trim()
   if (!content || isSending.value) return
   if (contentOverride === undefined) input.value = ''
@@ -69,6 +95,7 @@ async function send(contentOverride?: string) {
   const request: RunAgentInput = {
     threadId: threadId.value,
     runId,
+    parentRunId: appIntent?.parentRunId,
     messages: [{id: user.id, role: 'user', content}],
     tools: [],
     context: [],
@@ -77,6 +104,7 @@ async function send(contentOverride?: string) {
       locale: navigator.language,
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       clientName: '@ac/agent-ui',
+      ...(appIntent ? {appFollowupRef: appIntent.appFollowupRef} : {}),
     },
     resume: [],
   }
@@ -101,6 +129,7 @@ async function send(contentOverride?: string) {
     reply.streaming = false
     isSending.value = false
     controller.value = null
+    saveHistory()
     await scrollToBottom()
   }
 }
@@ -173,10 +202,11 @@ async function copyMessage(message: DisplayMessage) {
 
 function reset() {
   controller.value?.abort()
+  sessionStorage.removeItem(historyKey())
   threadId.value = `thread-${createId()}`
   sessionStorage.setItem('agent-thread-id', threadId.value)
   Object.assign(state, createAgentUiState())
-  messages.value = [messages.value[0]]
+  messages.value = [welcomeMessage]
   errorMessage.value = ''
 }
 
@@ -217,7 +247,8 @@ onBeforeUnmount(() => controller.value?.abort())
               <div v-if="part.kind === 'text'" :class="['text-part', {failed: message.failed}]">
                 {{ part.text }}<i v-if="message.streaming && index === message.parts.length - 1" class="cursor"></i>
               </div>
-              <UiSurfacePart v-else :surface="part.surface" @drill-down="(item) => { void send(item.question) }"/>
+              <UiSurfacePart v-else-if="part.kind === 'ui'" :surface="part.surface" @drill-down="(item) => { void send(item.question) }"/>
+              <McpAppPart v-else-if="part.kind === 'mcp_app'" :descriptor="part.descriptor"/>
             </template>
             <div v-if="message.role === 'assistant' && message.runId !== 'welcome'" class="message-actions">
               <RunLogPanel v-if="message.logs.length" :entries="message.logs"/>

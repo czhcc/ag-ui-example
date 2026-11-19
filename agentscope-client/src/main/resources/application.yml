@@ -6,6 +6,8 @@ spring:
     name: ac-agentscope-client
 
 ac:
+  mcp-apps:
+    allowed-tools: "${AC_MCP_APP_ALLOWED_TOOLS:knowledge:kg_fund_flow_graph,knowledge:kg_fund_flow_expand,knowledge:kg_fund_flow_filter,knowledge:kg_fund_flow_transactions}"
   deployment:
     # Set true only when shared result, AG-UI replay, and AgentScope state stores are installed.
     distributed: "${AC_DISTRIBUTED:false}"

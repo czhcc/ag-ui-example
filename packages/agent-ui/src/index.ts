@@ -1,4 +1,7 @@
 export * from './core/types'
+export * from './mcp-apps/types'
+export {configureMcpApps} from './mcp-apps/client'
+export {default as McpAppPart} from './components/McpAppPart.vue'
 export * from './core/reducer'
 export {configure, registerRenderer, unregisterRenderer, listRenderers, setFetchResult, context} from './core/registry'
 export {streamAgent, fetchResult, ResultUnavailableError} from './core/stream'

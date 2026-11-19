@@ -82,6 +82,11 @@ public final class AgUiEventTranslator {
                     epoch(updated.timestamp()), null));
         }
         if (runtimeEvent instanceof CustomRuntimeEvent custom) {
+            if ("mcp.app.create".equals(custom.name())) {
+                var output = new ArrayList<Event>(startMessage(epoch(custom.timestamp())));
+                output.add(new CustomEvent(custom.name(), custom.value(), epoch(custom.timestamp()), null));
+                return output;
+            }
             return List.of(new CustomEvent(
                     custom.name(), custom.value(), epoch(custom.timestamp()), null));
         }

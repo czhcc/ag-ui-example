@@ -10,7 +10,12 @@ import java.util.Map;
 public record RawToolResult(
         boolean error,
         Map<String, Object> structuredContent,
-        String textContent) {
+        String textContent,
+        Map<String, Object> uiMetadata) {
+
+    public RawToolResult(boolean error, Map<String, Object> structuredContent, String textContent) {
+        this(error, structuredContent, textContent, Map.of());
+    }
 
     /**
      * 保存结构化内容的不可变副本，并规范化空文本。
@@ -20,6 +25,7 @@ public record RawToolResult(
                 ? Map.of()
                 : Collections.unmodifiableMap(new LinkedHashMap<>(structuredContent));
         textContent = textContent == null ? "" : textContent;
+        uiMetadata = uiMetadata == null ? Map.of() : Collections.unmodifiableMap(new LinkedHashMap<>(uiMetadata));
     }
 
     /**

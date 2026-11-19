@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type {DrillDownEvent, RichMessage} from '../core/types'
 import UiSurfacePart from './UiSurfacePart.vue'
+import McpAppPart from './McpAppPart.vue'
 
 defineProps<{ message: RichMessage }>()
 const emit = defineEmits<{(e: 'drill-down', event: DrillDownEvent): void}>()
@@ -10,6 +11,7 @@ const emit = defineEmits<{(e: 'drill-down', event: DrillDownEvent): void}>()
   <div class="agent-ui-message">
     <template v-for="(part, index) in message.parts" :key="part.kind === 'ui' ? part.surfaceId : index">
       <div v-if="part.kind === 'text'" class="agent-ui-text">{{ part.text }}</div>
+      <McpAppPart v-else-if="part.kind === 'mcp_app'" :descriptor="part.descriptor"/>
       <UiSurfacePart v-else-if="part.kind === 'ui'" :surface="part.surface"
                      @drill-down="(event: DrillDownEvent) => emit('drill-down', event)"/>
       <span v-if="message.streaming && index === message.parts.length - 1"

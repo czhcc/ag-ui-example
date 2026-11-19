@@ -14,13 +14,14 @@ public class McpClientFactory {
 
     public McpSyncClient create(McpServerDefinition definition) {
         var builder = HttpClientStreamableHttpTransport.builder(definition.baseUrl()).endpoint(definition.endpoint());
-        switch (definition.auth().type()) {
-            case BEARER -> builder.httpRequestCustomizer((request, method, endpoint, body, context) ->
-                    request.header("Authorization", "Bearer " + definition.auth().token()));
-            case API_KEY, CUSTOM_HEADER -> builder.httpRequestCustomizer((request, method, endpoint, body, context) ->
-                    request.header(definition.auth().headerName(), definition.auth().headerValue()));
-            case NONE -> { }
-        }
+        builder.httpRequestCustomizer((request, method, endpoint, body, context) -> {
+            com.ac.mcpapps.web.McpAppsInitialization.customize(request, method, body);
+            switch (definition.auth().type()) {
+                case BEARER -> request.header("Authorization", "Bearer " + definition.auth().token());
+                case API_KEY, CUSTOM_HEADER -> request.header(definition.auth().headerName(), definition.auth().headerValue());
+                case NONE -> { }
+            }
+        });
         var client = McpClient.sync(builder.build()).requestTimeout(definition.timeout()).build();
         log.info("Initializing MCP connection serverCode={} endpoint={}", definition.code(), definition.endpoint());
         client.initialize();

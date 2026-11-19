@@ -143,6 +143,7 @@ export interface DrillDownEvent {
 }
 
 export type MessagePart =
+    | {kind: 'mcp_app'; appInstanceId: string; descriptor: import('../mcp-apps/types').McpAppDescriptor}
     | {kind: 'text'; text: string}
     | {kind: 'ui'; surfaceId: string; surface: UiSurface}
 
@@ -201,6 +202,7 @@ export interface AgentRunState {
 }
 
 export interface AgentUiState {
+    apps: Record<string, import('../mcp-apps/types').McpAppDescriptor>
     runs: Record<string, AgentRunState>
     runOrder: string[]
     messages: Record<string, RichMessage>

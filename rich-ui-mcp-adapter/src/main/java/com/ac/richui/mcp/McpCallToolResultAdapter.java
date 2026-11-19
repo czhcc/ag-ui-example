@@ -37,6 +37,9 @@ public final class McpCallToolResultAdapter {
                 .map(McpSchema.TextContent::text)
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining("\n"));
-        return new RawToolResult(Boolean.TRUE.equals(result.isError()), structured, text);
+        // UI-only payloads are explicitly namespaced; trace/auth/debug metadata is never copied.
+        Map<String, Object> uiMeta = result.meta() != null && result.meta().get("ac.uiData") instanceof Map<?, ?> payload
+                ? Map.of("ac.uiData", objectMapper.convertValue(payload, new TypeReference<Map<String, Object>>() { })) : Map.of();
+        return new RawToolResult(Boolean.TRUE.equals(result.isError()), structured, text, uiMeta);
     }
 }

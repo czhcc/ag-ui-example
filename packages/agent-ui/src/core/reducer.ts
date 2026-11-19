@@ -1,3 +1,4 @@
+import {validateApp} from '../mcp-apps/types.ts'
 import type {
     AgentRunState,
     AgentUiState,
@@ -21,6 +22,7 @@ const MAX_COMPONENTS = 10
 
 export function createAgentUiState(): AgentUiState {
     return {
+        apps: {},
         runs: {},
         runOrder: [],
         messages: {},
@@ -222,6 +224,29 @@ function reduceCustom(
     value: unknown,
     timestamp?: number,
 ) {
+    if (name.startsWith('mcp.app.')) {
+        if (!isObject(value)) {warn(state, 'Invalid MCP App event'); return}
+        if (name === 'mcp.app.create') {
+            const app = validateApp(value, run.threadId, run.id)
+            if (!app || state.apps[app.appInstanceId]) return
+            const existing = state.messages[app.messageId]
+            if (existing && existing.runId !== run.id) {warn(state, 'MCP App message scope mismatch'); return}
+            const message = ensureMessage(state, run, app.messageId)
+            state.apps[app.appInstanceId] = app
+            message.parts.push({kind: 'mcp_app', appInstanceId: app.appInstanceId, descriptor: app})
+        } else {
+            const id = stringValue(value.appInstanceId)
+            const app = id ? state.apps[id] : undefined
+            if (!app || app.originRunId !== run.id || !Number.isSafeInteger(value.revision) || Number(value.revision) <= app.revision) return
+            if (!['mcp.app.update', 'mcp.app.error', 'mcp.app.remove'].includes(name)) return
+            if (Number(value.revision) !== app.revision + 1) app.needsSync = true
+            app.revision = Number(value.revision)
+            if (name === 'mcp.app.update' && typeof value.resultRef === 'string') app.resultRef = value.resultRef
+            if (name === 'mcp.app.error') app.error = bounded(stringValue(value.code) ?? 'APP_FAILED', 128)
+            if (name === 'mcp.app.remove') app.status = 'CLOSED'
+        }
+        return
+    }
     if (name === 'ui.surface.create') {
         const surface = validateSurface(value, run.threadId, run.id)
         if (!surface) {
