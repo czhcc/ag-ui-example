@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "scripts": {
     "build:apps": "pnpm --filter @ac/fund-flow-app build",
-    "test:mcp-apps-browser": "playwright test --config tests/mcp-apps/playwright.config.ts"
+    "test:mcp-apps-browser": "playwright test --config tests/mcp-apps/playwright.config.ts",
+    "test:mcp-apps-live": "playwright test --config tests/mcp-apps/live.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.57.0"

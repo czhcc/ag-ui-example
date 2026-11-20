@@ -50,6 +50,9 @@ async function analyze() {
   } catch (e) {error.value = e instanceof Error ? e.message : String(e)}
   finally {busy.value = false}
 }
+function filter() {
+  void query('kg_fund_flow_filter', {startTime: start.value, endTime: end.value, minimumAmount: minimum.value})
+}
 onMounted(async () => {try {await host.connect()} catch (e) {error.value = String(e)}})
 watch(selected, () => {cursor.value = ''; pageLoaded.value = false; transactions.value = data.value?.transactions ?? []})
 </script>
@@ -59,12 +62,12 @@ watch(selected, () => {cursor.value = ''; pageLoaded.value = false; transactions
     <p v-if="error" role="alert" class="error">{{ error }}</p>
     <p v-if="!data">等待资金流数据…</p>
     <template v-else>
-      <form @submit.prevent="query('kg_fund_flow_filter', {startTime: start, endTime: end, minimumAmount: minimum})">
+      <div class="filters" role="group" aria-label="资金流筛选" @keydown.enter.prevent="filter">
         <label>开始时间（含时区）<input v-model="start" :disabled="busy" required></label>
         <label>结束时间（不包含）<input v-model="end" :disabled="busy" required></label>
         <label>最低金额<input v-model="minimum" :disabled="busy" inputmode="decimal" required></label>
-        <button :disabled="busy">{{ busy ? '查询中' : '查询' }}</button>
-      </form>
+        <button type="button" :disabled="busy" @click="filter">{{ busy ? '查询中' : '查询' }}</button>
+      </div>
       <section class="workspace">
         <div class="graph">
           <svg viewBox="0 0 440 230" role="img" aria-label="资金账户关系网络">
@@ -96,6 +99,6 @@ watch(selected, () => {cursor.value = ''; pageLoaded.value = false; transactions
 </template>
 <style>
 *{box-sizing:border-box}body{margin:0;font:14px system-ui,sans-serif;color:#0f172a;background:white}main{padding:16px}.notice{padding:10px;background:#eef2ff;border-radius:8px;color:#4338ca}
-form{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}label{display:flex;flex-direction:column;gap:4px;font-size:11px}input{padding:8px;border:1px solid #cbd5e1;border-radius:6px;width:180px}button{padding:8px 12px;border:0;border-radius:6px;color:white;background:#4f46e5;cursor:pointer}button:disabled{opacity:.5;cursor:default}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}label{display:flex;flex-direction:column;gap:4px;font-size:11px}input{padding:8px;border:1px solid #cbd5e1;border-radius:6px;width:180px}button{padding:8px 12px;border:0;border-radius:6px;color:white;background:#4f46e5;cursor:pointer}button:disabled{opacity:.5;cursor:default}
 .workspace{display:grid;grid-template-columns:1fr 150px;border:1px solid #e2e8f0;border-radius:8px}.graph svg{width:100%;min-height:230px}aside{padding:12px;background:#f8fafc}aside button{margin:4px 0}aside p,.muted{font-size:11px;color:#64748b;overflow-wrap:anywhere}.table{overflow:auto}table{width:100%;border-collapse:collapse;font-size:11px}td,th{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left}.error{color:#be123c}svg g[role=button]{cursor:pointer}@media(max-width:480px){.workspace{grid-template-columns:1fr}aside{display:flex;gap:8px;align-items:center}}
 </style>

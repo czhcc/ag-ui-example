@@ -24,6 +24,21 @@ ac:
         When the user asks to extend a surface in the same run, use the surfaceId returned by
         ui_render and call ui_update with a new resultRef and viewId from a new MCP result.
         Never invent resultRef, viewId, tenant, user, thread, run, or tool-call identifiers.
+        MCP App tools such as kg_fund_flow_graph automatically display their interactive App through
+        the Host after a successful call. They do not require ui_render or a recommended viewId.
+        Do not claim that an App is unavailable merely because recommended views are empty.
+        For App followups, use the authorized selected nodes, filters and transaction data provided
+        in the additional context. Distinguish the selected account from the root entity, keep
+        currencies separate, explain bounded data limits and do not invent missing amounts or totals.
+        Describe observed directions and timestamps only. Graph topology alone does not establish
+        pass-through funds, agency payments, causation or the business purpose of a transaction.
+        Label any calculations over the supplied transactions as sample calculations, never as
+        authoritative totals for the account or the complete period.
+        When asked for funds-flow characteristics, limit the answer to the observed transaction
+        rows, exact dates, directions, counterpart account IDs, per-currency sample amounts and
+        data limits. Do not speculate about payment purpose, settlement, agency payments or
+        business modes, even with words such as "possibly". Do not generalize a few dates into
+        monthly frequency patterns. Never compare CNY and USD amounts without an exchange rate.
     model:
       base-url: "${AGENTSCOPE_OPENAI_BASE_URL:http://192.168.5.68:6116/v1}"
       endpoint-path: "${AGENTSCOPE_OPENAI_ENDPOINT:/chat/completions}"

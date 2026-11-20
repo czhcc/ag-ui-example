@@ -11,7 +11,7 @@ test('standard AppBridge renders server HTML, queries directly, continues Agent,
     nodes: [{id: 'account_001', label: '账户 A'}, {id: 'account_002', label: '账户 B'}],
     edges: [{id: 'tx1', source: 'account_001', target: 'account_002', amount: '12000.00', currency: 'CNY', time: '2026-09-02'}],
     transactions: [{id: 'tx1', source: 'account_001', target: 'account_002', amount: '12000.00', currency: 'CNY', time: '2026-09-02'}],
-    generatedAt: '2026-10-10', filters: {startTime: '2026-09-01T00:00:00+08:00', endTime: '2026-10-01T00:00:00+08:00'},
+    generatedAt: '2026-10-10', filters: {startTime: '2026-09-01T00:00:00+08:00', endTime: '2026-10-01T00:00:00+08:00', minimumAmount: '0'},
     page: {hasMore: false, nextCursor: ''},
   }
   const result = () => ({content: [{type: 'text', text: '演示摘要'}], structuredContent: {success: true, data: snapshot}, isError: false})
@@ -38,7 +38,14 @@ test('standard AppBridge renders server HTML, queries directly, continues Agent,
     if (url.pathname.endsWith('/latest-result')) {await fulfill(result()); return}
     if (url.pathname.endsWith('/tool-calls')) {
       queries++; expect(request.postDataJSON().expectedRevision).toBe(revision)
-      snapshot = {...snapshot, nodes: [...snapshot.nodes, {id: 'account_003', label: '账户 C'}]}
+      const input = request.postDataJSON()
+      if (input.toolName === 'kg_fund_flow_filter') {
+        expect(input.arguments.minimumAmount).toBe(queries === 2 ? '3000' : '0')
+        snapshot = {...snapshot, filters: {...snapshot.filters, ...input.arguments}}
+      } else {
+        expect(input.toolName).toBe('kg_fund_flow_expand')
+        snapshot = {...snapshot, nodes: [...snapshot.nodes, {id: 'account_003', label: '账户 C'}]}
+      }
       await fulfill({revision: ++revision, result: result()}); return
     }
     if (url.pathname.endsWith('/context')) {expect(request.postDataJSON().selectedEntityIds).toEqual(['account_001']); await fulfill({}); return}
@@ -55,14 +62,24 @@ test('standard AppBridge renders server HTML, queries directly, continues Agent,
   await view.getByRole('button', {name: '展开账户', exact: true}).click()
   await expect(view.getByRole('button', {name: '选择账户 C'})).toBeVisible()
   expect(queries).toBe(1); expect(agentRuns).toBe(1)
+  // Filtering works inside allow-scripts-only sandbox, by click and keyboard.
+  await view.getByLabel('最低金额').fill('3000')
+  await view.getByRole('button', {name: '查询', exact: true}).click()
+  await expect.poll(() => queries).toBe(2)
+  await expect(view.getByRole('button', {name: '查询', exact: true})).toBeEnabled()
+  await view.getByLabel('最低金额').fill('0')
+  await view.getByLabel('最低金额').press('Enter')
+  await expect.poll(() => queries).toBe(3)
+  await expect(view.getByRole('button', {name: '查询', exact: true})).toBeEnabled()
+  expect(agentRuns).toBe(1)
   // A forged message from the main window must not be accepted as an App request.
   await page.evaluate(() => window.postMessage({jsonrpc:'2.0', id:99, method:'tools/call', params:{name:'evil'}}, '*'))
-  expect(queries).toBe(1)
+  expect(queries).toBe(3)
   await view.getByRole('button', {name: '继续分析', exact: true}).click()
   await expect.poll(() => agentRuns).toBe(2)
   await page.reload()
   await expect(view.getByRole('button', {name: '选择账户 C'})).toBeVisible()
-  expect(agentRuns).toBe(2); expect(queries).toBe(1); expect(resourceReads).toBe(2)
+  expect(agentRuns).toBe(2); expect(queries).toBe(3); expect(resourceReads).toBe(2)
   await page.getByRole('button', {name: '关闭', exact: true}).click()
   await expect(page.getByText('应用已关闭')).toBeVisible()
   expect(closed).toBe(true)

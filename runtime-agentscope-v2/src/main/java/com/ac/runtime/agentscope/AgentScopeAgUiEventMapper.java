@@ -19,6 +19,7 @@ import java.util.Optional;
 
 /** Converts official AgentScope AG-UI events into the runtime-neutral stream shared by both apps. */
 public final class AgentScopeAgUiEventMapper {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AgentScopeAgUiEventMapper.class);
     private final ObjectMapper mapper;
     private final SensitiveTextSanitizer sanitizer = new SensitiveTextSanitizer();
 
@@ -33,8 +34,12 @@ public final class AgentScopeAgUiEventMapper {
         return switch (event.getType()) {
             case RUN_STARTED -> standard("run.started", Map.of());
             case RUN_FINISHED -> finished((AguiEvent.RunFinished) event);
-            case RUN_ERROR -> standard("run.error", Map.of(
-                    "errorCode", text(values, "code", "AGENTSCOPE_RUN_ERROR")));
+            case RUN_ERROR -> {
+                log.debug("AgentScope adapter failure code={} detail={}",
+                        BoundedText.sanitizeAndLimit(text(values, "code", "AGENTSCOPE_RUN_ERROR"), sanitizer, 128),
+                        BoundedText.sanitizeAndLimit(text(values, "message", ""), sanitizer, 1000));
+                yield standard("run.error", Map.of("errorCode", text(values, "code", "AGENTSCOPE_RUN_ERROR")));
+            }
             case TEXT_MESSAGE_START -> standard("text.message.start", Map.of());
             case TEXT_MESSAGE_CONTENT -> standard("text.message.content", Map.of(
                     "delta", text(values, "delta", "")));
